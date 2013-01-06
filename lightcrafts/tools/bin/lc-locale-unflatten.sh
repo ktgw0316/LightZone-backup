@@ -34,18 +34,18 @@ tempdir=locale-unflatten
 mkdir $tempdir
 cd $tempdir
 # skip the first line, containing the revision stamp:
-tail +2 | \
+tail -n +2 | \
 # split into files by the separators:
-csplit -s -k - "/$separatorPre .* $separatorPost/" '{1000000}'
+csplit -s -k - "/$separatorPre .* $separatorPost/" '{*}'
+find . -size 0c -exec rm {} \;
 cd ..
 
 for split in $tempdir/*; do
     file=`head -1 $split | sed "s/$separatorPre \(.*\) $separatorPost/\1/"`
-    dir=`dirname $file`
-    name=`basename -s .properties $file`_$locale.properties
+    name=`basename $file .properties`_$locale.properties
     dir=`dirname $file`
     mkdir -p $dir 2>&1 > /dev/null
-    tail +2 $split > $dir/$name
+    tail -n +2 $split > $dir/$name
 done
 
 rm -rf $tempdir
