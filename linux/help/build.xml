@@ -18,6 +18,7 @@
 
     <target name="tidy">
         <exec executable="../../tidyall.sh" dir="build/English" vmlauncher="false" failonerror="true"/>
+        <exec executable="../../tidyall.sh" dir="build/Japanese" vmlauncher="false" failonerror="true"/>
     </target>
 
     <target name="index">
@@ -28,8 +29,9 @@
 
     <target name="jar">
         <jar jarfile="lightzonehelp.jar">
-            <fileset dir="build" includes="**" excludes="English/**,neutral/**,JavaHelpSearch/**"/>
+            <fileset dir="build" includes="**" excludes="English/**,Japanese/**,neutral/**,JavaHelpSearch/**"/>
             <fileset dir="build/English" includes="**"/>
+            <fileset dir="build/Japanese" includes="**"/>
             <fileset dir="build/neutral" includes="**"/>
         </jar>
     </target>
