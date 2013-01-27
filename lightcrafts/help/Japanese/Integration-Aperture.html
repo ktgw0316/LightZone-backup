@@ -33,155 +33,86 @@
     <h1>ワークフローの統合: Aperture</h1>
 
     <p>
-      
-      Aperture (from Apple) allows you to select another application
-      as an "external editor" for editing your photos.
-      You can configure LightZone to be such an editor.
-
-      Additionally, LightZone integrates seamlessly with Aperture via the
-      <a href="Preferences.html#Preferences-Direct_Save">Direct Save</a>
-      preference.
-    
+      Aperture（Apple 製）は写真を編集するための「外部エディタ」として他のアプリケーションを選択できます。LightZone を外部エディタとして設定することもできます。さらに、LightZone は<a href="Preferences.html#Preferences-Direct_Save">直接保存</a>を設定することで Aperture とシームレスに統合できます。
     </p>
     <p>
-      <b>Note:</b>
-      The information provided here is accurate as of Aperture version 1.5.3
-      but may need to change for future versions.
-    
+      <b>註:</b> ここで述べる情報は Aperture バージョン 1.5.3 の時点のものであり、より新しいバージョンでは変更が必要な場合があります。
     </p>
 
     <div class="task_box">
-      <h2>To configure Aperture to work with LightZone:</h2>
+      <h2>Aperture を設定して LightZone と一緒に使えるようにするには:</h2>
       <ol>
         <li>
-          
-          Select Aperture &gt; Preferences...
-          (the Preferences dialog will appear)
-          and refer to the Output section.
-        
+          「Aperture」→「環境設定...」を選択し、環境設定ダイアログで「エクスポート」セクションを参照します。
         </li>
         <li>
-          
-          Under External Image Editor,
-          click the Choose... button.
-        
+          「外部エディタ」で「選択...」ボタンをクリックします。
         </li>
         <li>
-          
-          Navigate to and select LightZone.
-        
+          LightZone を探して選択します。
         </li>
         <li>
-          
-          For External Editor File Format,
-          select TIFF.
-        
+          外部エディタのファイルフォーマット」で TIFF を選択します。
         </li>
         <li>
-          
-          Close the Preferences dialog.
-        
+          環境設定ダイアログを閉じます。
         </li>
       </ol>
       <p>
         <a href="help:runscript='LightZone_Help/scripts/Set_Aperture_Prefs.scpt'">
         <img src="images/AppleScriptAppIcon.png" width="32" height="32"
           class="inline_left"/></a>
-        
-        Alternatively,
-        you can click the AppleScript icon to the left
-        to configure Aperture automatically for you now.
-        (If Aperture is running, you must quit it first.)
-        
+        別の方法として、左の AppleScript のアイコンをクリックして Aperture を自動設定することもできます。（Aperture を起動している場合は、先に終了する必要があります。）
         <br clear="all"/>
       </p>
     </div>
 
     <p>
-      
-      When using an external editor, Aperture:
-      
+      外部エディタを使用する際の Aperture の動作:
       <ol>
         <li>
-          
-          Creates a TIFF copy of your photo (with corrections applied).
-        
+          （補正後の）写真を TIFF 形式でコピーしたものを作成する。
         </li>
         <li>
-          
-          Adds this TIFF copy to the current Aperture library
-          as a version of the original.
-        
+          その TIFF 画像を現在の Aperture ライブラリに元画像として追加する。
         </li>
         <li>
-          
-          Gives this TIFF copy to the external editor to edit.
-        
+          TIFF 画像を外部エディタに渡す。
         </li>
       </ol>
     </p>
 
     <div class="task_box">
-      <h2>To configure LightZone to work with Aperture:</h2>
+      <h2>LightZone を設定して Aperture と一緒に使えるようにするには:</h2>
       <ol>
         <li>
-          
-          Select LightZone &gt; Preferences...
-          (The Preferences dialog will appear.)
-        
+          「LightZone」→「設定…」を選択します。（設定ダイアログが現れます。）
         </li>
         <li>
-          
-          Make sure the
-          <a href="Preferences.html#Preferences-Direct_Save">Direct Save</a>
-          check-box is checked.
-        
+          <a href="Preferences.html#Preferences-Direct_Save">直接保存</a>チェックボックスにチェックが入っているのを確認します。
         </li>
         <li>
-          
-          Close the Preferences dialog.
-        
+          環境設定ダイアログを閉じます。
         </li>
       </ol>
     </div>
 
-    
-
-    Now that everything has been configured,
-    you can select one of your photos in Aperture
-    and edit it in LightZone.
-
-    
+    以上で設定が完了し、Aperture で写真を選択して LightZone で編集できるようになりました。
 
     <div class="task_box">
-      <h2>To edit your photo in LightZone from Aperture:</h2>
+      <h2>Aperture の写真を LightZone で編集するには:</h2>
       <ol>
         <li>
-          
-          In Aperture, select the photo you want to edit.
-        
+          編集したい写真を Aperture で選択します。
         </li>
         <li>
-          
-          Select Images &gt; Open With External Editor.
-          (LightZone will launch and open the TIFF copy of your photo.)
-        
+          「画像」→「外部エディタで開く」を選択します。（LightZone が起動して TIFF 画像が開きます。）
         </li>
         <li>
-          
-          In LightZone, edit the TIFF copy of your photo
-          to your liking
-          as you would any photo.
-        
+          LightZone で TIFF 画像を通常どおりに編集します。
         </li>
         <li>
-          
-          Select File &gt; Save to Aperture.
-          (LightZone will save your edited photo
-          back to the TIFF copy overwriting it,
-          switch back to Aperture,
-          and Aperture will reload the now edited TIFF copy of your photo.)
-        
+          「ファイル」→「保存」を選択して Aperture に戻ります。（LightZone は編集済みの写真を TIFF 画像に上書き保存し、Aperture に切り替え、Aperture はその編集済みの TIFF 画像を再読み込みします。）
         </li>
       </ol>
     </div>

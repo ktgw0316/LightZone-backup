@@ -33,139 +33,78 @@
     <h1>ワークフローの統合: iPhoto</h1>
 
     <p>
-      
-      iPhoto (from Apple) allows you to select another application
-      as an "external editor" for editing your photos.
-      You can configure LightZone to be such an editor.
-
-      Additionally, LightZone integrates seamlessly with iPhoto via the
-      <a href="Preferences.html#Preferences-Direct_Save">Direct Save</a>
-      preference.
-    
+      iPhoto（Apple 製）は写真を編集するための「外部エディタ」として他のアプリケーションを選択できます。LightZone を外部エディタとして設定することもできます。さらに、LightZone は<a href="Preferences.html#Preferences-Direct_Save">直接保存</a>を設定することで iPhoto とシームレスに統合できます。
     </p>
     <p>
-      <b>Note:</b>
-      The information provided here is accurate as of iPhoto version 7.0.1
-      but may need to change for future versions.
-    
+      <b>註:</b> ここで述べる情報は iPhoto バージョン 7.0.1 の時点のものであり、より新しいバージョンでは変更が必要な場合があります。
     </p>
 
     <div class="task_box">
-      <h2>To configure iPhoto to work with LightZone:</h2>
+      <h2>iPhoto を設定して LightZone と一緒に使えるようにするには:</h2>
       <ol>
         <li>
-          
-          Select iPhoto &gt; Preferences...
-          (the Preferences dialog will appear).
-        
+          「iPhoto」→「環境設定…」を選択します。（環境設定ダイアログが現れます。）
         </li>
         <li>
-          
-          Select the "General" tab.
-        
+          「一般」タブを選択します。
         </li>
         <li>
-          
-          For Edit Photo,
-          select "In application..."
-        
+          「写真の編集」で「アプリケーションで編集...」を選択します。
         </li>
         <li>
-          
-          Navigate to and select LightZone.
-        
+          LightZone を探して選択します。
         </li>
         <li>
-          
-          Select the "Advanced" tab.
-        
+          「詳細」タブを選択します。
         </li>
         <li>
-          
-          Under RAW Photos,
-          check "Use RAW files with external editor."
-        
+          「RAW 写真」で「外部エディタの使用時に RAW ファイルを使用」にチェックを入れます。
         </li>
         <li>
-          
-          Close the Preferences dialog.
-        
+          環境設定ダイアログを閉じます。
         </li>
       </ol>
       <p>
         <a href="help:runscript='LightZone_Help/scripts/Set_iPhoto_Prefs.scpt'">
         <img src="images/AppleScriptAppIcon.png" width="32" height="32"
           class="inline_left"/></a>
-        
-        Alternatively,
-        you can click the AppleScript icon to the left
-        to configure iPhoto automatically for you now.
-        (If iPhoto is running, you must quit it first.)
-        
+        別の方法として、左の AppleScript のアイコンをクリックして iPhoto を自動設定することもできます。（iPhoto を起動している場合は、先に終了する必要があります。）
         <br clear="all"/>
       </p>
     </div>
 
     <p>
-      
-      When using an external editor, iPhoto gives your original photo
-      to the external editor to edit.
-    
+      外部エディタで編集する際に、iPhoto は元画像を外部エディタに渡します。
     </p>
 
     <div class="task_box">
-      <h2>To configure LightZone to work with iPhoto:</h2>
+      <h2>LightZone を設定して iPhoto と一緒に使えるようにするには:</h2>
       <ol>
         <li>
-          
-          Select LightZone &gt; Preferences...
-          (the Preferences dialog will appear).
-        
+          「LightZone」→「設定…」を選択します。（設定ダイアログが現れます。）
         </li>
         <li>
-          
-          Make sure the
-          <a href="Preferences.html#Preferences-Direct_Save">Direct Save</a>
-          check-box is checked.
-        
+          <a href="Preferences.html#Preferences-Direct_Save">直接保存</a>チェックボックスにチェックが入っているのを確認します。
         </li>
         <li>
-          
-          Close the Preferences dialog.
-        
+          環境設定ダイアログを閉じます。
         </li>
       </ol>
     </div>
 
-    
-
-    Now that everything has been configured,
-    you can select one of your photos in iPhoto
-    and edit it in LightZone.
-
-    
+    以上で設定が完了し、iPhoto で写真を選択して LightZone で編集できるようになりました。
 
     <div class="task_box">
-      <h2>To edit your photo in LightZone from iPhoto:</h2>
+      <h2>iPhoto の写真を LightZone で編集するには:</h2>
       <ol>
         <li>
-          
-          In iPhoto, double-click the photo you want to edit.
-          (LightZone will launch and open your photo.)
-        
+          編集したい写真を iPhoto でダブルクリックします。（LightZone が起動して写真が開きます。）
         </li>
         <li>
-          
-          In LightZone, edit your photo to your liking as you would any photo.
-        
+          LightZone で写真を通常どおりに編集します。
         </li>
         <li>
-          
-          Select File &gt; Save to iPhoto.
-          (LightZone will automatically save your edited photo,
-          switch to iPhoto,
-          and tell iPhoto to import it into the current album.)
-        
+          「ファイル」→「保存」を選択して iPhoto に戻ります。（LightZone は編集済みの写真を自動で保存し、iPhoto に切り替え、iPhoto にその写真を現在のアルバムへ保存させます。）
         </li>
       </ol>
     </div>
