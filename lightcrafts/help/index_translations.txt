@@ -16,3 +16,4 @@ French	:fr :0x40c :France		:Aide de LightZone	:Index
 German	:de :0x407 :Germany		:LightZone Hilfe	:Index
 Italian	:it :0x410 :Italy		:Aiuto di LightZone	:Indice
 Spanish	:es :0x40a :Traditional Sort	:Ayuda de LightZone	:&Iacute;ndice
+Japanese	:ja :0x411 :Japan	:LightZone ヘルプ	:目次
