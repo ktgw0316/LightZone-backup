@@ -12,7 +12,8 @@ separatorPre='# *** flattened from'
 separatorPost='***'
 
 # Properties files are discovered under the working directory:
-files=`find . -regex ".*[^_]..\.properties" | sort`
+dir='locale/ resources/com/lightcrafts/ui/ resources/com/lightcrafts/app/ resources/com/lightcrafts/utils/'
+files=`find $dir -regex ".*[^_]..\.properties" | sort`
 
 # Stamp the flat form with its revision number:
 echo -n "# "

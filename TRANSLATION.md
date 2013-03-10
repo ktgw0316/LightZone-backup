@@ -1,11 +1,7 @@
 # Translation How-to
 This document describes how to use flatten/unflatten tools when you translate *.properties files.
 
-First of all, remove files not need to be translated:
-
-    rm `find . -regex '.*\/build\/.*\.properties'`
-
-Next, concatenate all property files into single file:
+To concatenate all property files into single file:
 
     cd lightcrafts
     ./tools/bin/lc-locale-flatten.sh > /tmp/source.properties
