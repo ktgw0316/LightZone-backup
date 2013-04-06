@@ -9,9 +9,9 @@ import com.lightcrafts.ui.layout.Box;
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
-import org.jvnet.substance.color.ColorScheme;
-import org.jvnet.substance.utils.SubstanceCoreUtilities;
-import org.jvnet.substance.utils.SubstanceSizeUtils;
+import org.pushingpixels.substance.api.SubstanceColorScheme;
+import org.pushingpixels.substance.internal.utils.SubstanceCoreUtilities;
+import org.pushingpixels.substance.internal.utils.SubstanceSizeUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +42,7 @@ class OpFooter extends Box implements PropertyChangeListener {
         }
     }
 
-    private static Icon getThemeIcon(ColorScheme colorScheme, boolean square) {
+    private static Icon getThemeIcon(SubstanceColorScheme colorScheme, boolean square) {
         int iSize = SubstanceSizeUtils.getTitlePaneIconSize();
         BufferedImage result = SubstanceCoreUtilities.getBlankImage(iSize, iSize);
         Graphics2D graphics = (Graphics2D) result.getGraphics().create();
@@ -98,7 +98,7 @@ class OpFooter extends Box implements PropertyChangeListener {
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport( this );
 
-    ColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
+    SubstanceColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
 
     OpFooter(OpControl control, List<LayerMode> layerModes) {
         super(BoxLayout.X_AXIS);

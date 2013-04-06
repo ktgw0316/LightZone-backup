@@ -16,8 +16,8 @@ import java.io.File;
 import java.util.Set;
 import java.util.HashSet;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.utils.SubstanceConstants;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceConstants;
 
 public class CoolButton extends JButton {
 

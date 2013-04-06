@@ -14,7 +14,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 /**
  * There is a problem with the popup component in JComboBox components under

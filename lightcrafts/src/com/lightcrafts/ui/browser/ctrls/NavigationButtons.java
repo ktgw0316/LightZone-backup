@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 public class NavigationButtons extends JPanel {
 

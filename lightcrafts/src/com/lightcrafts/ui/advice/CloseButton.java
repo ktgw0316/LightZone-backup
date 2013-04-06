@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 class CloseButton extends ImageOnlyButton {
 

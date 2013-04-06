@@ -9,7 +9,7 @@ import com.lightcrafts.ui.LightZoneSkin;
 import javax.swing.*;
 import java.awt.*;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 class BatchProgressBar extends ProgressThread {
 
@@ -18,8 +18,9 @@ class BatchProgressBar extends ProgressThread {
         JProgressBar bar = new JProgressBar();
 
         BatchProgressIndicator() {
-            bar.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+            bar.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
             bar.setBorder(null);
+	    SwingUtilities.updateComponentTreeUI(bar);
         }
 
         public void incrementBy(final int delta) {

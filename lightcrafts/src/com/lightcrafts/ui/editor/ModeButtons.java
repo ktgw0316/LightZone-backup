@@ -65,13 +65,17 @@ final class ModeButtons extends Box {
         regionButton.setStyle(CoolButton.ButtonStyle.RIGHT);
 
 //        arrowButton.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
-//        arrowButton.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        arrowButton.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+//        SwingUtilities.updateComponentTreeUI(arrowButton);
 //        cropButton.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
-//        cropButton.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        cropButton.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+//        SwingUtilities.updateComponentTreeUI(cropButton);
 //        rotateButton.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
-//        rotateButton.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        rotateButton.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+//        SwingUtilities.updateComponentTreeUI(rotateButton);
 //        regionButton.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
-//        regionButton.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        regionButton.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+//        SwingUtilities.updateComponentTreeUI(regionButton);
 
         final ButtonGroup group = new ButtonGroup();
         group.add(arrowButton);

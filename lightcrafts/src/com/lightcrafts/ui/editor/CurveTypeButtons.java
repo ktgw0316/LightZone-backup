@@ -13,8 +13,8 @@ import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.color.ColorScheme;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceColorScheme;
 
 /**
  * A group of three toggle buttons that control the Curve implementation
@@ -135,7 +135,7 @@ public class CurveTypeButtons extends Box {
         }
     }
 
-    ColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
+    SubstanceColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
 
     private void initButtons() {
         polygon = new CoolToggleButton(CoolButton.ButtonStyle.LEFT);
@@ -146,9 +146,12 @@ public class CurveTypeButtons extends Box {
         bezier.setIcon(BezierIcon);
 
         // bezier.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
-        polygon.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-        basis.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-        bezier.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+        polygon.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+        basis.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+        bezier.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+        SwingUtilities.updateComponentTreeUI(polygon);
+        SwingUtilities.updateComponentTreeUI(basis);
+        SwingUtilities.updateComponentTreeUI(bezier);
 
         polygon.setToolTipText(PolygonToolTip);
         basis.setToolTipText(BasisToolTip);

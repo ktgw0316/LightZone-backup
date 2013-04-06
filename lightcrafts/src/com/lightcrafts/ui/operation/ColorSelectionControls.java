@@ -29,9 +29,9 @@ import com.lightcrafts.utils.LCMS;
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.app.ComboFrame;
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.theme.SubstanceTheme;
-import org.jvnet.substance.color.ColorScheme;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceSkin;
+import org.pushingpixels.substance.api.SubstanceColorScheme;
 
 /**
  * A <code>ColorSelectionControls</code> is-a {@link Box} that contains all
@@ -102,11 +102,11 @@ final class ColorSelectionControls extends Box {
                                                 0xff & systemColor[1],
                                                 0xff & systemColor[2]);
 
-                        final ColorScheme colorScheme = new LightZoneSkin.CustomColorScheme(color);
-                        final SubstanceTheme theme = LightZoneSkin.makeTheme(colorScheme, p.name());
+                        final SubstanceColorScheme colorScheme = new LightZoneSkin.CustomColorScheme(color);
+                        final SubstanceSkin skin = new LightZoneSkin.CustomSkin(colorScheme, p.name());
 
-                        button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, theme);
-                        button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+                        button.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, skin);
+                        SwingUtilities.updateComponentTreeUI(button);
 
                         button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
                     }

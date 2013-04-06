@@ -2,7 +2,7 @@
 
 package com.lightcrafts.ui.operation.zone;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;

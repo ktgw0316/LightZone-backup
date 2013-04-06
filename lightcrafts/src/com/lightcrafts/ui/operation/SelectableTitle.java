@@ -19,7 +19,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 class SelectableTitle extends JPanel implements MouseListener {
 
@@ -189,8 +189,8 @@ class SelectableTitle extends JPanel implements MouseListener {
         button.setSize(size.width, size.height);
         
         if (selected) {
-            button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-            button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+            button.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, LightZoneSkin.orangeSkin);
+	    SwingUtilities.updateComponentTreeUI(button);
         }
         button.paint(g);
 
