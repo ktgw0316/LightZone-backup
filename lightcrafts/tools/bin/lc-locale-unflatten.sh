@@ -18,7 +18,7 @@
 # translators.  They are not part of the LightZone build.
 
 if [ $# -ne 1 ]; then
-    echo "usage: cat (flat-properties) | lc-locale-unflatten.sh (locale)"
+    echo "usage: native2ascii (flat-properties) | lc-locale-unflatten.sh (locale)"
     exit -1
 fi
 locale=$1

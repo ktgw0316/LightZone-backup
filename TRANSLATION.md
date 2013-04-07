@@ -3,8 +3,7 @@ This document describes how to use flatten/unflatten tools when you translate *.
 
 To concatenate all property files into single file:
 
-    cd lightcrafts
-    ./tools/bin/lc-locale-flatten.sh > /tmp/source.properties
+    ./lightcrafts/tools/bin/lc-locale-flatten.sh > /tmp/source.properties
     cd ..
 
 Then translate the source.properties into target.properties. I recommend to use a translation memory software such as OmegaT.
@@ -12,7 +11,7 @@ Then translate the source.properties into target.properties. I recommend to use 
 After the translation completed, convert UTF-8 chars to ISO-8859-1 and redivide the file:
 
     cd linux
-    native2ascii /tmp/target.properties | ./tools/bin/lc-locale-unflatten.sh (locale)
+    native2ascii /tmp/target.properties | ./lightcrafts/tools/bin/lc-locale-unflatten.sh (locale)
     cd ..
 
 Then rebuild the source:
