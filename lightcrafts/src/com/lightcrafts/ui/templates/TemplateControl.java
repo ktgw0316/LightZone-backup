@@ -14,6 +14,7 @@ import com.lightcrafts.ui.toolkit.PaneTitle;
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.EventQueue;
 
 /**
  * Maintain a selectable list of Templates and associated controls.  Update
@@ -171,7 +172,17 @@ public class TemplateControl
 
     public static void main(String[] args) throws Exception {
 
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
 
         TemplateControl control = new TemplateControl(
             null,

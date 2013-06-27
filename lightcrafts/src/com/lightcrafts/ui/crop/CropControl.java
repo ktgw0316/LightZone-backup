@@ -6,6 +6,7 @@ import com.lightcrafts.platform.Platform;
 import com.lightcrafts.model.CropBounds;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 
 /**
  * A control for CropMode that presents four editable text fields for the
@@ -98,7 +99,17 @@ public final class CropControl extends Box {
     }
 
     public static void main(String[] args) throws Exception {
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
 
         ResetAction reset = new ResetAction();
 

@@ -43,7 +43,17 @@ public class PreferencesDialog extends JPanel {
     }
 
     public static void main(String[] args) throws Exception {
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
         showDialog(null);
         System.exit(0);
     }

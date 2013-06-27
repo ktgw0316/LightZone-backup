@@ -6,6 +6,7 @@ import java.util.Observable;
 import java.util.Vector;
 import java.awt.Color;
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -496,22 +497,28 @@ public final class TCTool extends JFrame
             if ( item == pack_item ) {
                 pack();
             } else {
-                String cmd = item.getText();
+                final String cmd = item.getText();
 
                 // check look and feel options
-                if ( cmd.equalsIgnoreCase("Metal") ) {
-                    setLookAndFeel(METAL);
-                    return;
-                } else if ( cmd.equalsIgnoreCase("Windows") ) {
-                    setLookAndFeel(WINDOWS);
-                    return;
-                } else if ( cmd.equalsIgnoreCase("Motif") ) {
-                    setLookAndFeel(MOTIF);
-                    return;
-                } else if ( cmd.equalsIgnoreCase("Mac") ) {
-                    setLookAndFeel(MAC);
-                    return;
-                }
+                EventQueue.invokeLater(
+                    new Runnable() {
+                        public void run() {
+                            if ( cmd.equalsIgnoreCase("Metal") ) {
+                                setLookAndFeel(METAL);
+                                return;
+                            } else if ( cmd.equalsIgnoreCase("Windows") ) {
+                                setLookAndFeel(WINDOWS);
+                                return;
+                            } else if ( cmd.equalsIgnoreCase("Motif") ) {
+                                setLookAndFeel(MOTIF);
+                                return;
+                            } else if ( cmd.equalsIgnoreCase("Mac") ) {
+                                setLookAndFeel(MAC);
+                                return;
+                            }
+                        }
+                    }
+                );
 
                 // memory capacity range for slider
                 for ( int i = 0; i < capacities.length; i++ ) {

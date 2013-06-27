@@ -138,7 +138,17 @@ public class VideoLearningCenterDialog extends JFrame {
     public static void main(String[] args)
         throws UnsupportedLookAndFeelException
     {
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
         showDialog();
     }
 }

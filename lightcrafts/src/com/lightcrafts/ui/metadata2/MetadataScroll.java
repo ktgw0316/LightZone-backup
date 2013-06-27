@@ -7,6 +7,7 @@ import com.lightcrafts.platform.Platform;
 import com.lightcrafts.ui.LightZoneSkin;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 import java.io.File;
 
 /**
@@ -92,7 +93,18 @@ public class MetadataScroll extends JScrollPane {
         System.setProperty( "apple.laf.useScreenMenuBar", "true" );
         System.setProperty( "swing.aatext", "true" );
 
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
+
         File file = new File(args[0]);
         ImageInfo info = ImageInfo.getInstanceFor(file);
         MetadataScroll scroll = new MetadataScroll(info);

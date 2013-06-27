@@ -1530,7 +1530,17 @@ public class RangeSelector extends JComponent {
     ////////// main() for testing /////////////////////////////////////////////
 
     public static void main( String[] args ) throws Exception {
-        UIManager.setLookAndFeel( Platform.getPlatform().getLookAndFeel() );
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
 
 /*
         final RepaintManager rm = RepaintManager.currentManager( null );

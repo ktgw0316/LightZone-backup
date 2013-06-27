@@ -11,6 +11,7 @@ import com.lightcrafts.utils.ForkDaemon;
 import com.lightcrafts.utils.Version;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 
 public final class LinuxLauncher {
 
@@ -31,7 +32,17 @@ public final class LinuxLauncher {
 //            if (expired) {
 //                System.exit(0);
 //            }
-            UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+            EventQueue.invokeLater(
+                new Runnable() {
+                    public void run() {
+                        try {
+                            UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                        }
+                        catch (Exception e) {
+                        }
+                    }
+                }
+            );
 
             String revision = Version.getRevisionNumber();
             String name = Version.getVersionName();

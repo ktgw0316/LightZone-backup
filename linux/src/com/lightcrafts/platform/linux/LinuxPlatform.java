@@ -229,11 +229,21 @@ public class LinuxPlatform extends Platform {
     public static void main(String[] args)
         throws UnsupportedLookAndFeelException
     {
-        Platform platform = Platform.getPlatform();
+        final Platform platform = Platform.getPlatform();
         platform.loadLibraries();
         System.out.println(platform.getPhysicalMemoryInMB());
 
-        UIManager.setLookAndFeel(platform.getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(platform.getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
         platform.showHelpTopic("New_Features");
     }
 }

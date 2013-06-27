@@ -59,7 +59,17 @@ public class PrintLayoutDialog extends JDialog {
     }
 
     public static void main(final String[] args) throws Exception {
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
 
         BufferedImage image = ImageIO.read(new File(args[0]));
 

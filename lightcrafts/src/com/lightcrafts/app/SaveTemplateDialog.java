@@ -291,7 +291,17 @@ class SaveTemplateDialog extends JDialog {
     }
 
     public static void main(String[] args) throws Exception {
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
 
         XmlDocument doc = new XmlDocument(
             new FileInputStream(

@@ -199,10 +199,16 @@ public class BatchConfigurator {
     }
 
     public static void main(String[] args) throws Exception {
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+
         EventQueue.invokeLater(
             new Runnable() {
                 public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+
                     File[] files = new File[100];
                     for (int n=0; n<100; n++) {
                         files[n] = new File("/a/b/" + n + ".lzn");

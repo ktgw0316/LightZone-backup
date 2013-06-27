@@ -121,8 +121,17 @@ public class CoolButton extends JButton {
             System.err.println("usage: (file)");
             System.exit(1);
         }
-        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
-
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
         Icon icon = new ImageIcon(ImageIO.read(new File(args[0])));
 
         JPanel panel = new JPanel();

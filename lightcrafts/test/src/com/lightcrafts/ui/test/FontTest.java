@@ -181,7 +181,13 @@ public class FontTest extends JPanel {
     /// Main program, so we can run as an application too.
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+            EventQueue.invokeLater(
+                new Runnable() {
+                    public void run() {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    }
+                }
+            );
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

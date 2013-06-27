@@ -80,8 +80,14 @@ class DebugMenu extends UpdatableDisposableMenu {
             menuItem.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        String className = info.getClassName();
-                        Application.setLookAndFeel(className);
+                        EventQueue.invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    String className = info.getClassName();
+                                    Application.setLookAndFeel(className);
+                                }
+                            }
+                        );
                     }
                 }
             );

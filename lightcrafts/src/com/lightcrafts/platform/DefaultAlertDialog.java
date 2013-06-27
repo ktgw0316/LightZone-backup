@@ -127,11 +127,17 @@ public final class DefaultAlertDialog implements AlertDialog {
         System.setProperty( "apple.laf.useScreenMenuBar", "true" );
         System.setProperty( "swing.aatext", "true" );
 
-        try {
-            UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(Platform.getPlatform().getLookAndFeel());
+                    } catch (UnsupportedLookAndFeelException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        );
 
         int result = INSTANCE.showAlert(
             null,

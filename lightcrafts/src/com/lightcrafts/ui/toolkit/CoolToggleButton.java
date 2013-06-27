@@ -123,9 +123,18 @@ public class CoolToggleButton extends JToggleButton {
             System.err.println("usage: (file)");
         }
 
-        LookAndFeel laf = Platform.getPlatform().getLookAndFeel();
-
-        UIManager.setLookAndFeel(laf);
+        final LookAndFeel laf = Platform.getPlatform().getLookAndFeel();
+        EventQueue.invokeLater(
+            new Runnable() {
+                public void run() {
+                    try {
+                        UIManager.setLookAndFeel(laf);
+                    }
+                    catch (Exception e) {
+                    }
+                }
+            }
+        );
 
         BufferedImage image = ImageIO.read(new File(args[0]));
         Icon icon = new ImageIcon(image);
