@@ -63,10 +63,22 @@ class DocumentInitializer {
                     try {
                         frame.showWait(LOCALE.get("LoadMessage"));
                         notifyListenerStart(listener);
-                        Document doc = Application.createDocument(
-                            file, frame, Cancellable
+
+                        EventQueue.invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    try {
+                                        Document doc = Application.createDocument(
+                                            file, frame, Cancellable
+                                        );
+                                        notifyListener(doc, listener);
+                                    }
+                                    catch (Exception e) {
+                                    }
+                                }
+                            }
                         );
-                        notifyListener(doc, listener);
+
                     }
                     catch (Throwable t) {
                         notifyListener(t, listener);

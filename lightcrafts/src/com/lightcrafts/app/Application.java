@@ -2147,7 +2147,17 @@ public class Application {
 
     public static void main(final String[] args) {
         // Catch startup crashes that prevent launching:
-        StartupCrash.checkLastStartupSuccessful();
+        try {
+            EventQueue.invokeAndWait(
+                new Runnable() {
+                    public void run() {
+                        StartupCrash.checkLastStartupSuccessful();
+                    }
+                }
+            );
+        }
+        catch (Exception e) {
+        }
         StartupCrash.startupStarted();
 
         ExceptionDialog.installHandler();
