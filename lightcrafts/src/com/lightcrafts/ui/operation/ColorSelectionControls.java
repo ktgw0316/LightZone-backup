@@ -102,13 +102,9 @@ final class ColorSelectionControls extends Box {
                                                 0xff & systemColor[1],
                                                 0xff & systemColor[2]);
 
-                        final SubstanceColorScheme colorScheme = new LightZoneSkin.CustomColorScheme(color);
-                        final SubstanceSkin skin = new LightZoneSkin.CustomSkin(colorScheme, p.name());
-
-                        button.putClientProperty(SubstanceLookAndFeel.SKIN_PROPERTY, skin);
-                        SwingUtilities.updateComponentTreeUI(button);
-
+                        button.setBackground(color);
                         button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
+                        SwingUtilities.updateComponentTreeUI(button);
                     }
 
                     button.addItemListener(
