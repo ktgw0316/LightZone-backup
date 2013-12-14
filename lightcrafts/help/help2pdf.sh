@@ -12,6 +12,8 @@ if [ -e ${UNIFIED} ]; then
   rm ${UNIFIED}
 fi
 
+cp ../neutral/images/* images/
+
 while read LINE; do
   echo '\n\\clearpage\n' >> ${UNIFIED}
 
@@ -22,6 +24,11 @@ done < ${LIST}
 
 pandoc -f markdown --toc --toc-depth=2 --latex-engine=xelatex -o ${OUTPUT} ${UNIFIED}
 
+# Remove temporary files
+for i in ../neutral/images/*; do
+  rm images/`basename $i`
+done
 rm ${UNIFIED}
 rm tmp.markdown
+
 cd -
