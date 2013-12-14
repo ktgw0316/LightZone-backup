@@ -3,10 +3,12 @@
 #
 
 Name:           lightzone
-Version:	3.9.1
-Release:	14beta
-License:	GPL-2.0+
-Summary:	Open-source digital darkroom software
+# Do not use hyphens in Version tag. OBS doesn't handle it properly.
+# Use 4.1.0.beta2 for betas and 4.1.0.0 for final, since RPM sorts A-Z before 0-9.
+Version:	4.1.0.beta5
+Release:	0
+License:	BSD-3-Clause
+Summary:	Open-source professional-level digital darkroom software
 Url:		http://lightzoneproject.org/
 Group:		Productivity/Graphics/Convertors 
 Source:		%{name}-%{version}.tar.bz2
@@ -33,10 +35,14 @@ BuildRequires: java-1.6.0-openjdk-devel, libX11-devel, liblzma5
 BuildRequires: java-1.6.0-openjdk-devel, libX11-devel, liblzma5
 %endif
 
-Requires:	java >= 1.6.0
+%if 0%{?fedora}
+Requires:	java >= 1.6.0, xz-libs
+%else
+Requires:	java >= 1.6.0, liblzma5
+%endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %description
-LightZone is professional-level digital darkroom software for Windows, Mac OS X, and Linux. Rather than using layers as many other photo editors do, LightZone lets the user build up a stack of tools which can be rearranged, turned off and on, and removed from the stack. It's a non-destructive editor, where any of the tools can be re-adjusted or modified later — even in a different editing session. A tool stack can be copied to a batch of photos at one time. LightZone operates in a 16-bit linear color space with the wide gamut of ProPhoto RGB.
+LightZone is open-source professional-level digital darkroom software for Windows, Mac OS X, and Linux. Rather than using layers as many other photo editors do, LightZone lets the user build up a stack of tools which can be rearranged, turned off and on, and removed from the stack. It's a non-destructive editor, where any of the tools can be re-adjusted or modified later — even in a different editing session. A tool stack can be copied to a batch of photos at one time. LightZone operates in a 16-bit linear color space with the wide gamut of ProPhoto RGB.
 
 %prep
 %setup -q
