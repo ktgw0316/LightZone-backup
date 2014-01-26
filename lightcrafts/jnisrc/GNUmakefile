@@ -12,6 +12,7 @@ SUBDIRS:=	jniutils \
 		fast_bilateral \
 		jpeg \
 		lcms \
+		libraw \
 		tiff
 
 include	../mk/recurse.mk

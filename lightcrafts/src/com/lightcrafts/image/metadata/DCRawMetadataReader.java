@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.lightcrafts.image.ImageInfo;
+import com.lightcrafts.image.libs.LibRaw;
 import com.lightcrafts.image.metadata.values.*;
 import com.lightcrafts.image.types.RawImageInfo;
 import com.lightcrafts.utils.DCRaw;
@@ -45,7 +46,7 @@ public final class DCRawMetadataReader extends ImageMetadataReader {
         catch ( LightCraftsException e ) {
             return;
         }
-        final DCRaw dcraw = info.getDCRaw();
+        final LibRaw dcraw = info.getDCRaw();
 
         final ImageMetadata metadata = m_imageInfo.getCurrentMetadata();
         final EXIFDirectory exifDir =

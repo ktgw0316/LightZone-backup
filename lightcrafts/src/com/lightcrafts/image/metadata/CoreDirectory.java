@@ -11,13 +11,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
 import com.lightcrafts.image.ImageInfo;
+import com.lightcrafts.image.libs.LibRaw;
 import com.lightcrafts.image.metadata.values.*;
 import com.lightcrafts.image.metadata.providers.*;
 import com.lightcrafts.image.types.AuxiliaryImageInfo;
 import com.lightcrafts.image.types.ImageType;
 import com.lightcrafts.image.types.RawImageInfo;
 import com.lightcrafts.utils.ColorProfileInfo;
-import com.lightcrafts.utils.DCRaw;
 import com.lightcrafts.utils.TextUtil;
 import com.lightcrafts.utils.Version;
 import com.lightcrafts.utils.xml.XMLUtil;
@@ -548,7 +548,7 @@ public final class CoreDirectory extends ImageMetadataDirectory implements
                 return;
             }
             if ( auxInfo instanceof RawImageInfo ) {
-                final DCRaw dcRaw = ((RawImageInfo)auxInfo).getDCRaw();
+                final LibRaw dcRaw = ((RawImageInfo)auxInfo).getDCRaw();
                 camera = dcRaw.getCameraMake( true );
             }
         }

@@ -20,6 +20,7 @@ import com.lightcrafts.image.metadata.*;
 import com.lightcrafts.image.UnknownImageTypeException;
 import com.lightcrafts.image.libs.LCTIFFReader;
 import com.lightcrafts.image.libs.LCImageLibException;
+import com.lightcrafts.image.libs.LibRaw;
 import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.jai.utils.Functions;
 import com.lightcrafts.jai.opimage.CachedImage;
@@ -42,6 +43,9 @@ public abstract class RawImageType extends ImageType {
 
     static final boolean USE_EMBEDDED_PREVIEW = false;
 
+    static final int THUMB_WIDTH = 70;
+    static final int THUMB_HEIGHT = 70;
+
     ////////// public /////////////////////////////////////////////////////////
 
     /**
@@ -52,7 +56,7 @@ public abstract class RawImageType extends ImageType {
     {
         final AuxiliaryImageInfo auxInfo = imageInfo.getAuxiliaryInfo();
         assert auxInfo instanceof RawImageInfo;
-        final DCRaw dcRaw = ((RawImageInfo)auxInfo).getDCRaw();
+        final LibRaw dcRaw = ((RawImageInfo)auxInfo).getDCRaw();
         return new Dimension( dcRaw.getImageWidth(), dcRaw.getImageHeight() );
     }
 
@@ -96,7 +100,7 @@ public abstract class RawImageType extends ImageType {
         long startTime = System.currentTimeMillis();
 
         final RawImageInfo rawInfo = (RawImageInfo)imageInfo.getAuxiliaryInfo();
-        final DCRaw dcRaw = rawInfo.getDCRaw();
+        final LibRaw dcRaw = rawInfo.getDCRaw();
 
         if (!dcRaw.decodable() || dcRaw.rawColors() != 3)
             throw new UnknownImageTypeException("Unsupported Camera");
@@ -149,11 +153,12 @@ public abstract class RawImageType extends ImageType {
 
         final int filters = dcRaw.getFilters();
 
-        final BufferedImage dcrawImage = (BufferedImage) dcRaw.runDCRaw(DCRaw.dcrawMode.full, false);
+        final BufferedImage dcrawImage = (BufferedImage) dcRaw.getImage(); // runDCRaw(DCRaw.dcrawMode.full, false);
 
         System.out.println("dcraw width: " + dcrawImage.getWidth() + ", height: " + dcrawImage.getHeight());
 
         // Merge the secondary pixels of Fuji S3 and S5
+        /*
         if (this instanceof RAFImageType && dcRaw.getSecondaryPixels() &&
             (dcRaw.getCameraMake(true).endsWith("S3PRO") || dcRaw.getCameraMake(true).endsWith("S5PRO")))
         {
@@ -223,6 +228,7 @@ public abstract class RawImageType extends ImageType {
                 }
             }
         }
+        */
 
         long dcrawTime = System.currentTimeMillis();
 
@@ -431,20 +437,17 @@ public abstract class RawImageType extends ImageType {
         throws BadImageFileException, IOException, UnknownImageTypeException
     {
         final RawImageInfo rawInfo = (RawImageInfo)imageInfo.getAuxiliaryInfo();
-        final DCRaw dcRaw = rawInfo.getDCRaw();
+        final LibRaw dcRaw = rawInfo.getDCRaw();
 
-        if (dcRaw.getThumbHeight() >= 400 && dcRaw.getThumbWidth() >= 600)
-            return dcRaw.runDCRaw(DCRaw.dcrawMode.thumb);
-        else
-        return dcRaw.runDCRaw(DCRaw.dcrawMode.preview);
+        // if (dcRaw.getThumbHeight() >= 400 && dcRaw.getThumbWidth() >= 600)
+            return dcRaw.getThumbnail(maxWidth, maxHeight); // runDCRaw(DCRaw.dcrawMode.thumb);
+        // else
     }
 
     public RenderedImage getThumbnailImage( ImageInfo imageInfo )
         throws BadImageFileException, IOException, UnknownImageTypeException
     {
-        final RawImageInfo rawInfo = (RawImageInfo)imageInfo.getAuxiliaryInfo();
-        final DCRaw dcRaw = rawInfo.getDCRaw();
-        return dcRaw.runDCRaw(DCRaw.dcrawMode.thumb);
+        return getPreviewImage(imageInfo, THUMB_WIDTH, THUMB_HEIGHT);
     }
 
     /**

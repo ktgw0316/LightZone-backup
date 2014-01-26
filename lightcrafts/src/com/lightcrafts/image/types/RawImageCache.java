@@ -17,6 +17,7 @@ import com.lightcrafts.utils.thread.ProgressThread;
 import com.lightcrafts.image.libs.LCTIFFWriter;
 import com.lightcrafts.image.libs.LCImageLibException;
 import com.lightcrafts.image.libs.LCTIFFReader;
+import com.lightcrafts.image.libs.LibRaw;
 import com.lightcrafts.image.metadata.TIFFTags;
 import com.lightcrafts.image.metadata.ImageMetadata;
 import com.lightcrafts.image.ImageInfo;
@@ -71,7 +72,7 @@ class RawImageCache extends Thread {
         Date captureDate = metadata.getCaptureDateTime();
         if ( captureDate == null ) {
             final RawImageInfo rawInfo = (RawImageInfo)imageInfo.getAuxiliaryInfo();
-            final DCRaw dcRaw = rawInfo.getDCRaw();
+            final LibRaw dcRaw = rawInfo.getDCRaw();
             captureDate = dcRaw.getCaptureDateTime();
         }
         if ( captureDate != null ) {

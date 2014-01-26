@@ -18,7 +18,7 @@ import com.lightcrafts.mediax.jai.BorderExtender;
 import com.lightcrafts.mediax.jai.RenderedOp;
 import com.lightcrafts.mediax.jai.operator.MedianFilterDescriptor;
 import com.lightcrafts.utils.ColorScience;
-import com.lightcrafts.utils.DCRaw;
+import com.lightcrafts.image.libs.LibRaw;
 import com.lightcrafts.image.types.AuxiliaryImageInfo;
 import com.lightcrafts.image.types.RawImageInfo;
 
@@ -99,7 +99,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
         metadata = rendering.getEngine().getMetadata();
 
         if (auxInfo instanceof RawImageInfo) {
-            final DCRaw dcRaw = ((RawImageInfo)auxInfo).getDCRaw();
+            final LibRaw dcRaw = ((RawImageInfo)auxInfo).getDCRaw();
 
             daylightMultipliers = dcRaw.getDaylightMultipliers(); // pre_mul
             preMul = daylightMultipliers.clone();
