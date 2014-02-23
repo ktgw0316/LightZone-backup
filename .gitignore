@@ -34,6 +34,15 @@ lightcrafts/jnisrc/jpeg/libjpeg/libjpeg-turbo-1.2.90/ltmain.sh
 lightcrafts/jnisrc/jpeg/libjpeg/libjpeg-turbo-1.2.90/missing
 lightcrafts/jnisrc/jpeg/libjpeg/libjpeg-turbo-1.2.90/*/Makefile
 lightcrafts/jnisrc/jpeg/libjpeg/libjpeg-turbo-1.2.90/*/Makefile.in
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/Makefile
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/Makefile.in
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/aclocal.m4
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/config.*
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/configure
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/libraw.pc
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/libraw_r.pc
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/ltmain.sh
+lightcrafts/jnisrc/libraw/LibRaw-0.16.0/autom4te.cache/*
 lightcrafts/jnisrc/tiff/libtiff/tiff-4.0.3/config.log
 lightcrafts/jnisrc/tiff/libtiff/tiff-4.0.3/config.status
 lightcrafts/jnisrc/tiff/libtiff/tiff-4.0.3/libtiff/.libs/
