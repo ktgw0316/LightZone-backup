@@ -1,4 +1,6 @@
 #include <jni.h>
+#include <stdint.h>
+#include <time.h>
 
 #include "LC_JNIUtils.h"
 #include "libraw.h"
@@ -11,7 +13,7 @@ using namespace std;
 using namespace LightCrafts;
 
 JNIEXPORT void JNICALL Java_com_lightcrafts_image_libs_LibRaw_createLibRawObject(JNIEnv *env, jobject obj) {
-    env->SetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "libRawObject", "J"), (long) new LibRaw());
+    env->SetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "libRawObject", "J"), (uintptr_t) new LibRaw());
 }
 
 JNIEXPORT void JNICALL Java_com_lightcrafts_image_libs_LibRaw_disposeLibRawObject(JNIEnv *env, jobject obj) {
