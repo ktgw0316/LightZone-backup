@@ -9,7 +9,6 @@ import com.lightcrafts.ui.layout.Box;
 import com.lightcrafts.ui.layout.BoxLayout;
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.ui.toolkit.LCSliderUI;
-import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
 
@@ -56,7 +55,6 @@ final class LayerControls extends Box {
 
         combo = new JComboBox();
         combo.setBackground(OpControl.Background);
-        combo.setFont(OpControl.ControlFont);
         combo.setMaximumRowCount(30);
         // combo.setMaximumSize(combo.getPreferredSize());
         combo.setFocusable(false);
@@ -66,7 +64,6 @@ final class LayerControls extends Box {
         slider = new JSlider();
         slider.setFocusable(false);
         slider.setBackground(OpControl.Background);
-        slider.setFont(OpControl.ControlFont);
         slider.setPaintTicks(true);
         slider.setMajorTickSpacing(50);
         slider.setMinorTickSpacing(10);
@@ -75,13 +72,11 @@ final class LayerControls extends Box {
 
         final Box blendingModeBox = Box.createHorizontalBox();
         JLabel blendLabel = new JLabel( LOCALE.get( "BlendingModeMenuLabel" ) + ": " );
-        blendLabel.setFont(LightZoneSkin.fontSet.getSmallFont());
         blendingModeBox.add(blendLabel);
         blendingModeBox.add(combo);
 
         final Box opacityBox = Box.createHorizontalBox();
         JLabel opacityLabel = new JLabel( LOCALE.get( "ToolOpacitySliderLabel" ) + ":  " );
-        opacityLabel.setFont(LightZoneSkin.fontSet.getSmallFont());
         opacityBox.add(opacityLabel);
         opacityBox.add(slider);
 

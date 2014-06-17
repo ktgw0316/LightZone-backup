@@ -15,8 +15,6 @@ public class SelectableControl
 {
     public final static Color Background = LightZoneSkin.Colors.ToolsBackground;
 
-    public final static Font ControlFont = LightZoneSkin.fontSet.getSmallFont();
-
     private final static Border ControlBorder;
     private final static Border SelectedBorder;
     private final static int TitleHeight = 24;
@@ -40,14 +38,12 @@ public class SelectableControl
 
         title = new SelectableTitle(this);
         title.setBackground(Background);
-        title.setFont(ControlFont);
         add(title);
 
         setContent(new JLabel("Default Control"));
         setShowContent(true);
 
         setOpaque(false);
-        setFont(ControlFont);
         setBorder(ControlBorder);
 
         setTitle("Default Control");
@@ -107,7 +103,6 @@ public class SelectableControl
         if (isContentVisible) {
             add(content);
             content.setBackground(Background);
-            content.setFont(ControlFont);
         }
     }
 

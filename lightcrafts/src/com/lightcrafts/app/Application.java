@@ -2178,16 +2178,17 @@ public class Application {
             EventQueue.invokeLater(
                 new Runnable() {
                     public void run() {
+                        new LightZoneSkin();
                         if (Platform.getType() == Platform.MacOSX) {
                             // Get a Mac menu bar before setting LaF, then restore.
                             Object menuBarUI = UIManager.get("MenuBarUI");
-                            setLookAndFeel(new LightZoneSkin().getLightZoneLookAndFeel());
+                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
                             UIManager.put("MenuBarUI", menuBarUI);
 
                             openMacPlaceholderFrame();
                         }
                         else {
-                            setLookAndFeel(new LightZoneSkin().getLightZoneLookAndFeel());
+                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
                         }
                         openEmpty();
                         Platform.getPlatform().readyToOpenFiles();

@@ -7,7 +7,6 @@ import com.lightcrafts.model.OperationType;
 import com.lightcrafts.model.Preview;
 import com.lightcrafts.platform.Platform;
 import com.lightcrafts.ui.ActivityMeter;
-import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.ui.crop.CropMode;
 import static com.lightcrafts.ui.editor.Locale.LOCALE;
 import com.lightcrafts.ui.layout.ToggleTitleBorder;
@@ -209,8 +208,6 @@ public class Editor {
         imageScroll.setVerticalScrollBarPolicy(
             JScrollPane.VERTICAL_SCROLLBAR_NEVER
         );
-
-        imageScroll.setBorder(LightZoneSkin.getImageBorder());
 
         imagePane = new ActivityMeter(new PannerOverlay(imageScroll));
         engine.addEngineListener(imagePane);

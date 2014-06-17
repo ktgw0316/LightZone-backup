@@ -36,7 +36,6 @@ public class ZoneControl extends OpControl {
 
         scales = new ZoneScaleButtons(op, undoSupport);
         scales.setBackground(Background);
-        scales.setFont(ControlFont);
 
         ZoneWidget reference = new ZoneWidget(op, null);
         reference.setBackground(Background);

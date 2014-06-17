@@ -95,7 +95,6 @@ public class GenericControl extends OpControl {
                 }
             );
             slider.setBackgroundRecurse(Background);
-            slider.setFontRecurse(ControlFont);
             sliderContainer.addGenericSlider(slider);
 
             sliders.put(key, slider);
@@ -124,7 +123,6 @@ public class GenericControl extends OpControl {
                 checkbox.setSelected(oldCheckbox.isSelected());
             }
             checkbox.setBackground(Background);
-            checkbox.setFont(ControlFont);
             box.add(checkbox);
 
             checkboxes.put(key, checkbox);
@@ -151,7 +149,6 @@ public class GenericControl extends OpControl {
                 choice.setSelectedItem(oldChoice.getSelectedItem());
             }
             choice.setBackground(Background);
-            choice.setFont(ControlFont);
             box.add(choice);
 
             choices.put(key, choice);

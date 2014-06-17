@@ -19,8 +19,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-
 /**
  * Copyright (C) 2007 Light Crafts, Inc.
  * User: fabio
@@ -60,7 +58,6 @@ public class NavigationPane extends PaneTitle {
         btnForward.setEnabled(false);
 
         btnPath.setIcon(imgPath);
-        // btnPath.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
         btnPath.setToolTipText(LOCALE.get("PathToolTip"));
 
         btnBack.addActionListener(

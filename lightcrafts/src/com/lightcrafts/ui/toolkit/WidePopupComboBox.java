@@ -14,8 +14,6 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-
 /**
  * There is a problem with the popup component in JComboBox components under
  * the windows and linux PLAFs: the popup width is constrained by the combo
@@ -93,7 +91,6 @@ public class WidePopupComboBox extends JComboBox {
             int lenght = anObject.toString().length();
             if (lenght > maxItemLenght) {
                 maxItemLenght = lenght;
-                putClientProperty(SubstanceLookAndFeel.COMBO_POPUP_PROTOTYPE, anObject);
             }
         }
     }

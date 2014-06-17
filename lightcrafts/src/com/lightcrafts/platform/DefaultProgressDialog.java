@@ -17,7 +17,6 @@ import com.lightcrafts.utils.thread.CancelableThread;
 import com.lightcrafts.utils.thread.CancelableThreadMonitor;
 import com.lightcrafts.utils.thread.ProgressThread;
 import com.lightcrafts.ui.LightZoneSkin;
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 /**
  * A <code>DefaultProgressDialog</code> implements {@link ProgressDialog} for
@@ -31,7 +30,6 @@ public final class DefaultProgressDialog implements ProgressDialog {
 
     public DefaultProgressDialog() {
         m_progressBar = new JProgressBar();
-        m_progressBar.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
         m_progressBar.setBorder(null);
     }
 

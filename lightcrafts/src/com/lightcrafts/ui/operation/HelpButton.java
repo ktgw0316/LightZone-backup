@@ -14,8 +14,6 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-
 class HelpButton extends ImageOnlyButton {
 
     private static Icon InfoNormalIcon;
@@ -41,7 +39,6 @@ class HelpButton extends ImageOnlyButton {
 
     HelpButton(final SelectableControl control) {
         super(InfoNormalIcon, InfoPressedIcon);
-        putClientProperty(SubstanceLookAndFeel.BUTTON_NO_MIN_SIZE_PROPERTY, Boolean.TRUE);
         setToolTipText(ToolTip);
         addActionListener(
             new ActionListener() {

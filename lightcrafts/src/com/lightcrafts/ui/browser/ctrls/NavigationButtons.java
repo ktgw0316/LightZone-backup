@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-
 public class NavigationButtons extends JPanel {
 
     private static Icon ImgFwd =
@@ -74,7 +72,6 @@ public class NavigationButtons extends JPanel {
         btnForward.setEnabled(false);
 
         btnPath.setIcon(imgPath);
-        btnPath.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
         btnPath.setToolTipText(LOCALE.get("PathToolTip"));
     }
 

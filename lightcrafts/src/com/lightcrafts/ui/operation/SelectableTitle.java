@@ -19,8 +19,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-
 class SelectableTitle extends JPanel implements MouseListener {
 
     final static int ButtonSpace = 8;
@@ -30,8 +28,6 @@ class SelectableTitle extends JPanel implements MouseListener {
     private final static int TitleRightInset = 2;
 
     private final static int IconSpace = 3;
-
-    private final static float TitleFontSize = 12f;
 
     private final static Color TitleTextColor = LightZoneSkin.Colors.ToolTitleTextColor;
 
@@ -108,8 +104,6 @@ class SelectableTitle extends JPanel implements MouseListener {
         label = text;
         label.setOpaque(false);
         label.setForeground(TitleTextColor);
-        Font font = getTitleFont();
-        label.setFont(font);
         add(label);
         revalidate();
         repaint();  // Fixes mysterious paint glitches after title editing.
@@ -188,10 +182,6 @@ class SelectableTitle extends JPanel implements MouseListener {
         JButton button = new JButton("");
         button.setSize(size.width, size.height);
         
-        if (selected) {
-            button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-            button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
-        }
         button.paint(g);
 
         if (hasRegions) {
@@ -276,13 +266,6 @@ class SelectableTitle extends JPanel implements MouseListener {
                 collapseAction.setState(true);
             }
         }
-    }
-
-    private static Font getTitleFont() {
-        Font font = OpControl.ControlFont;
-        font = font.deriveFont(Font.BOLD);
-        font = font.deriveFont(TitleFontSize);
-        return font;
     }
 
     // Images for background patterns:

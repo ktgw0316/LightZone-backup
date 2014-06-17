@@ -29,9 +29,6 @@ import com.lightcrafts.utils.LCMS;
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.app.ComboFrame;
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.theme.SubstanceTheme;
-import org.jvnet.substance.color.ColorScheme;
 
 /**
  * A <code>ColorSelectionControls</code> is-a {@link Box} that contains all
@@ -101,12 +98,6 @@ final class ColorSelectionControls extends Box {
                         final Color color = new Color(0xff & systemColor[0],
                                                 0xff & systemColor[1],
                                                 0xff & systemColor[2]);
-
-                        final ColorScheme colorScheme = new LightZoneSkin.CustomColorScheme(color);
-                        final SubstanceTheme theme = LightZoneSkin.makeTheme(colorScheme, p.name());
-
-                        button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, theme);
-                        button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
 
                         button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
                     }
@@ -196,7 +187,6 @@ final class ColorSelectionControls extends Box {
             new JLabel( LOCALE.get( "ColorRangeLabel" ) + ':' );
         colorRadiusLabel.setBackground( OpControl.Background );
         colorRadiusLabel.setFocusable( false );
-        colorRadiusLabel.setFont( LightZoneSkin.fontSet.getSmallFont() );
         m_colorRangeSlider = new JSlider(
             SLIDER_RADIUS_MIN, SLIDER_RADIUS_MAX,
             COLOR_RADIUS_DEFAULT
@@ -223,7 +213,6 @@ final class ColorSelectionControls extends Box {
         initDropper( control );
 
         m_invertSelection = new JCheckBox( "Invert" );
-        m_invertSelection.setFont(LightZoneSkin.fontSet.getSmallFont());
         m_invertSelection.setFocusable( false );
         m_invertSelection.setToolTipText(
             LOCALE.get( "InvertColorSelectionEnableToolTip" )

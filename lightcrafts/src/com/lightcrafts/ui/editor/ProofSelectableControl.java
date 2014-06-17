@@ -195,11 +195,13 @@ final class ProofSelectableControl extends SelectableControl {
     }
 
     private static void setFixedSize(JComboBox combo) {
+        /*
         Dimension size = combo.getPreferredSize();
         size = new Dimension(PreferredComboWidth, size.height);
         combo.setMinimumSize(size);
         combo.setPreferredSize(size);
         combo.setMaximumSize(size);
+        */
     }
 
     protected String getHelpTopic() {

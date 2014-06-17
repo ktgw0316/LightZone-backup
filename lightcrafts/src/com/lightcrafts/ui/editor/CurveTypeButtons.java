@@ -7,14 +7,10 @@ import com.lightcrafts.ui.region.CurveFactory;
 import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.CoolToggleButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
-import com.lightcrafts.ui.LightZoneSkin;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.color.ColorScheme;
 
 /**
  * A group of three toggle buttons that control the Curve implementation
@@ -135,8 +131,6 @@ public class CurveTypeButtons extends Box {
         }
     }
 
-    ColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
-
     private void initButtons() {
         polygon = new CoolToggleButton(CoolButton.ButtonStyle.LEFT);
         polygon.setIcon(PolygonIcon);
@@ -144,11 +138,6 @@ public class CurveTypeButtons extends Box {
         basis.setIcon(BasisIcon);
         bezier = new CoolToggleButton(CoolButton.ButtonStyle.RIGHT);
         bezier.setIcon(BezierIcon);
-
-        // bezier.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
-        polygon.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-        basis.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-        bezier.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
 
         polygon.setToolTipText(PolygonToolTip);
         basis.setToolTipText(BasisToolTip);

@@ -52,7 +52,6 @@ public abstract class OpControl extends SelectableControl {
         remove(title);
         title = new OpTitle(this, stack);
         title.setBackground(Background);
-        title.setFont(ControlFont);
         add(title);
 
         maybeSetEngineDeactivatable();

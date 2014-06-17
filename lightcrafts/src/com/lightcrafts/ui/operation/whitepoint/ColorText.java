@@ -54,7 +54,6 @@ class ColorText extends Box {
 
     private static JLabel createLabel(String text) {
         JLabel label = new JLabel(text + ':');
-        label.setFont(WhitePointControl.ControlFont);
         label.setAlignmentX(1f);
         return label;
     }

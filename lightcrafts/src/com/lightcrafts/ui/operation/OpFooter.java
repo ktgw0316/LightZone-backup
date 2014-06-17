@@ -10,8 +10,6 @@ import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
 import org.jvnet.substance.color.ColorScheme;
-import org.jvnet.substance.utils.SubstanceCoreUtilities;
-import org.jvnet.substance.utils.SubstanceSizeUtils;
 
 import javax.swing.*;
 
@@ -29,77 +27,9 @@ class OpFooter extends Box implements PropertyChangeListener {
     private JTabbedPane tabPane;
 
     public void propertyChange(PropertyChangeEvent evt) {
-        if (tabPane != null && evt.getPropertyName().equals(ColorSelectionControls.COLOR_SELECTION)) {
-            if (evt.getNewValue() == Boolean.TRUE)
-                tabPane.setIconAt(1, getThemeIcon(null, false));
-            else
-                tabPane.setIconAt(1, getThemeIcon(orangeScheme, false));
-        }
-        if (layerControls != null && evt.getPropertyName().equals(LayerControls.BLENDING_MODES)) {
-            if (evt.getNewValue() == Boolean.TRUE)
-                tabPane.setIconAt(0, getThemeIcon(null, true));
-            else
-                tabPane.setIconAt(0, getThemeIcon(orangeScheme, true));
-        }
-    }
-
-    private static Icon getThemeIcon(ColorScheme colorScheme, boolean square) {
-        int iSize = SubstanceSizeUtils.getTitlePaneIconSize();
-        BufferedImage result = SubstanceCoreUtilities.getBlankImage(iSize, iSize);
-        Graphics2D graphics = (Graphics2D) result.getGraphics().create();
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                  RenderingHints.VALUE_ANTIALIAS_ON);
-
-        Color color1 = (colorScheme == null)
-                       ? Color.red
-                       : colorScheme.getUltraDarkColor();
-        Color color2 = (colorScheme == null)
-                       ? Color.green
-                       : colorScheme.getMidColor();
-        Color color3 = (colorScheme == null)
-                       ? Color.blue
-                       : colorScheme.getExtraLightColor();
-
-        graphics.setColor(color1);
-        if (square)
-            graphics.fillRect(5, 2, 6, 6);
-        else
-            graphics.fillOval(5, 2, 6, 6);
-        graphics.setColor(color1.darker());
-        if (square)
-            graphics.drawRect(5, 2, 6, 6);
-        else
-            graphics.drawOval(5, 2, 6, 6);
-
-        graphics.setColor(color2);
-        if (square)
-            graphics.fillRect(1, 9, 6, 6);
-        else
-            graphics.fillOval(1, 9, 6, 6);
-        graphics.setColor(color2.darker());
-        if (square)
-            graphics.drawRect(1, 9, 6, 6);
-        else
-            graphics.drawOval(1, 9, 6, 6);
-
-        graphics.setColor(color3);
-        if (square)
-            graphics.fillRect(9, 9, 6, 6);
-        else
-            graphics.fillOval(9, 9, 6, 6);
-        graphics.setColor(color3.darker());
-        if (square)
-            graphics.drawRect(9, 9, 6, 6);
-        else
-            graphics.drawOval(9, 9, 6, 6);
-
-        graphics.dispose();
-        return new ImageIcon(result);
     }
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport( this );
-
-    ColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
 
     OpFooter(OpControl control, List<LayerMode> layerModes) {
         super(BoxLayout.X_AXIS);
@@ -117,13 +47,9 @@ class OpFooter extends Box implements PropertyChangeListener {
         invertRegionSwitch.setAlignmentX( Component.LEFT_ALIGNMENT );
 
         tabPane = new JTabbedPane();
-        tabPane.setFont(LightZoneSkin.fontSet.getSmallFont());
         tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPane.add(LOCALE.get( "ToolSettingsTabName" ), blendBox);
         tabPane.add(LOCALE.get( "ColorSelectionTabName"), colorControls);
-
-        tabPane.setIconAt(0, getThemeIcon(orangeScheme, true));
-        tabPane.setIconAt(1, getThemeIcon(orangeScheme, false));
 
         add(tabPane, BorderLayout.NORTH);
 

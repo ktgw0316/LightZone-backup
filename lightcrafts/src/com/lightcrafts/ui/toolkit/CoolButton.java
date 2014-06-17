@@ -16,9 +16,6 @@ import java.io.File;
 import java.util.Set;
 import java.util.HashSet;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.utils.SubstanceConstants;
-
 public class CoolButton extends JButton {
 
     public enum ButtonStyle { NORMAL, LEFT, CENTER, RIGHT }
@@ -47,9 +44,6 @@ public class CoolButton extends JButton {
         super.setIcon(icon);
 
         if (icon != null && icon instanceof ImageIcon) {
-            if (style == ButtonStyle.NORMAL)
-                putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
-
             BufferedImage iconImage = new BufferedImage(icon.getIconWidth(),
                                                         icon.getIconHeight(),
                                                         BufferedImage.TYPE_4BYTE_ABGR);
@@ -82,38 +76,6 @@ public class CoolButton extends JButton {
 
     public void setStyle(ButtonStyle style) {
         this.style = style;
-
-        Set<SubstanceConstants.Side> openSides = new HashSet<SubstanceConstants.Side>();
-
-        switch (style) {
-            case NORMAL:
-                bkgnd = new CoolButtonNormalBackground(this);
-                break;
-
-            case LEFT:
-                openSides.add(SubstanceConstants.Side.RIGHT);
-                putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
-                bkgnd = new CoolButtonLeftBackground(this);
-                break;
-
-            case CENTER:
-	        openSides.add(SubstanceConstants.Side.LEFT);
-                openSides.add(SubstanceConstants.Side.RIGHT);
-	        putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
-                bkgnd = new CoolButtonCenterBackground(this);
-                break;
-
-            case RIGHT:
-                openSides.add(SubstanceConstants.Side.LEFT);
-                putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
-                bkgnd = new CoolButtonRightBackground(this);
-                break;
-        }
-        Insets insets = bkgnd.getInsets();
-        Border border = BorderFactory.createEmptyBorder(
-            insets.top, insets.left, insets.bottom, insets.right
-        );
-        setBorder(border);
     }
 
     public static void main(String args[]) throws Exception {

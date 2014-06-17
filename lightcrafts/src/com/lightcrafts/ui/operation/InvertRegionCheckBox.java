@@ -5,7 +5,6 @@ package com.lightcrafts.ui.operation;
 import com.lightcrafts.ui.operation.clone.CloneControl;
 import com.lightcrafts.ui.operation.clone.SpotControl;
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
-import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.model.RedEyeOperation;
 import com.lightcrafts.utils.xml.XmlNode;
 import com.lightcrafts.utils.xml.XMLException;
@@ -34,7 +33,6 @@ class InvertRegionCheckBox extends JCheckBox implements ItemListener {
         super("Invert Mask");
         this.control = control;
         undoSupport = control.undoSupport;
-        setFont(LightZoneSkin.fontSet.getSmallFont());
         this.pcs = pcs;
 
         addItemListener(this);

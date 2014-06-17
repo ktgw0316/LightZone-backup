@@ -16,9 +16,6 @@ import java.io.File;
 import java.util.Set;
 import java.util.HashSet;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.utils.SubstanceConstants;
-
 public class CoolToggleButton extends JToggleButton {
 
     private CoolButton.ButtonStyle style;
@@ -47,9 +44,6 @@ public class CoolToggleButton extends JToggleButton {
         super.setIcon(icon);
 
         if (icon != null) {
-            if (style == CoolButton.ButtonStyle.NORMAL)
-                putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
-
             BufferedImage iconImage = new BufferedImage(icon.getIconWidth(),
                                                         icon.getIconHeight(),
                                                         BufferedImage.TYPE_4BYTE_ABGR);
@@ -82,40 +76,6 @@ public class CoolToggleButton extends JToggleButton {
     // insets on this button.  Setting the style resets the border.
     public void setStyle(CoolButton.ButtonStyle style) {
         this.style = style;
-
-        Set<SubstanceConstants.Side> openSides = new HashSet<SubstanceConstants.Side>();
-
-        switch (style) {
-            case NORMAL:
-                bkgnd = new CoolButtonNormalBackground(this);
-                break;
-
-            case LEFT:
-                // putClientProperty(SubstanceLookAndFeel.BUTTON_SIDE_PROPERTY, SubstanceConstants.Side.LEFT.name());
-                openSides.add(SubstanceConstants.Side.RIGHT);
-                putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
-                bkgnd = new CoolButtonLeftBackground(this);
-                break;
-
-            case CENTER:
-	        openSides.add(SubstanceConstants.Side.LEFT);
-                openSides.add(SubstanceConstants.Side.RIGHT);
-	        putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
-                bkgnd = new CoolButtonCenterBackground(this);
-                break;
-
-            case RIGHT:
-                // putClientProperty(SubstanceLookAndFeel.BUTTON_SIDE_PROPERTY, SubstanceConstants.Side.RIGHT.name());
-                openSides.add(SubstanceConstants.Side.LEFT);
-                putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
-                bkgnd = new CoolButtonRightBackground(this);
-                break;
-        }
-        Insets insets = bkgnd.getInsets();
-        Border border = BorderFactory.createEmptyBorder(
-            insets.top, insets.left, insets.bottom, insets.right
-        );
-        setBorder(border);
     }
 
     public static void main(String args[]) throws Exception {

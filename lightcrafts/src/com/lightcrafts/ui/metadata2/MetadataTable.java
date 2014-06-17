@@ -34,8 +34,6 @@ class MetadataTable extends JTable {
         getColumnModel().getColumn(1).setMinWidth(120);
         // getColumnModel().getColumn(1).setMaxWidth(300);
 
-        setFont(LightZoneSkin.fontSet.getSmallFont());
-
         // Selection is not allowed, so a single click should enter the editor:
         addMouseListener(
             new MouseAdapter() {
@@ -71,7 +69,6 @@ class MetadataTable extends JTable {
         editComp.setForeground(
             LightZoneSkin.Colors.ToolPanesForeground
         );
-        editComp.setFont(LightZoneSkin.fontSet.getSmallFont());
         editComp.addFocusListener(
             new FocusAdapter() {
                 public void focusGained(FocusEvent event) {
