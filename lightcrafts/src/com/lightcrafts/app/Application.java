@@ -1840,8 +1840,12 @@ public class Application {
     }
 
     private static void setLookAndFeel() {
-        LookAndFeel plafName = Env.getLookAndFeel();
-        setLookAndFeel(plafName);
+        try {
+            LightZoneSkin.setLookAndFeel();
+        }
+        catch (Exception e) {
+            showError("Error setting LightZone look and feel", e, null);
+        }
     }
 
     private final static String FirstLaunchTag = "FirstLaunch";
@@ -2178,17 +2182,16 @@ public class Application {
             EventQueue.invokeLater(
                 new Runnable() {
                     public void run() {
-                        new LightZoneSkin();
                         if (Platform.getType() == Platform.MacOSX) {
                             // Get a Mac menu bar before setting LaF, then restore.
                             Object menuBarUI = UIManager.get("MenuBarUI");
-                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
+                            setLookAndFeel();
                             UIManager.put("MenuBarUI", menuBarUI);
 
                             openMacPlaceholderFrame();
                         }
                         else {
-                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
+                            setLookAndFeel();
                         }
                         openEmpty();
                         Platform.getPlatform().readyToOpenFiles();

@@ -4,8 +4,8 @@ package com.lightcrafts.ui;
 
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import javax.swing.*;
+import javax.swing.UIManager.*;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 
@@ -74,7 +74,9 @@ public class LightZoneSkin {
         return new EtchedBorder(EtchedBorder.LOWERED, new Color(48, 48, 48), new Color(23, 23, 23));
     }
 
-    public static LookAndFeel getLightZoneLookAndFeel() {
+    public static void setLookAndFeel()
+            throws ClassNotFoundException, InstantiationException,
+            IllegalAccessException, UnsupportedLookAndFeelException {
         // Primary Colors
         UIManager.put("control", new Color(22, 22, 22)); 
         UIManager.put("info", new Color(128, 128, 128));
@@ -83,7 +85,7 @@ public class LightZoneSkin {
         UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
         UIManager.put("nimbusFocus", new Color(188, 188, 188)); 
         UIManager.put("nimbusGreen", new Color(176,179,50));
-        UIManager.put("nimbusInfoBlue", new Color( 66, 139, 221));
+        UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
         UIManager.put("nimbusLightBackground", new Color(176,176,176)); 
         UIManager.put("nimbusOrange", new Color(254,155,14));
         UIManager.put("nimbusRed", new Color(169,46,34));
@@ -100,7 +102,13 @@ public class LightZoneSkin {
         UIManager.put("scrollbar", new Color(176,176,176)); 
         UIManager.put("textForeground", new Color(255, 255, 255));
 
-        LookAndFeel nimbus = new NimbusLookAndFeel();
-        return nimbus;
+        for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+            if ("Nimbus".equals(info.getName())) {
+                UIManager.setLookAndFeel(info.getClassName());
+                break;
+            }
+        }
+        UIManager.getLookAndFeel().getDefaults().put(
+                "defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, 13));
     }
 }

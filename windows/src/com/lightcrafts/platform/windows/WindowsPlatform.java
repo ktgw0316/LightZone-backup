@@ -105,7 +105,7 @@ public final class WindowsPlatform extends Platform {
     }
 
     public LookAndFeel getLookAndFeel() {
-        LookAndFeel laf = LightZoneSkin.getLightZoneLookAndFeel();
+        LookAndFeel laf = null; // LightZoneSkin.getLightZoneLookAndFeel();
 
         boolean addWindows = false;
 

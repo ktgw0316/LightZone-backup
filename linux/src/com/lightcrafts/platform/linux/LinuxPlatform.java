@@ -45,7 +45,7 @@ public class LinuxPlatform extends Platform {
     private static Collection<ColorProfileInfo> Profiles;
 
     public LookAndFeel getLookAndFeel() {
-        return LightZoneSkin.getLightZoneLookAndFeel();
+        return null; // LightZoneSkin.getLightZoneLookAndFeel();
     }
 
     public FileChooser getFileChooser() {

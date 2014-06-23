@@ -11,7 +11,6 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.*;
 
 import ch.randelshofer.quaqua.filechooser.QuaquaFileSystemView;
-import ch.randelshofer.quaqua.QuaquaLookAndFeel;
 
 import com.lightcrafts.platform.*;
 import com.lightcrafts.utils.ColorProfileInfo;
@@ -94,8 +93,8 @@ public final class MacOSXPlatform extends Platform {
     }
 
     public LookAndFeel getLookAndFeel() {
-        LookAndFeel lookAndFeel = LightZoneSkin.getLightZoneLookAndFeel();
-
+        LookAndFeel lookAndFeel = null; // LightZoneSkin.getLightZoneLookAndFeel();
+/*
         boolean addQuaqua = true;
 
         if (addQuaqua) {
@@ -123,6 +122,7 @@ public final class MacOSXPlatform extends Platform {
 
             }
         }
+*/
         return lookAndFeel;
     }
 
