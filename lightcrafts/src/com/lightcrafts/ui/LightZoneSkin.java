@@ -78,29 +78,19 @@ public class LightZoneSkin {
             throws ClassNotFoundException, InstantiationException,
             IllegalAccessException, UnsupportedLookAndFeelException {
         // Primary Colors
-        UIManager.put("control", new Color(22, 22, 22)); 
-        UIManager.put("info", new Color(128, 128, 128));
-        UIManager.put("nimbusBase", new Color(62, 62, 62)); 
-        UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
-        UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
-        UIManager.put("nimbusFocus", new Color(188, 188, 188)); 
-        UIManager.put("nimbusGreen", new Color(176,179,50));
-        UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
-        UIManager.put("nimbusLightBackground", new Color(176,176,176)); 
-        UIManager.put("nimbusOrange", new Color(254,155,14));
-        UIManager.put("nimbusRed", new Color(169,46,34));
-        UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
-        UIManager.put("nimbusSelectionBackground", new Color(90,130,195)); 
+        UIManager.put("control", new Color(22, 22, 22));
+        UIManager.put("info", new Color(38, 38, 38));
+        UIManager.put("nimbusBase", new Color(22, 22, 22));
+        UIManager.put("nimbusDisabledText", Color.GRAY);
+        UIManager.put("nimbusFocus", Colors.LZOrange);
+        UIManager.put("nimbusLightBackground", Color.GRAY);
+        UIManager.put("nimbusSelectedText", Color.WHITE);
+        UIManager.put("nimbusSelectionBackground", new Color(38, 38, 38));
         UIManager.put("text", new Color(230, 230, 230));
+
         // Secondary Colors
-        // UIManager.put("activeCaption", new Color(38, 38, 38));
-        UIManager.put("background", new Color(62, 62, 62));
-        UIManager.put("menu", new Color(62, 62, 62));
-        UIManager.put("menuText", new Color(255, 255, 255));
-        UIManager.put("nimbusBorder", new Color(62, 62, 62));
-        UIManager.put("nimbusSelection", new Color(254, 155, 14));
-        UIManager.put("scrollbar", new Color(176,176,176)); 
-        UIManager.put("textForeground", new Color(255, 255, 255));
+        UIManager.put("nimbusBlueGrey", new Color(22, 22, 22));
+        UIManager.put("textForeground", Color.WHITE);
 
         for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
             if ("Nimbus".equals(info.getName())) {
@@ -108,7 +98,34 @@ public class LightZoneSkin {
                 break;
             }
         }
-        UIManager.getLookAndFeel().getDefaults().put(
+        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+        defaults.put(
                 "defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, 13));
+
+        // Menu
+        defaults.put("Menu[Disabled].textForeground", Color.DARK_GRAY);
+        defaults.put("Menu[Enabled].textForeground", Color.WHITE);
+        defaults.put("Menu[Enabled+Selected].textForeground", Color.WHITE);
+
+        // MenuItem
+        defaults.put("MenuItem[Disabled].textForeground", Color.DARK_GRAY);
+        defaults.put("MenuItem[Enabled].textForeground", Color.WHITE);
+
+        // ComboBox
+        defaults.put("ComboBox.background", Color.BLACK);
+        defaults.put("ComboBox.foreground", Color.WHITE);
+
+        // Button
+        defaults.put("Button.contentMargins", new Insets(6, 6, 6, 6));
+        defaults.put("Button[Default].backgroundPainter", null);
+        defaults.put("Button[Enabled].backgroundPainter", null);
+        defaults.put("Button[Disabled].backgroundPainter", null);
+
+        // ToggleButton
+        defaults.put("ToggleButton.contentMargins", new Insets(6, 6, 6, 6));
+        defaults.put("Button[Default].backgroundPainter", null);
+        defaults.put("Button[Enabled].backgroundPainter", null);
+        defaults.put("Button[Disabled+Selected].backgroundPainter", null);
+        defaults.put("Button[Disabled].backgroundPainter", null);
     }
 }
