@@ -4,7 +4,6 @@ package com.lightcrafts.ui.editor;
 
 import static com.lightcrafts.ui.editor.Locale.LOCALE;
 import com.lightcrafts.ui.layout.ToggleTitleBorder;
-import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.CoolToggleButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
 
@@ -58,11 +57,6 @@ final class ModeButtons extends Box {
         cropButton.setToolTipText(CropTip);
         rotateButton.setToolTipText(RotateTip);
         regionButton.setToolTipText(RegionTip);
-
-        arrowButton.setStyle(CoolButton.ButtonStyle.LEFT);
-        cropButton.setStyle(CoolButton.ButtonStyle.CENTER);
-        rotateButton.setStyle(CoolButton.ButtonStyle.CENTER);
-        regionButton.setStyle(CoolButton.ButtonStyle.RIGHT);
 
 //        arrowButton.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
 //        arrowButton.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);

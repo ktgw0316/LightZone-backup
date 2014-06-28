@@ -23,13 +23,13 @@ public class RotateButtons extends Box {
         ImageBrowserActions actions = browser.getActions();
 
         Action leftAction = actions.getLeftAction();
-        JButton left = new CoolButton(/*CoolButton.ButtonStyle.LEFT*/);
+        JButton left = new CoolButton();
         left.setAction(leftAction);
         left.setIcon(ButtonFactory.getIconByName("rotateLeft"));
         left.setToolTipText(LeftToolTip);
 
         Action rightAction = actions.getRightAction();
-        JButton right = new CoolButton(/*CoolButton.ButtonStyle.RIGHT*/);
+        JButton right = new CoolButton();
         right.setAction(rightAction);
         right.setIcon(ButtonFactory.getIconByName("rotateRight"));
         right.setToolTipText(RightToolTip);

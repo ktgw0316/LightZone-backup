@@ -2,36 +2,18 @@
 
 package com.lightcrafts.ui.toolkit;
 
-import com.lightcrafts.platform.Platform;
-import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.app.ComboFrame;
+// import com.lightcrafts.platform.Platform;
+// import com.lightcrafts.ui.LightZoneSkin;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
-import java.io.File;
-import java.util.Set;
-import java.util.HashSet;
+// import java.io.File;
+// import javax.imageio.ImageIO;
 
 public class CoolButton extends JButton {
-
-    public enum ButtonStyle { NORMAL, LEFT, CENTER, RIGHT }
-
-    private ButtonStyle style;
-
-    private CoolButtonBackground bkgnd;
-
-    public CoolButton() {
-        this(ButtonStyle.NORMAL);
-    }
-
-    @SuppressWarnings({"OverridableMethodCallInConstructor"})
-    public CoolButton(ButtonStyle style) {
-        setStyle(style);
-    }
 
     public ComboFrame getComboFrame() {
         return (ComboFrame)SwingUtilities.getAncestorOfClass(
@@ -74,10 +56,7 @@ public class CoolButton extends JButton {
         }
     }
 
-    public void setStyle(ButtonStyle style) {
-        this.style = style;
-    }
-
+    /*
     public static void main(String args[]) throws Exception {
         if (args.length < 1) {
             System.err.println("usage: (file)");
@@ -130,4 +109,5 @@ public class CoolButton extends JButton {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
+    */
 }

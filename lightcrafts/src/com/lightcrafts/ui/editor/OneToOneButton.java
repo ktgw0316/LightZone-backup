@@ -31,7 +31,6 @@ final class OneToOneButton
 
      OneToOneButton(ScaleModel scale) {
          this.scale = scale;
-         setStyle(ButtonStyle.LEFT);
          setIcon(Icon);
          setToolTipText(ToolTip);
          addActionListener(this);

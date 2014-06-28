@@ -28,7 +28,6 @@ final class LargerButton
 
     LargerButton(ScaleModel scale) {
         this.scale = scale;
-        setStyle(ButtonStyle.CENTER);
         setIcon(Icon);
         setToolTipText(ToolTip);
         addActionListener(this);

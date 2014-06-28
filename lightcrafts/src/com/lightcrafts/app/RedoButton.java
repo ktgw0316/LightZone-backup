@@ -23,7 +23,6 @@ class RedoButton extends EditorButton implements PropertyChangeListener {
 
     RedoButton(ComboFrame frame) {
         super(frame, Icon);
-        setStyle(ButtonStyle.RIGHT);
         setToolTipText(ToolTip);
         setEnabled(false);
         addActionListener(

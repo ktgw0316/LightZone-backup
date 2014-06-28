@@ -4,7 +4,6 @@ package com.lightcrafts.ui.editor;
 
 import static com.lightcrafts.ui.editor.Locale.LOCALE;
 import com.lightcrafts.ui.region.CurveFactory;
-import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.CoolToggleButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
 
@@ -132,11 +131,11 @@ public class CurveTypeButtons extends Box {
     }
 
     private void initButtons() {
-        polygon = new CoolToggleButton(CoolButton.ButtonStyle.LEFT);
+        polygon = new CoolToggleButton();
         polygon.setIcon(PolygonIcon);
-        basis = new CoolToggleButton(CoolButton.ButtonStyle.CENTER);
+        basis = new CoolToggleButton();
         basis.setIcon(BasisIcon);
-        bezier = new CoolToggleButton(CoolButton.ButtonStyle.RIGHT);
+        bezier = new CoolToggleButton();
         bezier.setIcon(BezierIcon);
 
         polygon.setToolTipText(PolygonToolTip);

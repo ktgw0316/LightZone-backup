@@ -23,13 +23,13 @@ public class CopyPasteButtons extends Box {
         ImageBrowserActions actions = browser.getActions();
 
         Action copyAction = actions.getCopyAction();
-        JButton copy = new CoolButton(/*CoolButton.ButtonStyle.LEFT*/);
+        JButton copy = new CoolButton();
         copy.setAction(copyAction);
         copy.setIcon(ButtonFactory.getIconByName("copy"));
         copy.setToolTipText(CopyToolTip);
 
         Action pasteAction = actions.getPasteAction();
-        JButton paste = new CoolButton(/*CoolButton.ButtonStyle.RIGHT*/);
+        JButton paste = new CoolButton();
         paste.setAction(pasteAction);
         paste.setIcon(ButtonFactory.getIconByName("paste"));
         paste.setToolTipText(PasteToolTip);

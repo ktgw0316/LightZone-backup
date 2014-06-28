@@ -45,8 +45,8 @@ public class NavigationPane extends PaneTitle {
     }
 
     public NavigationPane(final FolderBrowserPane browser) {
-        final JButton btnBack = new CoolButton(/*CoolButton.ButtonStyle.LEFT*/);
-        final JButton btnForward = new CoolButton(/*CoolButton.ButtonStyle.RIGHT*/);
+        final JButton btnBack = new CoolButton();
+        final JButton btnForward = new CoolButton();
         final MenuButton btnPath = browser.getPathPopupMenu();
 
         btnBack.setIcon(ImgBack);

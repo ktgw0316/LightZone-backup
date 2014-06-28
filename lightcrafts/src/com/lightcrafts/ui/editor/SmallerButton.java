@@ -28,7 +28,6 @@ final class SmallerButton
 
     SmallerButton(ScaleModel scale) {
         this.scale = scale;
-        setStyle(ButtonStyle.RIGHT);
         setIcon(Icon);
         setToolTipText(ToolTip);
         addActionListener(this);

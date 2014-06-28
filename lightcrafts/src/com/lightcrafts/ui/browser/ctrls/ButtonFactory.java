@@ -10,13 +10,7 @@ import javax.swing.*;
 class ButtonFactory {
 
     static JButton createButtonByName(String name) {
-        return createButtonByName(name, CoolButton.ButtonStyle.NORMAL);
-    }
-
-    static JButton createButtonByName(
-        String name, CoolButton.ButtonStyle style
-    ) {
-        JButton button = new CoolButton(style);
+        JButton button = new CoolButton();
         Icon icon = getIconByName(name);
         if (icon != null) {
             button.setIcon(icon);
@@ -28,7 +22,7 @@ class ButtonFactory {
     }
 
     static JButton createButtonByText(String text) {
-        JButton button = new CoolButton(CoolButton.ButtonStyle.NORMAL);
+        JButton button = new CoolButton();
         button.setText(text);
         return button;
     }

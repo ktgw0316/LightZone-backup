@@ -23,7 +23,6 @@ class UndoButton extends EditorButton implements PropertyChangeListener {
 
     UndoButton(ComboFrame frame) {
         super(frame, Icon);
-        setStyle(ButtonStyle.LEFT);
         setToolTipText(ToolTip);
         setEnabled(false);
         addActionListener(

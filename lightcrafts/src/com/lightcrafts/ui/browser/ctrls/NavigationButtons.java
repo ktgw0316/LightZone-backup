@@ -57,8 +57,8 @@ public class NavigationButtons extends JPanel {
     }
 
     private void createComponents() {
-        btnBack = new CoolButton(/*CoolButton.ButtonStyle.LEFT*/);
-        btnForward = new CoolButton(/*CoolButton.ButtonStyle.RIGHT*/);
+        btnBack = new CoolButton();
+        btnForward = new CoolButton();
         btnPath = browser.getPathPopupMenu();
     }
 

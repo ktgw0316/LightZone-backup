@@ -30,14 +30,14 @@ class BrowseEditButtons extends Box {
     BrowseEditButtons(final ComboFrame frame) {
         super(BoxLayout.X_AXIS);
 
-        browse = new CoolToggleButton(CoolButton.ButtonStyle.LEFT);
+        browse = new CoolToggleButton();
         browse.setText(BrowseText);
         browse.setToolTipText(BrowseTip);
         Font font = browse.getFont();
         font = font.deriveFont(16f);
         browse.setFont(font);
 
-        edit = new CoolToggleButton(CoolButton.ButtonStyle.RIGHT);
+        edit = new CoolToggleButton();
         edit.setText(EditText);
         edit.setToolTipText(EditTip);
         edit.setFont(font);

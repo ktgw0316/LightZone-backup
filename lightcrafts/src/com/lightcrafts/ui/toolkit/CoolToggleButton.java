@@ -2,33 +2,20 @@
 
 package com.lightcrafts.ui.toolkit;
 
-import com.lightcrafts.platform.Platform;
-import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.app.ComboFrame;
+// import com.lightcrafts.platform.Platform;
+// import com.lightcrafts.ui.LightZoneSkin;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
-import java.io.File;
-import java.util.Set;
-import java.util.HashSet;
+// import java.io.File;
+// import javax.imageio.ImageIO;
 
 public class CoolToggleButton extends JToggleButton {
 
-    private CoolButton.ButtonStyle style;
-
-    private CoolButtonBackground bkgnd;
-
     public CoolToggleButton() {
-        this(CoolButton.ButtonStyle.NORMAL);
-    }
-
-    @SuppressWarnings({"OverridableMethodCallInConstructor"})
-    public CoolToggleButton(CoolButton.ButtonStyle style) {
-        setStyle(style);
         setFocusable(false);
         setFocusPainted(false);
     }
@@ -72,12 +59,7 @@ public class CoolToggleButton extends JToggleButton {
         }
     }
 
-    // The ButtonStyle effects the background, which determines the order
-    // insets on this button.  Setting the style resets the border.
-    public void setStyle(CoolButton.ButtonStyle style) {
-        this.style = style;
-    }
-
+    /*
     public static void main(String args[]) throws Exception {
         if (args.length < 1) {
             System.err.println("usage: (file)");
@@ -114,4 +96,5 @@ public class CoolToggleButton extends JToggleButton {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
+    */
 }

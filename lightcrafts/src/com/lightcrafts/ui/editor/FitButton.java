@@ -5,7 +5,6 @@ package com.lightcrafts.ui.editor;
 import com.lightcrafts.model.Engine;
 import com.lightcrafts.model.Scale;
 import static com.lightcrafts.ui.editor.Locale.LOCALE;
-import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.CoolToggleButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
 
@@ -40,7 +39,6 @@ final class FitButton
         this.editor = editor;
         this.engine = engine;
         this.scale = scale;
-        setStyle(CoolButton.ButtonStyle.CENTER);
         setIcon(Icon);
         setToolTipText(ToolTip);
         addItemListener(this);

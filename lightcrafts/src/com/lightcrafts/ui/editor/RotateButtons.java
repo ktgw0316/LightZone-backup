@@ -32,9 +32,6 @@ final class RotateButtons extends Box {
         leftButton.setToolTipText( LeftTip );
         rightButton.setToolTipText( RightTip );
 
-        leftButton.setStyle( CoolButton.ButtonStyle.LEFT );
-        rightButton.setStyle( CoolButton.ButtonStyle.RIGHT );
-
         leftButton.addActionListener( leftAction );
         rightButton.addActionListener( rightAction );
 
@@ -51,9 +48,6 @@ final class RotateButtons extends Box {
 
         leftButton.setIcon( LeftIcon );
         rightButton.setIcon( RightIcon );
-
-        leftButton.setStyle( CoolButton.ButtonStyle.LEFT );
-        rightButton.setStyle( CoolButton.ButtonStyle.RIGHT );
 
         leftButton.setEnabled( false );
         rightButton.setEnabled( false );

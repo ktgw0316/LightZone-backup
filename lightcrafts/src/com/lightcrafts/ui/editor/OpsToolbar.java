@@ -42,29 +42,22 @@ class OpsToolbar extends JPanel {
         boolean enabled = isEnabled();
         add(Box.createHorizontalGlue());
 
-        CoolButton.ButtonStyle style = CoolButton.ButtonStyle.LEFT;
         for (Iterator i=actions.iterator(); i.hasNext(); ) {
             Action action = (Action) i.next();
-            if (! i.hasNext()) {
-                style = CoolButton.ButtonStyle.RIGHT;
-            }
-            JButton button = createButton(action, style);
+            JButton button = createButton(action);
             button.setEnabled(enabled);
             add(button);
-            style = CoolButton.ButtonStyle.CENTER;
         }
         add(Box.createHorizontalGlue());
     }
 
-    private static JButton createButton(
-        Action action, CoolButton.ButtonStyle style
-    ) {
+    private static JButton createButton(Action action) {
         BufferedImage image =
             (BufferedImage) action.getValue(OpActions.IconImageKey);
         image = IconFactory.getScaledImage(image, IconFactory.StandardSize - 2);
         Icon icon = new ImageIcon(image);
         
-        CoolButton button = new CoolButton(style);
+        CoolButton button = new CoolButton();
         action.putValue(Action.SMALL_ICON, icon);
         button.setAction(action);
         button.setIcon(icon);

@@ -87,12 +87,10 @@ public final class RotorControl extends Box implements RotorListener {
         rightAction = new RotateRightAction(this);
 
         leftButton = new CoolButton();
-        leftButton.setStyle(CoolButton.ButtonStyle.LEFT);
         leftButton.setAction(leftAction);
         leftButton.setIcon(LeftUnselectedIcon);
 
         rightButton = new CoolButton();
-        rightButton.setStyle(CoolButton.ButtonStyle.RIGHT);
         rightButton.setAction(rightAction);
         rightButton.setIcon(RightUnselectedIcon);
 
