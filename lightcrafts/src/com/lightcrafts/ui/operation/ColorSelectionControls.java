@@ -77,7 +77,7 @@ final class ColorSelectionControls extends Box {
                     add(button);
 
                     if (p.equals(RGBColorSelectionPreset.AllColors)) {
-                        button.setText("All");
+                        button.setText( LOCALE.get( "AllLabel" ) );
                         button.setSelected(true);
 
                         button.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 3));
@@ -212,7 +212,9 @@ final class ColorSelectionControls extends Box {
 
         initDropper( control );
 
-        m_invertSelection = new JCheckBox( "Invert" );
+        m_invertSelection = new JCheckBox(
+            LOCALE.get( "InvertColorSelectionLabel" )
+        );
         m_invertSelection.setFocusable( false );
         m_invertSelection.setToolTipText(
             LOCALE.get( "InvertColorSelectionEnableToolTip" )

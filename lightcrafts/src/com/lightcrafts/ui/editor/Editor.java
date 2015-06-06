@@ -1,11 +1,11 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2015 Masahiro Kitagawa */
 
 package com.lightcrafts.ui.editor;
 
 import com.lightcrafts.model.Engine;
 import com.lightcrafts.model.OperationType;
 import com.lightcrafts.model.Preview;
-import com.lightcrafts.platform.Platform;
 import com.lightcrafts.ui.ActivityMeter;
 import com.lightcrafts.ui.crop.CropMode;
 import static com.lightcrafts.ui.editor.Locale.LOCALE;
@@ -164,7 +164,7 @@ public class Editor {
         public void mouseWheelMoved(MouseWheelEvent e) {
             if (imageScroll.isWheelScrollingEnabled() && e.getScrollAmount() != 0) {
                 int direction = e.getWheelRotation() < 0 ? -1 : 1;
-                if (((! isMac()) && e.isControlDown()) || (isMac() && e.isMetaDown())) {
+                if (overlay.peekMode() == transientPanMode) {
                     scale.scaleUpDown(-direction);
                 } else {
                     JScrollBar toScroll = (e.getScrollType() < 2 && ! e.isShiftDown())
@@ -284,8 +284,8 @@ public class Editor {
         // Orientation buttons:
         final Action leftAction = crop.getLeftAction();
         final Action rightAction = crop.getRightAction();
-        RotateButtons rotors = new RotateButtons(leftAction, rightAction);
-        ToggleTitleBorder.setBorder(rotors, LOCALE.get("RotateBorderTitle"));
+        BoxedButton rotors = new BoxedButton(LOCALE.get("RotateBorderTitle"),
+                new RotateButtons(leftAction, rightAction));
 
         // Stuff some Mode controls into a SelectableControl in EditorControls:
         ProofSelectableControl proofOp = new ProofSelectableControl(engine);
@@ -319,24 +319,28 @@ public class Editor {
         zoomBox.add(largerButton);
         zoomBox.add(smallerButton);
         ToggleTitleBorder.setBorder(zoomBox, LOCALE.get("ZoomBorderTitle"));
-
+        /*
+        BoxedButton zoom = new BoxedButton(LOCALE.get("ZoomBorderTitle"),
+                oneToOneButton, fitButton, largerButton, smallerButton);
+         */
         ModeButtons modeBox = new ModeButtons(modes);
         modes.setModeButtons(modeBox);
 
+        final int space = 8;
         toolbar = Box.createHorizontalBox();
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(eyeButton.box);
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(proofButton.box);
-        toolbar.add(Box.createHorizontalStrut(8));
-        toolbar.add(rotors);
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
+        toolbar.add(rotors.box);
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(zoomBox);
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(new Separator());
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(modeBox);
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
 
         // Add space above and below, to tune the layout:
         Border border = BorderFactory.createEmptyBorder(3, 0, 3, 0);
@@ -377,19 +381,10 @@ public class Editor {
         showHideAction.actionPerformed(null);
         showHideAction.setEnabled(false);
 
-        final RotateButtons rotors = new RotateButtons();
-        ToggleTitleBorder.setBorder(rotors, LOCALE.get("RotateBorderTitle"));
+        BoxedButton rotors = new BoxedButton(LOCALE.get("RotateBorderTitle"),    new RotateButtons());
+        BoxedButton proof  = new BoxedButton(LOCALE.get("SoftProofBorderTitle"), new ProofButton());
+        BoxedButton eye    = new BoxedButton(LOCALE.get("EyeBorderTitle"),       new EyeButton());
 
-        final ProofButton proofButton = new ProofButton();
-        final JComponent eyeButton = new EyeButton();
-
-        // Lots of titles:
-        ToggleTitleBorder.setBorder(
-            proofButton, LOCALE.get("SoftProofBorderTitle")
-        );
-        ToggleTitleBorder.setBorder(
-            eyeButton, LOCALE.get("EyeBorderTitle")
-        );
         final JComponent oneToOneButton = new OneToOneButton();
         final JComponent fitButton = new FitButton();
         final JComponent largerButton = new LargerButton();
@@ -401,26 +396,29 @@ public class Editor {
         zoomBox.add(largerButton);
         zoomBox.add(smallerButton);
         ToggleTitleBorder.setBorder(zoomBox, LOCALE.get("ZoomBorderTitle"));
+        /*
+        BoxedButton zoom   = new BoxedButton(LOCALE.get("ZoomBorderTitle"),
+                oneToOneButton, fitButton, largerButton, smallerButton);
+         */
+        BoxedButton mode   = new BoxedButton(LOCALE.get("ModeBorderTitle"), new ModeButtons());
 
-        final ModeButtons modeBox = new ModeButtons();
-        ToggleTitleBorder.setBorder(modeBox, LOCALE.get("ModeBorderTitle"));
-
+        final int space = 8;
         toolbar = Box.createHorizontalBox();
         toolbar.add(Box.createHorizontalGlue());
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(zoomBox);
-        toolbar.add(Box.createHorizontalStrut(8));
-        toolbar.add(proofButton);
-        toolbar.add(Box.createHorizontalStrut(8));
-        toolbar.add(eyeButton);
-        toolbar.add(Box.createHorizontalStrut(8));
-        toolbar.add(rotors);
+        toolbar.add(Box.createHorizontalStrut(space));
+        toolbar.add(proof.box);
+        toolbar.add(Box.createHorizontalStrut(space));
+        toolbar.add(eye.box);
+        toolbar.add(Box.createHorizontalStrut(space));
+        toolbar.add(rotors.box);
         toolbar.add(new Separator());
-        toolbar.add(Box.createHorizontalStrut(8));
-        toolbar.add(modeBox);
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
+        toolbar.add(mode.box);
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(new Separator());
-        toolbar.add(Box.createHorizontalStrut(8));
+        toolbar.add(Box.createHorizontalStrut(space));
         toolbar.add(Box.createHorizontalGlue());
 
         // Add space above and below, to tune the Mac layout:
@@ -618,9 +616,5 @@ public class Editor {
         regions.restore(opControls, node);
 
         crop.restore(node);
-    }
-
-    private static boolean isMac() {
-        return Platform.getType() == Platform.MacOSX;
     }
 }

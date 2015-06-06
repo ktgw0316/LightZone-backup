@@ -2,6 +2,7 @@
 
 package com.lightcrafts.model.ImageEditor;
 
+import static com.lightcrafts.model.ImageEditor.Locale.LOCALE;
 import com.lightcrafts.model.Preview;
 import com.lightcrafts.model.Region;
 import com.lightcrafts.utils.ColorScience;
@@ -9,6 +10,7 @@ import com.lightcrafts.utils.LCMS;
 import com.lightcrafts.jai.utils.Functions;
 import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.ui.toolkit.ShadowFactory;
+import com.lightcrafts.ui.LightZoneSkin;
 
 import com.lightcrafts.mediax.jai.IHSColorSpace;
 import java.awt.*;
@@ -32,7 +34,7 @@ class DropperPreview extends Preview {
     }
 
     public String getName() {
-        return "Sampler";
+        return LOCALE.get("Sampler_Name");
     }
 
     public void setDropper(Point p) {
@@ -72,7 +74,7 @@ class DropperPreview extends Preview {
     }
 
     protected void paintComponent(Graphics graphics) {
-        Graphics2D g = (Graphics2D) graphics;
+        final Graphics2D g = (Graphics2D) graphics;
 
         g.setRenderingHints(aliasingRenderHints);
 
@@ -85,9 +87,9 @@ class DropperPreview extends Preview {
 
         final int gap = width - 130;
 
-        g.setColor(new Color(245, 245, 245));
+        g.setColor(LightZoneSkin.Colors.NeutralGray);
         g.fillRect(minx, miny, width, height);
-        g.setColor(Color.black);
+        g.setColor(LightZoneSkin.Colors.ToolPanesForeground);
 
         Font font = new Font("Monospaced", Font.PLAIN, 13);
         g.setFont(font);
@@ -97,26 +99,41 @@ class DropperPreview extends Preview {
         float textHeight = (float) layout.getBounds().getHeight() + 5;
 
         if (loc != null && engine != null) {
-            g.drawString("    x: " + loc.x, minx + 10, miny + 2 + textHeight);
-            g.drawString("    y: " + loc.y, minx + 10, miny + 2 + 2 * textHeight);
+            final String separator = ": ";
+            final FontMetrics fm = getFontMetrics(font);
+
+            class graph {
+                void drawAlignedString(String name, int value, float x, float y) {
+                    drawAlignedString(name, Integer.toString(value), x, y);
+                }
+
+                void drawAlignedString(String name, String value, float x, float y) {
+                    g.drawString(name + separator + value, x - fm.stringWidth(name), y);
+                }
+            }
+
+            graph gg = new graph();
+
+            gg.drawAlignedString("x", loc.x, minx + 50, miny + 2 + textHeight);
+            gg.drawAlignedString("y", loc.y, minx + 50, miny + 2 + 2 * textHeight);
 
             int red = color.getRed();
             int green = color.getGreen();
             int blue = color.getBlue();
 
-            g.drawString("  Red: " + red, minx + 10, miny + 12 + 3 * textHeight);
-            g.drawString("Green: " + green, minx + 10, miny + 12 + 4 * textHeight);
-            g.drawString(" Blue: " + blue, minx + 10, miny + 12 + 5 * textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_RedLabel"),   red,   minx + 50, 12 + 3 * textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_GreenLabel"), green, minx + 50, 12 + 4 * textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_BlueLabel"),  blue,  minx + 50, 12 + 5 * textHeight);
 
             double lightness = ColorScience.Wr * red + ColorScience.Wg * green + ColorScience.Wb * blue;
 
-            g.drawString("Luminosity: " + (int) lightness, minx + gap, miny + 2 + textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_LuminosityLabel"), (int) lightness, minx + gap + 50, miny + 2 + textHeight);
 
             double zone = Math.log1p(lightness) / (8 * Math.log(2));
 
             DecimalFormat format = new DecimalFormat("0.0");
 
-            g.drawString("      Zone: " + format.format(16 * zone), minx + gap, miny + 2 + 2 * textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_ZoneLabel"), format.format(16 * zone), minx + gap + 50, miny + 2 + 2 * textHeight);
 
             float xyzColor[] = JAIContext.linearColorSpace.toCIEXYZ(new float[]{(float) (red / 255.),
                                                                                 (float) (green / 255.),
@@ -124,9 +141,9 @@ class DropperPreview extends Preview {
 
             float ihsColor[] = ihsCS.fromCIEXYZ(xyzColor);
 
-            g.drawString(" Intensity: " + (int) (100 * ihsColor[0]) + "%", minx + gap, miny + 12 + 3 * textHeight);
-            g.drawString("       Hue: " + (int) (360 * (ihsColor[1] / (2 * Math.PI))) + "\u00B0", minx + gap, miny + 12 + 4 * textHeight);
-            g.drawString("Saturation: " + (int) (100 * ihsColor[2]) + "%", minx + gap, miny + 12 + 5 * textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_IntensityLabel"),  (int) (100 * ihsColor[0]) + "%",                        minx + gap + 50, miny + 12 + 3 * textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_HueLabel"),        (int) (360 * (ihsColor[1] / (2 * Math.PI))) + "\u00B0", minx + gap + 50, miny + 12 + 4 * textHeight);
+            gg.drawAlignedString(LOCALE.get("Sampler_SaturationLabel"), (int) (100 * ihsColor[2]) + "%",                        minx + gap + 50, miny + 12 + 5 * textHeight);
 
             // float labColor[] = JAIContext.labColorSpace.fromCIEXYZ(xyzColor);
 
@@ -141,9 +158,9 @@ class DropperPreview extends Preview {
             int a = ((0xffff & labColors[1]) - 128 * 256) / 256;
             int b = ((0xffff & labColors[2]) - 128 * 256) / 256;
 
-            g.drawString("    L: " + L, minx + 10, miny + 12 + 7 * textHeight);
-            g.drawString("    a: " + a, minx + 10, miny + 12 + 8 * textHeight);
-            g.drawString("    b: " + b, minx + 10, miny + 12 + 9 * textHeight);
+            gg.drawAlignedString("L", L, minx + 50, miny + 12 + 7 * textHeight);
+            gg.drawAlignedString("a", a, minx + 50, miny + 12 + 8 * textHeight);
+            gg.drawAlignedString("b", b, minx + 50, miny + 12 + 9 * textHeight);
 
             float components[] = color.getRGBComponents(null);
 

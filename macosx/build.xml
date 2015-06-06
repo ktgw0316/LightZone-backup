@@ -11,7 +11,7 @@
   <property name="macosx-jar" value="products/lightcrafts-apple.jar"/>
 
   <!-- The default maxmemory for the run target. -->
-  <property name="maxmemory" value="256m"/>
+  <property name="maxmemory" value="512m"/>
 
   <exec executable="cat" vmlauncher="false" failonerror="true"
         outputproperty="app-version">
@@ -179,16 +179,19 @@
 
     <copy todir="${bundle-resources}/Java">
       <fileset dir="products" excludes=".git">
-        <include name="dcraw"/>
+        <include name="dcraw_lz"/>
         <include name="LightZone-forkd"/>
-        <include name="EWSMacCompress.tar.gz"/>
         <include name="**/*.dylib"/>
         <include name="**/*.jar"/>
         <include name="**/*.jnilib"/>
       </fileset>
     </copy>
-    <chmod file="${bundle-resources}/Java/dcraw" perm="775"/>
+    <chmod file="${bundle-resources}/Java/dcraw_lz" perm="775"/>
     <chmod file="${bundle-resources}/Java/LightZone-forkd" perm="775"/>
+
+    <exec executable="./postprocess.sh" dir="." failonerror="true" vmlauncher="false">
+      <arg value="${bundle-resources}/Java"/>
+    </exec>
 
     <exec executable="make" dir="help" failonerror="true" vmlauncher="false">
       <arg value="APP_NAME=${app-name}"/>
@@ -199,6 +202,10 @@
     </copy>
     <chmod file="${bundle-resources}/CrashReporter.app/Contents/MacOS/CrashReporter"
            perm="775"/>
+
+    <exec executable="./postprocess.sh" dir="." failonerror="true" vmlauncher="false">
+      <arg value="${bundle-resources}/CrashReporter.app/Contents/MacOS"/>
+    </exec>
   </target>
 
   <!--===== Make a dmg file ================================================-->

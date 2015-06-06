@@ -11,9 +11,12 @@ import com.lightcrafts.platform.Platform;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
@@ -28,7 +31,7 @@ import java.util.List;
 //
 // It works in screen coordinates (no AffineTransform).
 
-class CropOverlay extends JComponent implements MouseInputListener {
+class CropOverlay extends JComponent implements MouseInputListener, MouseWheelListener {
 
     private final static Stroke RectStroke = new BasicStroke(20f);
     private final static Color RectColor = new Color(0, 0, 0, 128);
@@ -70,6 +73,8 @@ class CropOverlay extends JComponent implements MouseInputListener {
     private static int GridCount = 3;
     private static int GridSpacing = 30;
 
+    private Point2D poll;
+
     private Cursor cursor;
 
     private Point dragStart;
@@ -100,6 +105,7 @@ class CropOverlay extends JComponent implements MouseInputListener {
         setCursor(cursor);
         addMouseListener(this);
         addMouseMotionListener(this);
+        addMouseWheelListener(this);
         addRotateKeyListener();
     }
 
@@ -235,8 +241,6 @@ class CropOverlay extends JComponent implements MouseInputListener {
     }
 
     private void paintRotateGrid(Graphics2D g) {
-        Point2D center = crop.getCenter();
-
         Point2D ul = crop.getUpperLeft();
         Point2D ur = crop.getUpperRight();
         Point2D ll = crop.getLowerLeft();
@@ -250,44 +254,54 @@ class CropOverlay extends JComponent implements MouseInputListener {
         Line2D hMidLine = new Line2D.Double(midLeft, midRight);
         Line2D vMidLine = new Line2D.Double(midTop, midBottom);
 
-        List<Point2D> upPts = getPointsBetween(center, midTop, GridSpacing);
-        List<Point2D> downPts = getPointsBetween(center, midBottom, GridSpacing);
-        List<Point2D> rightPts = getPointsBetween(center, midRight, GridSpacing);
-        List<Point2D> leftPts = getPointsBetween(center, midLeft, GridSpacing);
+        if (poll == null)
+            poll = crop.getCenter();
 
-        // When painting all these lines, we take care not to paint the center
-        // lines twice, which would make them appear darker than the other
-        // lines because of the compositing.
+        Line2D hPollLine = getSegmentThroughPoint(hMidLine, poll);
+        Line2D vPollLine = getSegmentThroughPoint(vMidLine, poll);
+        Point2D hMidPoint = getMidPoint(hPollLine.getP1(), hPollLine.getP2());
+        Point2D vMidPoint = getMidPoint(vPollLine.getP1(), vPollLine.getP2());
 
-        for (Point2D p : upPts) {
-            Line2D line = getSegmentThroughPoint(hMidLine, p);
-            g.draw(line);
+        List<Point2D> upPts = getPointsBetween(hMidPoint, midTop, GridSpacing);
+        List<Point2D> downPts = getPointsBetween(hMidPoint, midBottom, GridSpacing);
+        List<Point2D> rightPts = getPointsBetween(vMidPoint, midRight, GridSpacing);
+        List<Point2D> leftPts = getPointsBetween(vMidPoint, midLeft, GridSpacing);
+
+        if (isInRect(poll)) {
+            g.draw(hPollLine);
+            g.draw(vPollLine);
         }
-        boolean firstDown = true;
-        for (Point2D p : downPts) {
-            if (firstDown) {
-                firstDown = false;
+        paintLines(g, hMidLine,    upPts);
+        paintLines(g, hMidLine,  downPts);
+        paintLines(g, vMidLine, rightPts);
+        paintLines(g, vMidLine,  leftPts);
+    }
+
+    private void paintLines(Graphics2D g, Line2D refLine, List<Point2D> Pts) {
+        //boolean isFirstLine = true;
+
+        for (Point2D p : Pts) {
+            if (! isInRect(p))
+                continue;
+            /*
+            // When painting all these lines, we take care not to paint the center
+            // lines twice, which would make them appear darker than the other
+            // lines because of the compositing.
+
+            if (isFirstLine) {
+                isFirstLine = false;
                 continue;
             }
-            Line2D line = getSegmentThroughPoint(hMidLine, p);
-            g.draw(line);
-        }
-        for (Point2D p : rightPts) {
-            Line2D line = getSegmentThroughPoint(vMidLine, p);
-            g.draw(line);
-        }
-        boolean firstLeft = true;
-        for (Point2D p : leftPts) {
-            if (firstLeft) {
-                firstLeft = false;
-                continue;
-            }
-            Line2D line = getSegmentThroughPoint(vMidLine, p);
+            */
+            Line2D line = getSegmentThroughPoint(refLine, p);
             g.draw(line);
         }
     }
 
     public void mouseClicked(MouseEvent e) {
+        Point p = e.getPoint();
+        if (isInRect(p))
+            poll = p;
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -441,9 +455,10 @@ class CropOverlay extends JComponent implements MouseInputListener {
             }
         }
         else if (isRotating) {
-            Point2D center = crop.getCenter();
-            Line2D start = new Line2D.Double(center, rotateMouseStart);
-            Line2D end = new Line2D.Double(center, p);
+            if (poll == null)
+                poll = crop.getCenter();
+            Line2D start = new Line2D.Double(poll, rotateMouseStart);
+            Line2D end = new Line2D.Double(poll, p);
             double startAngle = Math.atan2(
                 start.getY2() - start.getY1(), start.getX2() - start.getX1()
             );
@@ -612,6 +627,25 @@ class CropOverlay extends JComponent implements MouseInputListener {
         updateHighlight(e);
     }
 
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        int count = e.getWheelRotation();
+
+        rotateAngleStart = crop.getAngle();
+        double deg = rotateAngleStart * 180 / Math.PI;
+        deg = Math.round(100 * deg) * 0.01d;
+
+        final double STEPS_PER_DEG = 50;
+        double angle = Math.round(STEPS_PER_DEG * deg + count) / STEPS_PER_DEG * Math.PI / 180;
+
+        CropBounds newCrop = new CropBounds(crop, angle);
+        updateRotateConstraints();
+        newCrop = UnderlayConstraints.sizeToUnderlay(
+                newCrop, underlayRect, rotateWidthLimit, rotateHeightLimit
+                );
+        if (newCrop != null)
+            setCrop(newCrop);
+    }
+
     private boolean isEdgeAdjusting() {
         return (
             (adjustingNorth && ! (adjustingEast || adjustingWest)) ||
@@ -720,7 +754,7 @@ class CropOverlay extends JComponent implements MouseInputListener {
                isMoving;
     }
 
-    boolean isInRect(Point p) {
+    boolean isInRect(Point2D p) {
         Shape shape = getCropAsShape();
         return (shape != null) && shape.contains(p);
     }

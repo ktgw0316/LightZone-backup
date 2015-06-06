@@ -9,18 +9,17 @@ TARGET_BASE:=		DCRaw
 # Uncomment to compile in debug mode.
 #DEBUG:=			true
 
-ifneq ($(PLATFORM),Windows)
-  JNI_EXTRA_CFLAGS:=	-Wno-pointer-sign
-endif
-
 ifeq ($(PLATFORM),MacOSX)
   JNI_EXTRA_LINK:=      -lstdc++
 endif
+
+JNI_EXTRA_CFLAGS+=	-fopenmp
 
 JNI_EXTRA_DEFINES:=	-DNO_JPEG -DNO_LCMS
 JNI_LINUX_DEFINES:=	-Dfgetc=getc_unlocked
 JNI_MACOSX_DEFINES:=	$(JNI_LINUX_DEFINES)
 
+JNI_WINDOWS_LINK:=      -lgomp.dll
 JNI_MACOSX_LINK:=	-single_module
 
 ##

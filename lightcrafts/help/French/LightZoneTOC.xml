@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'  ?>
+<!DOCTYPE toc
+  PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp TOC Version 2.0//EN"
+            "../dtd/toc_2_0.dtd">
+<toc version="2.0">
+    <tocitem text="Aide de LightZone" target="index">
+        <tocitem text="Bases" target="">
+            <tocitem text="Découvrir LightZone" target="Discover"/>
+            <tocitem text="Nouvelles fonctionnalités" target="New_Features"/>
+            <tocitem text="Préférences" target="Preferences"/>
+        </tocitem>
+        <tocitem text="Navigateur Photo" target="Anatomy-Browser" expand="false">
+            <tocitem text="Parcourir les dossiers" target="Navigating_Folders"/>
+            <tocitem text="Vignettes" target="Thumbnails"/>
+            <tocitem text="Rotation des photos" target="Photos-Rotating"/>
+            <tocitem text="Notez des photos" target="Photos-Rating"/>
+            <tocitem text="Renommer des Photos" target="Photos-Renaming"/>
+            <tocitem text="Supprimer des Photos" target="Photos-Deleting"/>
+            <tocitem text="Glisser et Déposer des photos" target="Photos-Dragging_and_Dropping"/>
+            <tocitem text="Métadonnées" target="Metadata"/>
+            <tocitem text="Éditer une photo" target="Photos-Editing"/>
+        </tocitem>
+        <tocitem text="Éditeur Photo" target="Anatomy-Editor" expand="false">
+            <tocitem text="Présentation de l'Éditeur" target="Anatomy-Editor"/>
+            <tocitem text="Viewers" target="">
+                <tocitem text="ZoneFinder" target="ZoneFinder"/>
+                <tocitem text="Color selection" target="Color_Selection_Viewer"/>
+                <tocitem text="Histogram" target="Histogram"/>
+                <tocitem text="Sampler" target="Sampler"/>
+            </tocitem>
+            <tocitem text="Vue d'ensemble des Outils d'Édition" target="Tools-Editing"/>
+            <tocitem text="Vue d'ensemble des Outils de Contrôle" target="Tools-Controls"/>
+            <tocitem text="Présentation des Outils" target="Tool_Anatomy"/>
+            <tocitem text="Menu des Outils" target="Tool_Anatomy-Menu"/>
+            <tocitem text="La Chaîne de développement" target="Tool_Stack"/>
+            <tocitem text="La Courbe de Tonalités par défaut" target="Default_Tone_Curve"/>
+            <tocitem text="Historique" target="History"/>
+            <tocitem text="Régions and masques" target="Regions"/>
+            <tocitem text="Sélection de Couleur/Luminosité" target="Color_Luminosity_Selection"/>
+            <tocitem text="Enregistrer votre travail" target="Saving"/>
+            <tocitem text="Conversion d'Images" target="Converting"/>
+            <tocitem text="Impressions" target="Printing"/>
+            <tocitem text="Outils Copier &amp; Coller" target="Tools-Copy_and_Paste"/>
+            <tocitem text="Styles" target="Styles"/>
+        </tocitem>
+        <tocitem text="Outils d'Édition" expand="false">
+            <tocitem text="Noir et Blanc" target="Tool-Black_and_White"/>
+            <tocitem text="Flou" target="Tool-Blur"/>
+            <tocitem text="Cloner" target="Tool-Clone"/>
+            <tocitem text="Balance de Couleur" target="Tool-Color_Balance"/>
+            <tocitem text="Recadrer" target="Tool-Crop"/>
+            <tocitem text="Teinte/Saturation" target="Tool-Hue_Saturation"/>
+            <tocitem text="Réduction de Bruit" target="Tool-Noise_Reduction"/>
+            <tocitem text="Épreuvage" target="Tool-Proof"/>
+            <tocitem text="Ajustements RAW" target="Tool-Raw_Adjustments"/>
+            <tocitem text="Yeux-Rouges" target="Tool-Red-Eye"/>
+            <tocitem text="Relight" target="Tool-Relight"/>
+            <tocitem text="Tourner" target="Tool-Rotate"/>
+            <tocitem text="Netteté" target="Tool-Sharpen"/>
+            <tocitem text="Poussière" target="Tool-Spot"/>
+            <tocitem text="Balance des Blancs" target="Tool-White_Balance"/>
+            <tocitem text="ZoneMapper" target="Tool-ZoneMapper"/>
+        </tocitem>
+        <tocitem text="Autres" expand="false">
+            <tocitem text="Remerciements" target="Acknowledgments"/>
+            <tocitem text="Mentions Légales" target="Legal"/>
+        </tocitem>
+    </tocitem>
+</toc>

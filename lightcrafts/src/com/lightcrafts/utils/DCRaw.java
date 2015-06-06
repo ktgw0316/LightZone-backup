@@ -256,11 +256,15 @@ public final class DCRaw implements
     private final static String CAMERA_RGB_PROFILE = "Camera RGB Profile: ";
     private final static String CAMERA_XYZ_PROFILE = "Camera XYZ Profile: ";
 
-    private static String DCRAW_PATH = "./dcraw";
+    private static final String DCRAW_NAME = "dcraw_lz";
+    private static String DCRAW_PATH;
     static {
-        String appDir = System.getProperty("install4j.appDir");
-        if (appDir != null) {
-            DCRAW_PATH = appDir + "/dcraw";
+        DCRAW_PATH = System.getProperty("java.library.path") + File.separatorChar + DCRAW_NAME;
+        if (! new File(DCRAW_PATH).canExecute()) {
+            String dir = System.getProperty("install4j.appDir");
+            if (dir == null)
+                dir = ".";
+            DCRAW_PATH = dir + File.separatorChar + DCRAW_NAME;
         }
     }
 
@@ -373,7 +377,7 @@ public final class DCRaw implements
                         m_rawColors = Integer.decode(rawColors);
                     } else if (line.startsWith(search = FILTER_PATTERN)) {
                         String pattern = line.substring(search.length());
-                        if (pattern.length() >= 8 && !pattern.substring(0,4).equals(pattern.substring(4,4)))
+                        if (pattern.length() >= 8 && !pattern.substring(0,4).equals(pattern.substring(4,8)))
                             m_filters = -1;
                         else if (pattern.startsWith("BGGR"))
                             m_filters = 0x16161616;
@@ -426,8 +430,9 @@ public final class DCRaw implements
                 }
                 m_error = p.exitValue();
                 p.destroy();
-            } else
+            } else {
                 m_error = 0;
+            }
         }
     }
 
@@ -489,8 +494,9 @@ public final class DCRaw implements
                 // String STUPLTYPE = readln(s);
                 // String SENDHDR = readln(s);
                 imageData = new ImageData(width, height, bands, dataType);
-            } else
+            } else {
                 return null;
+            }
 
             int totalData = width * height * bands * (dataType == DataBuffer.TYPE_BYTE ? 1 : 2);
 
@@ -504,10 +510,17 @@ public final class DCRaw implements
             ByteBuffer bb = c.map(FileChannel.MapMode.READ_ONLY, c.position(), totalData);
 
             if (dataType == DataBuffer.TYPE_USHORT) {
-                bb.order(ByteOrder.BIG_ENDIAN);
+                // bb.order(ByteOrder.BIG_ENDIAN);
+                bb.order(ByteOrder.nativeOrder());
                 bb.asShortBuffer().get((short[]) imageData.data);
-            } else
+
+                // Darty hack to prevent crash on Arch Linux (issue #125)
+                if (ByteOrder.nativeOrder() != ByteOrder.BIG_ENDIAN)
+                    for (int i = 0; i < ((short[]) imageData.data).length; ++i)
+                        ((short[]) imageData.data)[i] = Short.reverseBytes(((short[]) imageData.data)[i]);
+            } else {
                 bb.get((byte[]) imageData.data);
+            }
 
             if (bb instanceof DirectBuffer)
                 ((DirectBuffer) bb).cleaner().clean();
@@ -605,7 +618,7 @@ public final class DCRaw implements
                 String line, args;
                 // output expected on stderr
                 while ((line = readln(dcrawStdErr)) != null) {
-                    // System.out.println(line);
+                    System.out.println(line);
 
                     if ((args = match(line, DCRAW_OUTPUT)) != null)
                         ofName = args.substring(0, args.indexOf(" ..."));
@@ -613,7 +626,7 @@ public final class DCRaw implements
 
                 // Flush stdout just in case...
                 while ((line = readln(dcrawStdOut)) != null)
-                    ; // System.out.println(line);
+                    System.out.println(line);
 
                 if (p != null) {
                     dcrawStdErr.close();
@@ -625,8 +638,9 @@ public final class DCRaw implements
                     }
                     m_error = p.exitValue();
                     p.destroy();
-                } else
+                } else {
                     m_error = 0;
+                }
             }
 
             System.out.println("dcraw value: " + m_error);
@@ -636,7 +650,10 @@ public final class DCRaw implements
                 throw new BadImageFileException(of);
             }
 
-            if (!ofName.equals(of.getPath())) {
+            if (ofName == null) {
+                ofName = of.getPath();
+                System.out.println("Cannot get output filename. Falling back to: " + ofName);
+            } else if (!ofName.equals(of.getPath())) {
                 of.delete();
                 of = new File(ofName);
             }

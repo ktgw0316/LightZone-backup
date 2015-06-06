@@ -1,7 +1,48 @@
 -------------------------------------------------------------------
-Sun May 18 2014 - KITAGAWA Masahiro <arctica0316@gmail.com>
+Sun May 31 2015 - KITAGAWA Masahiro <arctica0316@gmail.com>
 
-- Upstream sync to 4.1.0 beta9
+- Upstream sync to 4.1.1
+
+-------------------------------------------------------------------
+Sat May 09 2015 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Upstream sync to 4.1.0
+
+-------------------------------------------------------------------
+Thu Apr 23 2015 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Upstream sync to 4.1.0 rc2
+
+-------------------------------------------------------------------
+Sun Feb 08 2015 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Upstream sync to 4.1.0 rc1
+
+-------------------------------------------------------------------
+Tue Dec 23 2014 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Upstream sync to 4.1.0 beta14
+
+-------------------------------------------------------------------
+Sun Oct 26 2014 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Upstream sync to 4.1.0 beta13
+
+-------------------------------------------------------------------
+Wed Sep 17 2014 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Switched instdir from /opt/lightzone to /usr/share/lightzone
+- Upstream sync to 4.1.0 beta12
+
+-------------------------------------------------------------------
+Mon Sep 01 2014 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Upstream sync to 4.1.0 beta11
+
+-------------------------------------------------------------------
+Sat Aug 02 2014 - KITAGAWA Masahiro <arctica0316@gmail.com>
+
+- Upstream sync to 4.1.0 beta10
 
 -------------------------------------------------------------------
 Sun Apr 27 2014 - KITAGAWA Masahiro <arctica0316@gmail.com>

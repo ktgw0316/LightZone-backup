@@ -37,6 +37,7 @@ CLASSPATH_SEP:=		:
 # The default C and C++ compilers.
 CC:=			gcc
 CXX:=			g++
+PKGCFG:=		pkg-config
 
 # Unset USE_ICC_HERE if the overall USE_ICC flags != 1.
 ifneq ($(USE_ICC),1)
@@ -146,12 +147,9 @@ ifeq ($(PLATFORM),MacOSX)
 
   LIPO:=		lipo
 
-  ##
-  # Note that JAVA_INCLUDES is treated as relative to SDKROOT.
-  ##
   JAVA_HOME=		/Library/Java/Home
-  JAVA_INCLUDES=	-I/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
-  JAVA_LDFLAGS=		-L/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Libraries
+  JAVA_INCLUDES=	-I$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
+  JAVA_LDFLAGS=		-L$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Libraries
   JNILIB_PREFIX:=	lib
   JNILIB_EXT:=		.jnilib
   DYLIB_PREFIX:=	$(JNILIB_PREFIX)
@@ -203,6 +201,8 @@ ifeq ($(PLATFORM),Windows)
   endif
   CC:=			$(MINGW)-gcc
   CXX:=			$(MINGW)-g++
+  PKGCFG:=		$(MINGW)-pkg-config
+  PKG_CONFIG_PATH:=	/usr/$(MINGW)/sys-root/mingw/lib/pkgconfig/
   PLATFORM_CFLAGS+=	$(SSE_FLAGS)
 
   ifdef HIGH_PERFORMANCE
@@ -265,6 +265,7 @@ ifeq ($(PLATFORM),$(filter $(PLATFORM),Linux FreeBSD SunOS))
     JAVA_INCLUDES:=	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
     NUM_PROCESSORS:=	$(shell grep '^processor' /proc/cpuinfo | wc -l)
   else ifeq ($(PLATFORM),FreeBSD)
+    PKGCFG:=		pkgconf
     JAVA_INCLUDES:=	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/freebsd
     NUM_PROCESSORS:=	$(shell dmesg | grep '^cpu' | wc -l)
     PLATFORM_INCLUDES=	-I/usr/local/include

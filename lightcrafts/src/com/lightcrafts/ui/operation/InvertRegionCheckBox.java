@@ -30,7 +30,7 @@ class InvertRegionCheckBox extends JCheckBox implements ItemListener {
     public static final String BLENDING_MODES = "Blending Modes";
 
     InvertRegionCheckBox(OpControl control, PropertyChangeSupport pcs) {
-        super("Invert Mask");
+        super(LOCALE.get("InvertMaskLabel"));
         this.control = control;
         undoSupport = control.undoSupport;
         this.pcs = pcs;

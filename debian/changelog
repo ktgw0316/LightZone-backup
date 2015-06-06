@@ -1,3 +1,69 @@
+lightzone (4.1.1-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Sun, 31 May 2015 22:30:10 +0900
+
+lightzone (4.1.0-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Sat, 09 May 2015 22:50:57 +0900
+
+lightzone (4.1.0~rc2-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Thu, 23 Apr 2015 22:45:28 +0900
+
+lightzone (4.1.0~rc1-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Sun, 08 Feb 2015 15:13:04 +0900
+
+lightzone (4.1.0~beta14-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Tue, 23 Dec 2014 23:53:00 +0900
+
+lightzone (4.1.0~beta13-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Sun, 26 Oct 2014 19:46:03 +0900
+
+lightzone (4.1.0~beta12-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Wed, 17 Sep 2014 20:12:31 +0900
+
+lightzone (4.1.0~beta11-0obs2) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Wed, 17 Sep 2014 00:07:23 +0900
+
+lightzone (4.1.0~beta11-0obs1) unstable; urgency=medium
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Mon, 01 Sep 2014 23:01:33 +0900
+
+lightzone (4.1.0~beta10-0obs2) unstable; urgency=low
+
+  * Build-Depends: added pkg-config
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Sat, 09 Aug 2014 18:19:12 +0900
+
+lightzone (4.1.0~beta10-0obs1) unstable; urgency=low
+
+  * Upstream sync
+
+ -- Masahiro Kitagawa <arctica0316@gmail.com>  Sat, 2 Aug 2014 16:06:45 +0900
+
 lightzone (4.1.0~beta9-0obs1) unstable; urgency=low
 
   * Upstream sync
