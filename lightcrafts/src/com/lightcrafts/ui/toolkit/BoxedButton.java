@@ -18,8 +18,7 @@ import javax.swing.*;
 
 public class BoxedButton {
 
-    // private static final Font font = UIManager.getFont("TitledBorder.font"); // size incorrect
-    private static final Font font = LightZoneSkin.fontSet.getTitleFont();
+    private static final Font font = UIManager.getFont("TitledBorder.font");
 
     public final Box box;
     public final JComponent[] buttons;
