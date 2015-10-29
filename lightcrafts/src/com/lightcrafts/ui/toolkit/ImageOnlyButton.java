@@ -72,15 +72,5 @@ public class ImageOnlyButton extends JButton {
         button.setContentAreaFilled(false);
         button.setFocusable(false);
         button.setFocusPainted(false);
-/*
-        UIDefaults overrides = new UIDefaults(); 
-        overrides.put("Button.contentMargins", new Insets(0, 0, 0, 0));
-        overrides.put("Button.background", new Color(22, 22, 22));
-        overrides.put("Button.foreground", new Color(255, 255, 255));
-        overrides.put("Button.disabled",   new Color(22, 22, 22));
-        button.putClientProperty("Nimbus.Overrides", overrides);
-        button.putClientProperty("Nimbus.Overrides.InheritDefaults", Boolean.TRUE);
-        SwingUtilities.updateComponentTreeUI(button);
-        */
     }
 }

@@ -90,7 +90,7 @@ class LayoutHeader extends Box {
 
         add(Box.createHorizontalStrut(22));
         add(modes);
-        add(Box.createHorizontalStrut(64));
+        add(Box.createHorizontalStrut(22));
         add(buttonBox);
         add(Box.createHorizontalGlue());
         add(logoButton);

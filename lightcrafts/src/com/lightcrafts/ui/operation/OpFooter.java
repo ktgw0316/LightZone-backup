@@ -9,12 +9,10 @@ import com.lightcrafts.ui.layout.Box;
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
-import org.jvnet.substance.color.ColorScheme;
 
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -26,6 +24,14 @@ class OpFooter extends Box implements PropertyChangeListener {
     private ColorSelectionControls colorControls;
     private JTabbedPane tabPane;
 
+    @Override
+    public Dimension getPreferredSize() {
+        final int height = (int) super.getPreferredSize().getHeight();
+        // Add extra height to workaround bug JDK-6747580
+        return new Dimension(Integer.MAX_VALUE, height + 12);
+    }
+
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
     }
 

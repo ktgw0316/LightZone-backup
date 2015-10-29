@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.awt.*;
 import java.beans.PropertyChangeSupport;
 import java.util.Enumeration;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -27,6 +28,7 @@ import com.lightcrafts.utils.xml.XmlNode;
 import com.lightcrafts.utils.LCMS;
 
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
+
 import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.app.ComboFrame;
 
@@ -46,7 +48,7 @@ final class ColorSelectionControls extends Box {
     );
 
     public static JRadioButton getSelection( ButtonGroup group ) {
-        for ( Enumeration e = group.getElements(); e.hasMoreElements(); ) {
+        for ( Enumeration<AbstractButton> e = group.getElements(); e.hasMoreElements(); ) {
             final JRadioButton b = (JRadioButton)e.nextElement();
             if ( b.getModel() == group.getSelection() ) {
                 return b;
@@ -96,8 +98,13 @@ final class ColorSelectionControls extends Box {
                         );
 
                         final Color color = new Color(0xff & systemColor[0],
-                                                0xff & systemColor[1],
-                                                0xff & systemColor[2]);
+                                                      0xff & systemColor[1],
+                                                      0xff & systemColor[2]);
+
+                        UIDefaults defaults = new UIDefaults();
+                        defaults.put("RadioButton.icon", colorIcon(color));
+                        button.putClientProperty("Nimbus.Overrides", defaults);
+                        button.putClientProperty("Nimbus.Overrides.InheritDefaults", false);
 
                         button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
                     }
@@ -119,6 +126,32 @@ final class ColorSelectionControls extends Box {
             add(Box.createHorizontalGlue());
         }
 
+        Icon colorIcon(final Color color)
+        {
+            return new Icon(){
+                @Override
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Graphics2D g2 = (Graphics2D) g;
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                        RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(color);
+                    g2.fillOval(x+3, y+3, x+13, y+13);
+                    g2.setColor(Color.BLACK);
+                    g2.drawOval(x+3, y+3, x+13, y+13); 
+                }
+
+                @Override
+                public int getIconWidth() {
+                    return 18;
+                }
+
+                @Override
+                public int getIconHeight() {
+                    return 18;
+                }
+            };
+        }
+
         RGBColorSelectionPreset getSelectedItem() {
             final ColorButton selection = (ColorButton) getSelection(group);
             if (selection == null)
@@ -128,7 +161,7 @@ final class ColorSelectionControls extends Box {
 
         void setSelectedItem( RGBColorSelectionPreset p ) {
             if ( !p.equals( RGBColorSelectionPreset.SampledColors ) ) {
-                final Enumeration e = group.getElements();
+                final Enumeration<AbstractButton> e = group.getElements();
                 while ( e.hasMoreElements() ) {
                     final ColorButton b = (ColorButton)e.nextElement();
                     if ( b.m_preset.equals( p ) ) {

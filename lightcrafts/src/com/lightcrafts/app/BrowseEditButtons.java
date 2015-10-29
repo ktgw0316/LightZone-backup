@@ -4,7 +4,6 @@ package com.lightcrafts.app;
 
 import static com.lightcrafts.app.Locale.LOCALE;
 import com.lightcrafts.ui.toolkit.CoolToggleButton;
-import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.LightZoneSkin;
 
 import javax.swing.*;
@@ -36,11 +35,13 @@ class BrowseEditButtons extends Box {
         Font font = browse.getFont();
         font = font.deriveFont(16f);
         browse.setFont(font);
+        browse.setMargin(new Insets(0, 16, 0, 16));
 
         edit = new CoolToggleButton();
         edit.setText(EditText);
         edit.setToolTipText(EditTip);
         edit.setFont(font);
+        edit.setMargin(new Insets(0, 16, 0, 16));
 
         ButtonGroup group = new ButtonGroup();
         group.add(browse);
