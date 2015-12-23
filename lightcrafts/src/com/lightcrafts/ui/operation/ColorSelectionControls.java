@@ -62,6 +62,11 @@ final class ColorSelectionControls extends Box {
             final RGBColorSelectionPreset m_preset;
 
             ColorButton( RGBColorSelectionPreset preset ) {
+                this(preset, null);
+            }
+
+            ColorButton( RGBColorSelectionPreset preset, Icon icon ) {
+                super(icon);
                 m_preset = preset;
                 setFocusable( false );
             }
@@ -74,15 +79,11 @@ final class ColorSelectionControls extends Box {
 
             for ( final RGBColorSelectionPreset p : RGBColorSelectionPreset.values() ) {
                 if (!p.equals(RGBColorSelectionPreset.SampledColors)) {
-                    final ColorButton button = new ColorButton(p);
-                    group.add(button);
-                    add(button);
+                    final ColorButton button;
+                    final Color color;
 
                     if (p.equals(RGBColorSelectionPreset.AllColors)) {
-                        button.setText( LOCALE.get( "AllLabel" ) );
-                        button.setSelected(true);
-
-                        button.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 3));
+                        color = Color.WHITE;
                     } else {
                         final RGBColorSelection cs =
                             new RGBColorSelection(p, false);
@@ -97,16 +98,22 @@ final class ColorSelectionControls extends Box {
                             systemColor
                         );
 
-                        final Color color = new Color(0xff & systemColor[0],
-                                                      0xff & systemColor[1],
-                                                      0xff & systemColor[2]);
+                        color = new Color(0xff & systemColor[0],
+                                          0xff & systemColor[1],
+                                          0xff & systemColor[2]);
+                    }
+                    button = new ColorButton(p, colorIcon(color, false));
+                    button.setSelectedIcon(colorIcon(color, true));
+                    button.setPressedIcon(colorIcon(color, false));
+                    button.setRolloverIcon(colorIcon(color, false));
+                    button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
 
-                        UIDefaults defaults = new UIDefaults();
-                        defaults.put("RadioButton.icon", colorIcon(color));
-                        button.putClientProperty("Nimbus.Overrides", defaults);
-                        button.putClientProperty("Nimbus.Overrides.InheritDefaults", false);
+                    group.add(button);
+                    add(button);
 
-                        button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
+                    if (p.equals(RGBColorSelectionPreset.AllColors)) {
+                        button.setText( LOCALE.get( "AllLabel" ) );
+                        button.setSelected(true);
                     }
 
                     button.addItemListener(
@@ -126,7 +133,7 @@ final class ColorSelectionControls extends Box {
             add(Box.createHorizontalGlue());
         }
 
-        Icon colorIcon(final Color color)
+        Icon colorIcon(final Color color, final boolean isSelected)
         {
             return new Icon(){
                 @Override
@@ -135,9 +142,13 @@ final class ColorSelectionControls extends Box {
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                         RenderingHints.VALUE_ANTIALIAS_ON);
                     g2.setColor(color);
-                    g2.fillOval(x+3, y+3, x+13, y+13);
+                    g2.fillOval(x+3, y+3, x+12, y+12);
                     g2.setColor(Color.BLACK);
-                    g2.drawOval(x+3, y+3, x+13, y+13); 
+                    g2.drawOval(x+3, y+3, x+12, y+12);
+
+                    if (isSelected) {
+                        g2.fillOval(x+7, y+7, x+5, y+5);
+                    }
                 }
 
                 @Override
