@@ -48,77 +48,82 @@ class StartupCrash {
         Preferences prefs = Preferences.userRoot().node("/com/lightcrafts/app");
         boolean wasSuccessful = prefs.getBoolean(StartupKey, true);
         if (! wasSuccessful) {
-            JButton help = new JButton(LOCALE.get("StartupErrorHelpOption"));
-            help.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent event) {
-                        showHelpDialog();
-                    }
-                }
-            );
-            JTextArea text = createText(LOCALE.get("StartupErrorMessage"));
-            int option = JOptionPane.showOptionDialog(
-                null,
-                text,
-                LOCALE.get("StartupErrorDialogTitle"),
-                JOptionPane.OK_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-                null,
-                new Object[] {
-                    help,
-                    LOCALE.get("StartupErrorResetOption"),
-                    LOCALE.get("StartupErrorDontResetOption")
-                },
-                LOCALE.get("StartupErrorDontResetOption")
-            );
-            if (option == 1) {
-                text = createText(LOCALE.get("ResetWarningMajor"));
-                option = JOptionPane.showOptionDialog(
-                    null,
-                    text,
-                    LOCALE.get("ResetDialogTitle"),
-                    JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.WARNING_MESSAGE,
-                    null,
-                    new Object[] {
-                        help,
-                        LOCALE.get("StartupErrorResetOption"),
-                        LOCALE.get("StartupErrorDontResetOption")
-                    },
-                    LOCALE.get("StartupErrorDontResetOption")
-                );
-                if (option == 1) {
-                    boolean success = true;
-                    try {
-                        Preferences root = Preferences.userRoot();
-                        Preferences node = root.node("/com/lightcrafts");
-                        node.removeNode();
-                    }
-                    catch (BackingStoreException e) {
-                        System.err.println(
-                            "StartupCrash failed to reset Preferences"
-                        );
-                        showErrorDialog(e);
-                        success = false;
-                    }
-                    try {
-                        FileCache cache = FileCacheFactory.getGlobalCache();
-                        if (cache != null) {
-                            cache.clear();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    JButton help = new JButton(LOCALE.get("StartupErrorHelpOption"));
+                    help.addActionListener(
+                            new ActionListener() {
+                                public void actionPerformed(ActionEvent event) {
+                                    showHelpDialog();
+                                }
+                            }
+                            );
+                    JTextArea text = createText(LOCALE.get("StartupErrorMessage"));
+                    int option = JOptionPane.showOptionDialog(
+                            null,
+                            text,
+                            LOCALE.get("StartupErrorDialogTitle"),
+                            JOptionPane.OK_OPTION,
+                            JOptionPane.WARNING_MESSAGE,
+                            null,
+                            new Object[] {
+                                    help,
+                                    LOCALE.get("StartupErrorResetOption"),
+                                    LOCALE.get("StartupErrorDontResetOption")
+                            },
+                            LOCALE.get("StartupErrorDontResetOption")
+                            );
+                    if (option == 1) {
+                        text = createText(LOCALE.get("ResetWarningMajor"));
+                        option = JOptionPane.showOptionDialog(
+                                null,
+                                text,
+                                LOCALE.get("ResetDialogTitle"),
+                                JOptionPane.OK_CANCEL_OPTION,
+                                JOptionPane.WARNING_MESSAGE,
+                                null,
+                                new Object[] {
+                                        help,
+                                        LOCALE.get("StartupErrorResetOption"),
+                                        LOCALE.get("StartupErrorDontResetOption")
+                                },
+                                LOCALE.get("StartupErrorDontResetOption")
+                                );
+                        if (option == 1) {
+                            boolean success = true;
+                            try {
+                                Preferences root = Preferences.userRoot();
+                                Preferences node = root.node("/com/lightcrafts");
+                                node.removeNode();
+                            }
+                            catch (BackingStoreException e) {
+                                System.err.println(
+                                        "StartupCrash failed to reset Preferences"
+                                        );
+                                showErrorDialog(e);
+                                success = false;
+                            }
+                            try {
+                                FileCache cache = FileCacheFactory.getGlobalCache();
+                                if (cache != null) {
+                                    cache.clear();
+                                }
+                            }
+                            catch (IOException e) {
+                                System.err.println(
+                                        "StartupCrach failed to clear FileCache"
+                                        );
+                                showErrorDialog(e);
+                                success = false;
+                            }
+                            if (success) {
+                                showSuccessDialog();
+                            }
                         }
                     }
-                    catch (IOException e) {
-                        System.err.println(
-                            "StartupCrach failed to clear FileCache"
-                        );
-                        showErrorDialog(e);
-                        success = false;
-                    }
-                    if (success) {
-                        showSuccessDialog();
-                    }
                 }
-            }
+            });
         }
     }
 
