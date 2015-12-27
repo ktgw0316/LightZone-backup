@@ -185,7 +185,7 @@ public class ExportControls extends JPanel {
                 break;
             }
         }
-        sizes.setMaximumSize(sizes.getPreferredSize());
+        // sizes.setMaximumSize(sizes.getPreferredSize());
 
         Box controls = Box.createHorizontalBox();
         controls.add(sizes);

@@ -64,7 +64,7 @@ class SavePrefsPanel extends JPanel implements ItemListener {
         if (defaultItem != null) {
             typeCombo.setSelectedItem(defaultItem);
         }
-        typeCombo.setMaximumSize(typeCombo.getPreferredSize());
+        // typeCombo.setMaximumSize(typeCombo.getPreferredSize());
 
         typeCombo.addItemListener(this);
 
