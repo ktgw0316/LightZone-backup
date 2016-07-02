@@ -348,6 +348,7 @@ public abstract class ImageType {
             LZNImageType.INSTANCE,
             MOSImageType.INSTANCE,
             MRWImageType.INSTANCE,
+            MEFImageType.INSTANCE,
             NEFImageType.INSTANCE,
             ORFImageType.INSTANCE,
             PanasonicRawImageType.INSTANCE,
