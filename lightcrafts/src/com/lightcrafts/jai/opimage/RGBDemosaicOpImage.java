@@ -128,18 +128,15 @@ public class RGBDemosaicOpImage extends AreaOpImage {
         int dWidth = dst.getWidth();
         int dHeight = dst.getHeight();
 
-        interpolateGreen(srcData, destData, dWidth, dHeight, srcScanlineStride, dstScanlineStride, srcOffset, rOffset, gOffset, bOffset, gx, gy, ry );
-        interpolateRedBlue(destData, dWidth, dHeight, dstScanlineStride, rOffset, gOffset, bOffset, rx, ry, bx, by );
+        demosaic(srcData, destData, dWidth, dHeight,
+                srcScanlineStride, dstScanlineStride,
+                srcOffset, rOffset, gOffset, bOffset,
+                rx, ry, gx, gy, bx, by);
     }
 
-    private native static void interpolateGreen(
+    private native static void demosaic(
             short[] srcData, short[] destData, int width, int height,
             int srcLineStride, int destLineStride,
             int srcOffset, int rOffset, int gOffset, int bOffset,
-            int gx, int gy, int ry );
-
-    private native static void interpolateRedBlue(
-            short[] jdata, int width, int height, int lineStride,
-            int rOffset, int gOffset, int bOffset,
-            int rx0, int ry0, int bx0, int by0);
+            int rx, int ry, int gx, int gy, int bx, int by);
 }
