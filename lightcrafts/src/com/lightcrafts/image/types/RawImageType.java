@@ -109,8 +109,6 @@ public abstract class RawImageType extends ImageType {
             indicator.setMaximum( 3 );
         }
 
-        val filters = dcRaw.getFilters();
-
         val colorModel = RasterFactory.createComponentColorModel(
                 DataBuffer.TYPE_USHORT, JAIContext.linearColorSpace, false, false,
                 Transparency.OPAQUE
@@ -143,8 +141,8 @@ public abstract class RawImageType extends ImageType {
 
         PlanarImage rgbImage;
 
-        if (dcrawImage.getSampleModel().getNumBands() == 1 && filters != 0 && filters != -1) {
-            rgbImage = new RGBDemosaicOpImage(dcrawImage, null, dcrawLayout, filters);
+        if (dcrawImage.getSampleModel().getNumBands() == 1 && dcRaw.isBayer()) {
+            rgbImage = new RGBDemosaicOpImage(dcrawImage, null, dcrawLayout, dcRaw.getFilters());
 
             val make = dcRaw.getCameraMake(false);
             val cameraMake = make == null ? "" : make;

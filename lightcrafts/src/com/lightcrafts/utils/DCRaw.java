@@ -9,6 +9,7 @@ import com.lightcrafts.image.libs.LCImageReaderFactory;
 import com.lightcrafts.image.metadata.providers.*;
 import com.lightcrafts.image.metadata.MetadataUtil;
 import com.lightcrafts.jai.JAIContext;
+import com.lightcrafts.jai.opimage.RGBDemosaicOpImage;
 import com.lightcrafts.utils.bytebuffer.ByteBufferUtil;
 
 import java.awt.*;
@@ -307,13 +308,13 @@ public final class DCRaw implements
                     && !pattern.substring(0,4).equals(pattern.substring(4,8)))
                 m_filters = -1;
             else if (pattern.startsWith("BG/GR"))
-                m_filters = 0x16161616;
+                m_filters = RGBDemosaicOpImage.BGGR;
             else if (pattern.startsWith("GR/BG"))
-                m_filters = 0x61616161;
+                m_filters = RGBDemosaicOpImage.GRBG;
             else if (pattern.startsWith("GB/RG"))
-                m_filters = 0x49494949;
+                m_filters = RGBDemosaicOpImage.GBRG;
             else if (pattern.startsWith("RG/GB"))
-                m_filters = 0x94949494;
+                m_filters = RGBDemosaicOpImage.RGGB;
             else
                 m_filters = -1;
         } else if (line.startsWith(search = DAYLIGHT_MULTIPLIERS)) {
@@ -341,6 +342,11 @@ public final class DCRaw implements
                 m_xyz_cam[i] = Float.parseFloat(xyz_cam[i]);
             }
         }
+    }
+
+    // True if the filter array pattern is one of BG/GR, GR/BG, GB/RG, and RG/GB.
+    public boolean isBayer() {
+        return m_filters > 0;
     }
 
     private static class ImageData {
@@ -610,7 +616,7 @@ public final class DCRaw implements
         case full:
             if (four_colors)
                 cmd.addAll(Arrays.asList("-f", "-H", "1", "-t", "0", "-o", "0", "-4"));
-            else if (m_filters == -1 || (m_make != null && m_make.equalsIgnoreCase("SIGMA")))
+            else if (!isBayer() || (m_make != null && m_make.equalsIgnoreCase("SIGMA")))
                 cmd.addAll(Arrays.asList("-H", "1", "-t", "0", "-o", "0", "-4"));
             else if (secondaryPixels)
                 cmd.addAll(Arrays.asList("-j", "-H", "1", "-t", "0", "-s", "1", "-d", "-4"));

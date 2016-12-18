@@ -20,6 +20,11 @@ import java.util.Arrays;
 public class RGBDemosaicOpImage extends AreaOpImage {
     private static final BorderExtender copyExtender = BorderExtender.createInstance(BorderExtender.BORDER_ZERO);
 
+    public static final int BGGR = 0x16161616;
+    public static final int GRBG = 0x61616161;
+    public static final int GBRG = 0x49494949;
+    public static final int RGGB = 0x94949494;
+
     private final int rx, ry, gx, gy, bx, by;
 
     public RGBDemosaicOpImage(RenderedImage source, Map config, int rawFilters) {
@@ -30,16 +35,16 @@ public class RGBDemosaicOpImage extends AreaOpImage {
         super(source, layout, config, true, copyExtender, 4, 4, 4, 4);
 
         switch (rawFilters) {
-            case 0x16161616:
+            case BGGR:
                 rx=1; ry=1; gx=1; gy=0; bx=0; by=0;
                 break;
-            case 0x61616161:
+            case GRBG:
                 rx=1; ry=0; gx=0; gy=0; bx=0; by=1;
                 break;
-            case 0x49494949:
+            case GBRG:
                 rx=0; ry=1; gx=0; gy=0; bx=1; by=0;
                 break;
-            case 0x94949494:
+            case RGGB:
                 rx=0; ry=0; gx=1; gy=0; bx=1; by=1;
                 break;
             default:
