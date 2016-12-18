@@ -3,7 +3,6 @@
 package com.lightcrafts.jai.opimage;
 
 import com.lightcrafts.mediax.jai.*;
-import com.lightcrafts.utils.DCRaw;
 import com.lightcrafts.jai.utils.Functions;
 
 import java.awt.image.*;
@@ -129,7 +128,18 @@ public class RGBDemosaicOpImage extends AreaOpImage {
         int dWidth = dst.getWidth();
         int dHeight = dst.getHeight();
 
-        DCRaw.interpolateGreen(srcData, destData, dWidth, dHeight, srcScanlineStride, dstScanlineStride, srcOffset, rOffset, gOffset, bOffset, gx, gy, ry );
-        DCRaw.interpolateRedBlue(destData, dWidth, dHeight, dstScanlineStride, rOffset, gOffset, bOffset, rx, ry, bx, by );
+        interpolateGreen(srcData, destData, dWidth, dHeight, srcScanlineStride, dstScanlineStride, srcOffset, rOffset, gOffset, bOffset, gx, gy, ry );
+        interpolateRedBlue(destData, dWidth, dHeight, dstScanlineStride, rOffset, gOffset, bOffset, rx, ry, bx, by );
     }
+
+    private native static void interpolateGreen(
+            short[] srcData, short[] destData, int width, int height,
+            int srcLineStride, int destLineStride,
+            int srcOffset, int rOffset, int gOffset, int bOffset,
+            int gx, int gy, int ry );
+
+    private native static void interpolateRedBlue(
+            short[] jdata, int width, int height, int lineStride,
+            int rOffset, int gOffset, int bOffset,
+            int rx0, int ry0, int bx0, int by0);
 }

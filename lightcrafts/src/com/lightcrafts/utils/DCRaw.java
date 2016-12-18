@@ -740,16 +740,5 @@ public final class DCRaw implements
             "LEICA CAMERA AG M8 DIGITAL CAMERA"
             // TODO: what about the Panasonic 4/3 and the Leica Digilux 3?
     ));
-
-    public native static void interpolateGreen(
-            short[] srcData, short[] destData, int width, int height,
-            int srcLineStride, int destLineStride,
-            int srcOffset, int rOffset, int gOffset, int bOffset,
-            int gx, int gy, int ry );
-
-    public native static void interpolateRedBlue(
-            short[] jdata, int width, int height, int lineStride,
-            int rOffset, int gOffset, int bOffset,
-            int rx0, int ry0, int bx0, int by0);
 }
 /* vim:set et sw=4 ts=4: */

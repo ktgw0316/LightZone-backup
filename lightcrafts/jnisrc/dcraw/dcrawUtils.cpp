@@ -1,21 +1,21 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2016-     Masahiro Kitagawa */
 
 #include <jni.h>
 #include <stdlib.h>
-#include <math.h>
 #ifndef AUTO_DEP
-#include "javah/com_lightcrafts_utils_DCRaw.h"
+#include "javah/com_lightcrafts_jai_opimage_RGBDemosaicOpImage.h"
 #endif
 
 #include "LC_JNIUtils.h"
 
-#define DCRaw_METHOD(method) \
-        name4(Java_,com_lightcrafts_utils_DCRaw,_,method)
+#define DEMOSAIC_METHOD(method) \
+        name4(Java_,com_lightcrafts_jai_opimage_RGBDemosaicOpImage,_,method)
 
 #include<limits.h>
 #include<omp.h>
 
-JNIEXPORT void JNICALL DCRaw_METHOD(interpolateGreen)
+JNIEXPORT void JNICALL DEMOSAIC_METHOD(interpolateGreen)
 ( JNIEnv *env, jclass cls,
   jshortArray jsrcData, jshortArray jdestData, jint width, jint height,
   jint srcLineStride, jint destLineStride,
@@ -240,7 +240,7 @@ JNIEXPORT void JNICALL DCRaw_METHOD(interpolateGreen)
     env->ReleasePrimitiveArrayCritical(jdestData, destData, 0);
 }
 
-JNIEXPORT void JNICALL DCRaw_METHOD(interpolateRedBlue)
+JNIEXPORT void JNICALL DEMOSAIC_METHOD(interpolateRedBlue)
 ( JNIEnv *env, jclass cls,
   jshortArray jdata, jint width, jint height,
   jint lineStride,
@@ -312,3 +312,5 @@ JNIEXPORT void JNICALL DCRaw_METHOD(interpolateRedBlue)
     }
     env->ReleasePrimitiveArrayCritical(jdata, data, 0);
 }
+
+/* vim:set et sw=4 ts=4: */
