@@ -2,7 +2,6 @@
 /* Copyright (C) 2016-     Masahiro Kitagawa */
 
 #include <jni.h>
-#include <stdlib.h>
 #ifndef AUTO_DEP
 #include "javah/com_lightcrafts_jai_opimage_RGBDemosaicOpImage.h"
 #endif
@@ -20,6 +19,13 @@ static inline int clipUShort(unsigned short sample)
     return sample < 0      ? 0
          : sample > 0xffff ? 0xffff
                            : (unsigned short) sample;
+}
+
+#if _OPENMP >= 201307
+#pragma omp declare simd
+#endif
+static inline int _abs(int x) {
+    return x < 0 ? -x : x;
 }
 
 static inline bool isOdd(int x)
@@ -47,7 +53,7 @@ void interpolateGreen(
         for (int x = 0; x < width; ++x) {
             const bool colorPixel = isSameMathParity(x, x0);
             const int offset = colorPixel ? cOffset : gOffset;
-            
+
             int value = srcData[y * srcLineStride + x + srcOffset];
             if (x >= 2 && x < width-2 && y >= 2 && y < height-2) {
                 int v[12];
@@ -69,7 +75,7 @@ void interpolateGreen(
                     v[1] = srcData[(y+2) * srcLineStride + x + srcOffset];
                     v[2] = srcData[y * srcLineStride + x-2 + srcOffset];
                     v[3] = srcData[y * srcLineStride + x+2 + srcOffset];
-                    
+
                     v[4] = 2 * srcData[(y-1) * srcLineStride + x-1 + srcOffset];
                     v[5] = 2 * srcData[(y-1) * srcLineStride + x+1 + srcOffset];
                     v[6] = 2 * srcData[(y+1) * srcLineStride + x-1 + srcOffset];
@@ -99,24 +105,24 @@ void interpolateGreen(
     for (int y = 2; y < height-2; ++y) {
         const int cOffset = isSameMathParity(y, ry) ? rOffset : bOffset;
         const int x0 = isSameMathParity(y, gy) ? gx+1 : gx;
-        
+
         int hl = destData[3 * (y * destLineStride + (x0-1)) + gOffset];
         int cxy = destData[3 * (y * destLineStride + x0) + cOffset];
         int chl = destData[3 * (y * destLineStride + (x0-2)) + cOffset];
-        
+
         const int x_min = isOdd(x0) ? 3 : 2; 
         for (int x = x_min; x < width-2; x += 2) {
             const int hr = destData[3 * (y * destLineStride + (x+1)) + gOffset];
             const int vu = destData[3 * ((y-1) * destLineStride + x) + gOffset];
             const int vd = destData[3 * ((y+1) * destLineStride + x) + gOffset];
-            const int dh = abs(hl - hr);
-            const int dv = abs(vu - vd);
+            const int dh = _abs(hl - hr);
+            const int dv = _abs(vu - vd);
 
             const int chr = destData[3 * (y * destLineStride + (x+2)) + cOffset];
             const int cvu = destData[3 * ((y-2) * destLineStride + x) + cOffset];
             const int cvd = destData[3 * ((y+2) * destLineStride + x) + cOffset];
-            const int cdh = abs(chl + chr - 2 * cxy);
-            const int cdv = abs(cvu + cvd - 2 * cxy);
+            const int cdh = _abs(chl + chr - 2 * cxy);
+            const int cdv = _abs(cvu + cvd - 2 * cxy);
 
             // we're doing edge directed bilinear interpolation on the green channel,
             // which is a low pass operation (averaging), so we add some signal from the
@@ -147,87 +153,83 @@ void interpolateGreen(
 
     // get the constant component out of the reconstructed green pixels and add to it
     // the "high frequency" part of the corresponding observed color channel
-    
+
 #pragma omp for schedule (dynamic)
     for (int y = 2; y < height-2; ++y) {
         const int cOffset = isSameMathParity(y, ry) ? rOffset : bOffset;
         const int x0 = isSameMathParity(y, gy) ? gx+1 : gx;
-        
+
         int xy = destData[3 * (y * destLineStride + x0) + gOffset];
         int hl = destData[3 * (y * destLineStride + x0-2) + gOffset];
         int ul = destData[3 * ((y-2) * destLineStride + x0-2) + gOffset];
         int bl = destData[3 * ((y+2) * destLineStride + x0-2) + gOffset];
-        
+
         int cxy = destData[3 * (y * destLineStride + x0) + cOffset];
         int chl = destData[3 * (y * destLineStride + x0-2) + cOffset];
         int cul = destData[3 * ((y-2) * destLineStride + x0-2) + cOffset];
         int cbl = destData[3 * ((y+2) * destLineStride + x0-2) + cOffset];
-        
-        for (int x = 2; x < width-2; x+=2) {
+
+        int x = 2;
+
+        int vu = destData[3 * ((y-2) * destLineStride + x) + gOffset];
+        int vd = destData[3 * ((y+2) * destLineStride + x) + gOffset];
+
+        int cvu = destData[3 * ((y-2) * destLineStride + x) + cOffset];
+        int cvd = destData[3 * ((y+2) * destLineStride + x) + cOffset];
+
+        for (; x < width-2; x += 2) {
             const int hr = destData[3 * (y * destLineStride + x+2) + gOffset];
             const int ur = destData[3 * ((y-2) * destLineStride + x+2) + gOffset];
             const int br = destData[3 * ((y+2) * destLineStride + x+2) + gOffset];
 
-            int vu = destData[3 * ((y-2) * destLineStride + x) + gOffset];
-            int vd = destData[3 * ((y+2) * destLineStride + x) + gOffset];
-            
             const int chr = destData[3 * (y * destLineStride + x+2) + cOffset];
             const int cur = destData[3 * ((y-2) * destLineStride + x+2) + cOffset];
             const int cbr = destData[3 * ((y+2) * destLineStride + x+2) + cOffset];
 
-            int cvu = destData[3 * ((y-2) * destLineStride + x) + cOffset];
-            int cvd = destData[3 * ((y+2) * destLineStride + x) + cOffset];
-
             // Only work on the pixels that have a strong enough correlation between channels
-            
+
             if (xy < 4 * cxy && cxy < 4 * xy) {
-                const int dh = xy - (hl + hr)/2;
-                const int dv = xy - (vu + vd)/2;
-                const int ne = xy - (ul + br)/2;
-                const int nw = xy - (ur + bl)/2;
-                
-                const int cdh = cxy - (chl + chr)/2;
-                const int cdv = cxy - (cvu + cvd)/2;
-                const int cne = cxy - (cul + cbr)/2;
-                const int cnw = cxy - (cur + cbl)/2;
-                
-                const int gradients[4] = {abs(dh)+abs(cdh), abs(dv)+abs(cdv), abs(ne)+abs(cne), abs(nw)+abs(cnw)};
-                
-                int mind = 4, maxd = 4;
-                int ming = INT_MAX;
+                const int vec1[4] = {hl, vu, ul, ur};
+                const int vec2[4] = {hr, vd, br, bl};
+                const int cvec1[4] = {chl, cvu, cul, cur};
+                const int cvec2[4] = {chr, cvd, cbr, cbl};
+
+                int diffs[4], cdiffs[4], gradients[4];
+#if _OPENMP >= 201307
+#pragma omp simd
+#endif
                 for (int i = 0; i < 4; ++i) {
-                    if (gradients[i] < ming) {
-                        ming = gradients[i];
-                        mind = i;
+                    diffs[i]  = xy  - ( vec1[i] +  vec2[i]) / 2;
+                    cdiffs[i] = cxy - (cvec1[i] + cvec2[i]) / 2;
+                }
+#if _OPENMP >= 201307
+#pragma omp simd
+#endif
+                for (int i = 0; i < 4; ++i) {
+                    gradients[i] = _abs(diffs[i] + cdiffs[i]);
+                }
+
+                //  -1: flat, 0: horizontal, 1: vertical, 2: north-east, 3: north-west
+                int min_dir = -1;
+                int min_grad = xy / 4;
+#if _OPENMP >= 201307
+#pragma omp simd reduction(min:min_grad)
+#endif
+                for (int i = 0; i < 4; ++i) {
+                    if (gradients[i] < min_grad) {
+                        min_grad = gradients[i];
+                        min_dir = i;
                     }
                 }
-                
-                // Only work on parts of the image that have enough "detail"
-                
-                if (mind != 4 && ming > xy / 4) {
-                    int sample;
-                    switch (mind) {
-                        case 0: // horizontal
-                            sample = (xy + (hl + hr)/2 + cdh) / 2;
-                            break;
-                        case 1: // vertical
-                            sample = (xy + (vu + vd)/2 + cdv) / 2;
-                            break;
-                        case 2: // north-east
-                            sample = (xy + (ul + br)/2 + cne) / 2;
-                            break;
-                        case 3: // north-west
-                            sample = (xy + (ur + bl)/2 + cnw) / 2;
-                            break;
-                        case 4: // flat
-                            // nothing to do
-                            break;
-                    }
 
+                // Only work on parts of the image that have enough "detail"
+
+                if (min_dir != -1) { // min_grad > xy / 4
+                    const int sample = (xy + (xy - diffs[min_dir]) + cdiffs[min_dir]) / 2;
                     destData[3 * (y * destLineStride + x) + gOffset] = clipUShort(sample);
                 }
             }
-            
+
             hl = xy;
             xy = hr;
             ul = vu;
