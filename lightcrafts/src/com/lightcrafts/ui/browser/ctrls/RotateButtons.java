@@ -15,6 +15,11 @@ import javax.swing.*;
  */
 public class RotateButtons extends Box {
 
+    private final static Icon LeftIcon = ButtonFactory.getIconByName("rotateLeft" );
+    private final static Icon RightIcon = ButtonFactory.getIconByName("rotateRight" );
+    private final static Icon HorizontalIcon = ButtonFactory.getIconByName("rotateLeft"); // TOCO:
+    private final static Icon VerticalIcon = ButtonFactory.getIconByName("rotateRight"); // TOCO:
+
     private final static String LeftToolTip = LOCALE.get("RotateLeftToolTip");
     private final static String RightToolTip = LOCALE.get("RotateRightToolTip");
     private final static String HorizontalToolTip = LOCALE.get("FlipHorizontalToolTip");
@@ -23,35 +28,24 @@ public class RotateButtons extends Box {
     public RotateButtons(AbstractImageBrowser browser) {
         super(BoxLayout.X_AXIS);
 
-        ImageBrowserActions actions = browser.getActions();
+        final ImageBrowserActions actions = browser.getActions();
 
-        Action leftAction = actions.getLeftAction();
-        JButton left = new CoolButton(/*CoolButton.ButtonStyle.LEFT*/);
-        left.setAction(leftAction);
-        left.setIcon(ButtonFactory.getIconByName("rotateLeft"));
-        left.setToolTipText(LeftToolTip);
+        final Action leftAction = actions.getLeftAction();
+        final Action rightAction = actions.getRightAction();
+        final Action horizontalAction = actions.getHorizontalAction();
+        final Action verticalAction = actions.getVerticalAction();
 
-        Action rightAction = actions.getRightAction();
-        JButton right = new CoolButton(/*CoolButton.ButtonStyle.CENTER*/);
-        right.setAction(rightAction);
-        right.setIcon(ButtonFactory.getIconByName("rotateRight"));
-        right.setToolTipText(RightToolTip);
+        addButton(leftAction, LeftIcon, LeftToolTip);
+        addButton(rightAction, RightIcon, RightToolTip);
+        addButton(horizontalAction, HorizontalIcon, HorizontalToolTip);
+        addButton(verticalAction, VerticalIcon, VerticalToolTip);
+    }
 
-        Action horizontalAction = actions.getHorizontalAction();
-        JButton horizontal = new CoolButton(/*CoolButton.ButtonStyle.CENTER*/);
-        horizontal.setAction(horizontalAction);
-        horizontal.setIcon(ButtonFactory.getIconByName("rotateLeft" /* TODO: "flipHorizontal" */));
-        horizontal.setToolTipText(HorizontalToolTip);
-
-        Action verticalAction = actions.getVerticalAction();
-        JButton vertical = new CoolButton(/*CoolButton.ButtonStyle.RIGHT*/);
-        vertical.setAction(verticalAction);
-        vertical.setIcon(ButtonFactory.getIconByName("rotateRight" /* TODO: "flipVertical" */));
-        vertical.setToolTipText(VerticalToolTip);
-
-        add(left);
-        add(right);
-        add(horizontal);
-        add(vertical);
+    private void addButton(Action action, Icon icon, String toolTip) {
+        final CoolButton button = new CoolButton();
+        button.setAction(action);
+        button.setIcon(icon);
+        button.setToolTipText(toolTip);
+        add(button);
     }
 }

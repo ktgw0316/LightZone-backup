@@ -11,7 +11,6 @@ import com.lightcrafts.image.export.BitsPerChannelOption;
 import com.lightcrafts.image.export.ImageExportOptions;
 import com.lightcrafts.image.export.ImageFileExportOptions;
 import com.lightcrafts.image.metadata.ImageMetadata;
-import com.lightcrafts.image.metadata.ImageOrientation;
 import com.lightcrafts.image.types.AuxiliaryImageInfo;
 import com.lightcrafts.image.types.JPEGImageType;
 import com.lightcrafts.image.types.RawImageInfo;
@@ -26,6 +25,7 @@ import com.lightcrafts.platform.Platform;
 import com.lightcrafts.utils.ColorProfileInfo;
 import com.lightcrafts.utils.UserCanceledException;
 import com.lightcrafts.utils.thread.ProgressThread;
+import com.lightcrafts.utils.xml.XMLUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
-import com.lightcrafts.utils.xml.XMLUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.val;

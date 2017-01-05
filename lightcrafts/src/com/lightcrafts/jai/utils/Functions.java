@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2017-     Masahiro Kitagawa */
 
 package com.lightcrafts.jai.utils;
 
@@ -15,6 +16,7 @@ import java.text.DecimalFormat;
 
 import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.jai.operator.LCMSColorConvertDescriptor;
+import com.lightcrafts.mediax.jai.operator.TransposeDescriptor;
 import com.lightcrafts.utils.ColorProfileInfo;
 import com.lightcrafts.model.ImageEditor.Rendering;
 import com.lightcrafts.model.ImageEditor.ImageProcessor;
@@ -38,6 +40,21 @@ public class Functions {
         pb.add(width);
         pb.add(height);
         return JAI.create("Crop", pb, hints);
+    }
+
+    static public RenderedOp flip(RenderedImage image, boolean horizontal, boolean vertical, RenderingHints hints) {
+        if (!horizontal && !vertical)
+            return null;
+
+        ParameterBlock pb = new ParameterBlock();
+        pb.addSource(image);
+        if (horizontal && vertical)
+            pb.add(TransposeDescriptor.ROTATE_180);
+        else if (horizontal)
+            pb.add(TransposeDescriptor.FLIP_HORIZONTAL);
+        else // if (vertical)
+            pb.add(TransposeDescriptor.FLIP_VERTICAL);
+        return JAI.create("Transpose", pb, hints);
     }
 
     static public PlanarImage scaledRendering(Rendering rendering, Operation op, float scale, boolean cheap) {

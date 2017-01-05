@@ -3,6 +3,7 @@
 
 package com.lightcrafts.model.ImageEditor;
 
+import com.lightcrafts.mediax.jai.operator.TransposeDescriptor;
 import com.lightcrafts.model.CropBounds;
 import com.lightcrafts.model.Operation;
 import com.lightcrafts.jai.utils.Functions;
@@ -232,7 +233,7 @@ public class Rendering implements Cloneable {
 
     private AffineTransform buildTransform(boolean isInputTransform) {
         // NOTE: we must clone PlanarImage.getBounds() since it returns a reference to an object
-        Rectangle sourceBounds = new Rectangle(sourceImage.getBounds());
+        val sourceBounds = new Rectangle(sourceImage.getBounds());
 
         AffineTransform transform = new AffineTransform();
 
@@ -347,6 +348,12 @@ public class Rendering implements Cloneable {
                         finalBounds.x, finalBounds.y,
                         finalBounds.width, finalBounds.height, null);
             }
+        }
+        val hFlip = cropBounds.isFlippedHorizontally();
+        val vFlip = cropBounds.isFlippedVertically();
+        if (hFlip || vFlip) {
+            xformedSourceImage = Functions.flip(
+                    xformedSourceImage, hFlip, vFlip, null);
         }
         return xformedSourceImage;
     }
