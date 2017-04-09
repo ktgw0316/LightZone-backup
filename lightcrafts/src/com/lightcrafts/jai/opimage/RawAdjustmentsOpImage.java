@@ -15,7 +15,6 @@ import java.util.Map;
 
 public class RawAdjustmentsOpImage extends PointOpImage {
     private float exposureCompensation;
-    private float colorTemperature;
     private float[][] cameraRGB;
 
     public RawAdjustmentsOpImage(RenderedImage source,
@@ -27,7 +26,6 @@ public class RawAdjustmentsOpImage extends PointOpImage {
         super(source, layout, config, true);
 
         this.exposureCompensation = exposureCompensation;
-        this.colorTemperature = colorTemperature;
         this.cameraRGB = cameraRGB;
 
         permitInPlaceOperation();
@@ -44,7 +42,7 @@ public class RawAdjustmentsOpImage extends PointOpImage {
 
         RasterAccessor srcAccessor =
                 new RasterAccessor(source, srcRect, formatTags[0],
-                                   getSource(0).getColorModel());
+                                   getSourceImage(0).getColorModel());
         RasterAccessor dstAccessor =
                 new RasterAccessor(dest, destRect, formatTags[1],
                                    this.getColorModel());

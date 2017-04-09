@@ -8,8 +8,8 @@
     <string>US</string>
     <key>CFBundleExecutable</key>
     <string>@APPNAME@</string>
-    <key>CFBundleGetInfoString</key>
-    <string>@APPNAME@ @VERSION@ (@BUILD@), Copyright 2005-2007 Light Crafts, Inc. All Rights Reserved.</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>@APPNAME@ @VERSION@ (@BUILD@), Copyright 2005-2011 Light Crafts, Inc. All Rights Reserved. Copyright 2013- The LightZone Project. All Rights Reserved.</string>
     <key>CFBundleHelpBookFolder</key>
     <string>LightZone_Help</string>
     <key>CFBundleHelpBookName</key>
@@ -96,16 +96,21 @@
         <key>ClassPath</key>
         <array>
             <string>.</string>
+            <string>asm-all-2.2.2.jar</string>
+            <string>laf-widget.jar</string>
+            <string>lcjai.jar</string>
             <string>lightcrafts-apple.jar</string>
             <string>lightcrafts.jar</string>
             <string>quaqua.jar</string>
-            <string>lcjai.jar</string>
             <string>substance-lite.jar</string>
             <string>/System/Library/Java</string>
         </array>
         <key>VMOptions</key>
         <array>
             <string>-Xrs</string>
+            <string>-XX:UseG1GC</string>
+            <string>-XX:MinHeapFreeRatio=30</string>
+            <string>-XX:MaxHeapFreeRatio=30</string>
         </array>
         <key>Properties</key>
         <dict>

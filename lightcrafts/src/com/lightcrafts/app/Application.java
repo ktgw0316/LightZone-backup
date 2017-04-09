@@ -2,7 +2,6 @@
 
 package com.lightcrafts.app;
 
-import static com.lightcrafts.app.Locale.LOCALE;
 import com.lightcrafts.app.batch.BatchConfig;
 import com.lightcrafts.app.batch.BatchConfigurator;
 import com.lightcrafts.app.batch.BatchProcessor;
@@ -34,10 +33,10 @@ import com.lightcrafts.ui.editor.assoc.DocumentInterpreter;
 import com.lightcrafts.ui.export.ExportLogic;
 import com.lightcrafts.ui.export.ExportNameUtility;
 import com.lightcrafts.ui.export.SaveOptions;
+import com.lightcrafts.ui.help.HelpConstants;
 import com.lightcrafts.ui.print.PrintLayoutDialog;
 import com.lightcrafts.ui.print.PrintLayoutModel;
 import com.lightcrafts.ui.templates.TemplateList;
-import com.lightcrafts.ui.help.HelpConstants;
 import com.lightcrafts.utils.TerseLoggingHandler;
 import com.lightcrafts.utils.UserCanceledException;
 import com.lightcrafts.utils.file.FileUtil;
@@ -66,6 +65,8 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
+import static com.lightcrafts.app.Locale.LOCALE;
 
 /** This class collects static methods and structures for top-level document
   * management.  These methods handle startup processing; window management;
@@ -171,6 +172,10 @@ public class Application {
     }
 
     public static void reOpen(ComboFrame frame) {
+        if (frame == null) {
+            openEmpty();
+	    return;
+        }
         Document doc = frame.getDocument();
         File file = doc.getFile();
         ImageMetadata meta = doc.getMetadata();
@@ -569,7 +574,7 @@ public class Application {
         return frame;
     }
 
-    public static void openRecentFolder(ComboFrame frame, File folder) {
+    public static void openFolder(ComboFrame frame, File folder) {
         // This can be called from the no-frame menu on the Mac.
         if (frame == null) {
             // See if there's an active frame:
@@ -579,12 +584,11 @@ public class Application {
                 frame = openEmpty();
             }
         }
-        frame.showRecentFolder(folder);
-        addToRecentFolders(folder);
-        savePrefs();
+        frame.showFolder(folder);
+        notifyRecentFolder(folder);
     }
 
-    public static void notifyRecentFolder(File folder) {
+    static void notifyRecentFolder(File folder) {
         addToRecentFolders(folder);
         savePrefs();
     }
@@ -747,7 +751,7 @@ public class Application {
             savePrefs();
             removeFromCurrent(frame);
             frame.dispose();
-            if (Platform.getType() != Platform.MacOSX) {
+            if (!Platform.isMac()) {
                 maybeQuit();
             }
             return true;
@@ -792,9 +796,6 @@ public class Application {
     }
 
     public static void quit() {
-        // In case the 20 second wait before setting the startup flag has
-        // not elapsed, set it here.
-        StartupCrash.startupEnded();
         // Persist open documents in preferences.
         ArrayList<ComboFrame> frames = new ArrayList<ComboFrame>(Current);
         IsQuitting = true;
@@ -807,7 +808,6 @@ public class Application {
             // The last one closing will trigger exit().
         }
         // Unless there are no active ComboFrames.
-        savePrefs();
         System.exit(0);
     }
 
@@ -1498,12 +1498,10 @@ public class Application {
                 public void windowClosing(WindowEvent event) {
                     ComboFrame frame = (ComboFrame) event.getWindow();
                     // On the Mac, we can close the last frame without quitting.
-                    if (Platform.getType() != Platform.MacOSX) {
-                        if (Current.size() == 1) {
-                            boolean confirmed = askConfirmQuit(frame);
-                            if (! confirmed) {
-                                return;
-                            }
+                    if (!Platform.isMac() && Current.size() == 1) {
+                        boolean confirmed = askConfirmQuit(frame);
+                        if (! confirmed) {
+                            return;
                         }
                     }
                     // Trigger the standard cleanup, which results in quit:
@@ -2153,7 +2151,24 @@ public class Application {
         );
     }
 
+    private static void addShutdownHook() {
+        final String threadName = "LightZone.shutdownHook";
+        Runtime.getRuntime().addShutdownHook(
+                new Thread( threadName ) {
+                    @Override
+                    public void run() {
+                        // In case the 20 second wait before setting
+                        // the startup flag has not elapsed, set it here.
+                        StartupCrash.startupEnded();
+                        savePrefs();
+                    }
+                }
+        );
+    }
+
     public static void main(final String[] args) {
+        addShutdownHook();
+
         // Catch startup crashes that prevent launching:
         StartupCrash.checkLastStartupSuccessful();
         StartupCrash.startupStarted();
@@ -2183,7 +2198,7 @@ public class Application {
                 new Runnable() {
                     public void run() {
                         new LightZoneSkin();
-                        if (Platform.getType() == Platform.MacOSX) {
+                        if (Platform.isMac()) {
                             // Get a Mac menu bar before setting LaF, then restore.
                             Object menuBarUI = UIManager.get("MenuBarUI");
                             setLookAndFeel();
@@ -2194,13 +2209,22 @@ public class Application {
                         else {
                             setLookAndFeel();
                         }
-                        ComboFrame frame = openEmpty();
-                        for (int i = 0; i < args.length; ++i) {
-                            File file = new File(args[i]);
-                            if (file.exists()) {
-                                open(file, frame, null);
-                                break;
+
+                        for (final String arg : args) {
+                            final File file = new File(arg);
+                            if (file.isDirectory()) {
+                                openFolder(openEmpty(), file);
                             }
+                            else /* if (file.isFile()) */ {
+                                final File parent = file.getParentFile();
+                                if (parent != null) {
+                                    notifyRecentFolder(parent);
+                                    open(file, openEmpty(), null);
+                                }
+                            }
+                        }
+                        if (Current.isEmpty()) {
+                            openEmpty();
                         }
                         Platform.getPlatform().readyToOpenFiles();
 

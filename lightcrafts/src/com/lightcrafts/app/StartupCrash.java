@@ -2,6 +2,7 @@
 
 package com.lightcrafts.app;
 
+import com.lightcrafts.splash.SplashWindow;
 import com.lightcrafts.ui.toolkit.TextAreaFactory;
 import com.lightcrafts.utils.filecache.FileCacheFactory;
 import com.lightcrafts.utils.filecache.FileCache;
@@ -48,82 +49,105 @@ class StartupCrash {
         Preferences prefs = Preferences.userRoot().node("/com/lightcrafts/app");
         boolean wasSuccessful = prefs.getBoolean(StartupKey, true);
         if (! wasSuccessful) {
-            SwingUtilities.invokeLater(new Runnable() {
+            SplashWindow.disposeSplash(); // because the splash can conceal other dialogs
+            showResetDialog(true);
+        }
+    }
+
+    private static void showResetDialog(boolean timeout) {
+        final String helpButtonText = LOCALE.get("StartupErrorHelpOption");
+        final String resetButtonText = LOCALE.get("StartupErrorResetOption");
+        final String dontResetButtonText = LOCALE.get("StartupErrorDontResetOption");
+
+        final JOptionPane pane = new JOptionPane(
+                createText(LOCALE.get("StartupErrorMessage")),
+                JOptionPane.WARNING_MESSAGE,
+                JOptionPane.OK_CANCEL_OPTION,
+                null,
+                new Object[] {
+                        helpButtonText,
+                        resetButtonText,
+                        dontResetButtonText
+                },
+                dontResetButtonText
+        );
+        final JDialog dialog = pane.createDialog(
+                LOCALE.get("StartupErrorHelpDialogTitle"));
+        if (timeout) {
+            final Timer timer = new Timer(5000, new ActionListener() {
                 @Override
-                public void run() {
-                    JButton help = new JButton(LOCALE.get("StartupErrorHelpOption"));
-                    help.addActionListener(
-                            new ActionListener() {
-                                public void actionPerformed(ActionEvent event) {
-                                    showHelpDialog();
-                                }
-                            }
-                            );
-                    JTextArea text = createText(LOCALE.get("StartupErrorMessage"));
-                    int option = JOptionPane.showOptionDialog(
-                            null,
-                            text,
-                            LOCALE.get("StartupErrorDialogTitle"),
-                            JOptionPane.OK_OPTION,
-                            JOptionPane.WARNING_MESSAGE,
-                            null,
-                            new Object[] {
-                                    help,
-                                    LOCALE.get("StartupErrorResetOption"),
-                                    LOCALE.get("StartupErrorDontResetOption")
-                            },
-                            LOCALE.get("StartupErrorDontResetOption")
-                            );
-                    if (option == 1) {
-                        text = createText(LOCALE.get("ResetWarningMajor"));
-                        option = JOptionPane.showOptionDialog(
-                                null,
-                                text,
-                                LOCALE.get("ResetDialogTitle"),
-                                JOptionPane.OK_CANCEL_OPTION,
-                                JOptionPane.WARNING_MESSAGE,
-                                null,
-                                new Object[] {
-                                        help,
-                                        LOCALE.get("StartupErrorResetOption"),
-                                        LOCALE.get("StartupErrorDontResetOption")
-                                },
-                                LOCALE.get("StartupErrorDontResetOption")
-                                );
-                        if (option == 1) {
-                            boolean success = true;
-                            try {
-                                Preferences root = Preferences.userRoot();
-                                Preferences node = root.node("/com/lightcrafts");
-                                node.removeNode();
-                            }
-                            catch (BackingStoreException e) {
-                                System.err.println(
-                                        "StartupCrash failed to reset Preferences"
-                                        );
-                                showErrorDialog(e);
-                                success = false;
-                            }
-                            try {
-                                FileCache cache = FileCacheFactory.getGlobalCache();
-                                if (cache != null) {
-                                    cache.clear();
-                                }
-                            }
-                            catch (IOException e) {
-                                System.err.println(
-                                        "StartupCrach failed to clear FileCache"
-                                        );
-                                showErrorDialog(e);
-                                success = false;
-                            }
-                            if (success) {
-                                showSuccessDialog();
-                            }
-                        }
-                    }
+                public void actionPerformed(ActionEvent e) {
+                    dialog.setVisible(false);
+                    dialog.dispose();
                 }
             });
+            timer.setRepeats(false);
+            timer.start();
+        }
+        dialog.setVisible(true);
+        final Object selectedValue = pane.getValue();
+
+        if (helpButtonText.equals(selectedValue)) {
+            showHelpDialog();
+            dialog.dispose();
+            showResetDialog(false);
+        }
+        else if (resetButtonText.equals(selectedValue)) {
+            JButton help = new JButton(helpButtonText);
+            help.addActionListener(
+                    new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent event) {
+                            showHelpDialog();
+                        }
+                    }
+            );
+            final int option = JOptionPane.showOptionDialog(
+                    null,
+                    createText(LOCALE.get("ResetWarningMajor")),
+                    LOCALE.get("ResetDialogTitle"),
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE,
+                    null,
+                    new Object[] {
+                            help,
+                            resetButtonText,
+                            dontResetButtonText
+                    },
+                    dontResetButtonText
+            );
+            if (option != 1) {
+                return;
+            }
+            boolean success = true;
+            try {
+                Preferences root = Preferences.userRoot();
+                Preferences node = root.node("/com/lightcrafts");
+                node.removeNode();
+            }
+            catch (BackingStoreException e) {
+                System.err.println(
+                        "StartupCrash failed to reset Preferences"
+                );
+                showErrorDialog(e);
+                success = false;
+            }
+            try {
+                FileCache cache = FileCacheFactory.getGlobalCache();
+                if (cache != null) {
+                    cache.clear();
+                }
+            }
+            catch (IOException e) {
+                System.err.println(
+                        "StartupCrach failed to clear FileCache"
+                );
+                showErrorDialog(e);
+                success = false;
+            }
+            if (success) {
+                showSuccessDialog();
+            }
         }
     }
 

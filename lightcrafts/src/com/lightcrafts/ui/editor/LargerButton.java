@@ -43,9 +43,6 @@ final class LargerButton
     }
 
     public void actionPerformed(ActionEvent event) {
-        final ComboFrame frame = getComboFrame();
-        if ( frame != null )
-            frame.getEditor().setMode( EditorMode.ARROW );
         scale.scaleUp();
     }
 
