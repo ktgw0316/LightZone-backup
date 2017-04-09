@@ -55,20 +55,44 @@ public final class SidecarJPEGImageType extends JPEGImageType
      * @param imageInfo The image to get the LightZone document from.
      * @return Returns said {@link Document} or <code>null</code> if none.
      */
+    @Override
     public Document getLZNDocument( ImageInfo imageInfo )
         throws BadImageFileException, IOException, UnknownImageTypeException
     {
         final ByteBuffer buf = getFirstSegment( imageInfo, JPEG_APP4_MARKER );
-        if ( buf != null ) {
-            final InputStream is = new ByteArrayInputStream( buf.array() );
-            return XMLUtil.readDocumentFrom( is );
+        return getLZNDocument(buf);
+    }
+
+    /**
+     * Gets the LightZone document (if any) from the given JPEG image.
+     *
+     * @param buf The first segment of APP4 marker to get the LightZone
+     *            document from.
+     * @return Returns said {@link Document} or <code>null</code> if none.
+     */
+    Document getLZNDocument(ByteBuffer buf) throws IOException {
+        if ( buf == null )
+            return null;
+        byte[] b;
+        if ( buf.hasArray() ) {
+        	b = buf.array();
         }
-        return null;
+        else {
+        	b = new byte[buf.remaining()];
+        	buf.get(b);
+        }
+        final InputStream is = new ByteArrayInputStream( b );
+        final Document doc = XMLUtil.readDocumentFrom(is);
+
+        // Check if it is really a lzn document.
+        final org.w3c.dom.Element root = doc.getDocumentElement();
+        return "LightZoneTransform".equals(root.getNodeName()) ? doc : null;
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getName() {
         return super.getName() + "-LZN";
     }
@@ -76,6 +100,7 @@ public final class SidecarJPEGImageType extends JPEGImageType
     /**
      * {@inheritDoc}
      */
+    @Override
     public ExportOptions newExportOptions() {
         return new ExportOptions();
     }

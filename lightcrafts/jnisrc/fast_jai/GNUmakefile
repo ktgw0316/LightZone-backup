@@ -7,7 +7,11 @@ include			$(COMMON_DIR)/mk/platform.mk
 
 TARGET_BASE:=		FASTJAI
 
-JNI_MACOSX_LINK:=	-lstdc++
+JNI_EXTRA_CFLAGS+=	-fopenmp -std=c++0x
+
+# Must not use := here!
+JNI_MACOSX_LINK=	-lstdc++
+JNI_WINDOWS_LINK:=      -lgomp.dll
 # JNI_WINDOWS_LINK:=	-lLCJNI
 # JNI_LINUX_LINK:=	$(JNI_WINDOWS_LINK)
 
@@ -21,7 +25,9 @@ JAVAH_CLASSES:=		com.lightcrafts.jai.opimage.HighlightRecoveryOpImage \
 			com.lightcrafts.jai.opimage.PixelBlender \
 			com.lightcrafts.jai.opimage.ColorSelectionMaskOpImage \
 			com.lightcrafts.jai.opimage.RGBColorSelectionMaskOpImage \
-			com.lightcrafts.jai.opimage.HDROpImage2
+			com.lightcrafts.jai.opimage.BilateralFilterRGBOpImage \
+			com.lightcrafts.jai.opimage.HDROpImage2 \
+			com.lightcrafts.jai.opimage.BilateralFilterOpImage
 
 ROOT:=			../../..
 include			../jni.mk

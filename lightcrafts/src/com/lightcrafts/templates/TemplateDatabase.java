@@ -192,7 +192,7 @@ public class TemplateDatabase {
         }
     }
 
-    public static TemplateKey getDefaultTemplate(ImageMetadata meta) {
+    public static TemplateKey getDefaultTemplate(ImageMetadata meta) throws TemplateException {
         boolean isRaw = (meta.getImageType() instanceof RawImageType);
         if (isRaw) {
             String camera = meta.getCameraMake(true);
@@ -207,7 +207,7 @@ public class TemplateDatabase {
                 }
                 catch (TemplateException e) {
                     // Counts as a missing template.
-                    System.err.println("Template error: " + e.getMessage());
+                    throw new TemplateException("Template error: " + e.getMessage(), e);
                 }
                 if (xml == null) {
                     // Compatibility for users of the LightZone 2 beta:
@@ -319,16 +319,28 @@ public class TemplateDatabase {
 
     // In later pre-release versions of LightZone 2, Templates on Windows were
     // stored as files under "Application Data\LightZone\Templates", instead
-    // of "My Documents\LightZone\Templates".  This method copies templates
-    // from the old folder to the new one.
+    // of "My Documents\LightZone\Templates".
+    // In versions of LightZone earlier than 4.1.0~beta14, Templates on Linux were
+    // stored as files under "~/LightZone/Templates", instead
+    // of "~/.local/share/LightZone/Templates".
+    // This method copies templates from the old folder to the new one.
     private static void migrateTemplateFolders() {
-        if (Platform.getType() != Platform.Windows) {
-            // Only on Windows did we move the template folder.
+        final String oldPath;
+
+        if (Platform.isWindows()) {
+            oldPath = "Application Data\\LightZone\\Templates";
+        }
+        else if (Platform.isLinux()) {
+            oldPath = "LightZone/Templates";
+        }
+        else {
+            // Only on Windows and Linux did we move the template folder.
             return;
         }
-        String home = System.getProperty("user.home");
-        String oldPath = "Application Data\\LightZone\\Templates";
-        File oldTemplateDir = new File(home, oldPath);
+
+        final String home = System.getProperty("user.home");
+        final File oldTemplateDir = new File(home, oldPath);
+
         if (oldTemplateDir.isDirectory()) {
             File[] oldFiles = FileUtil.listFiles(oldTemplateDir);
             if (oldFiles != null) {

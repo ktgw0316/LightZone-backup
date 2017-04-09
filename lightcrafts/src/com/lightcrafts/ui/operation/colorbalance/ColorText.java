@@ -2,8 +2,6 @@
 
 package com.lightcrafts.ui.operation.colorbalance;
 
-import com.lightcrafts.ui.layout.Box;
-import com.lightcrafts.ui.layout.BoxLayout;
 import static com.lightcrafts.ui.operation.colorbalance.Locale.LOCALE;
 
 import javax.swing.*;
@@ -53,7 +51,7 @@ class ColorText extends Box {
     }
 
     // TODO: this should be defined elsewhere
-    public final static Font ControlFont = new Font("SansSerif", Font.PLAIN, 10);
+    public final static Font ControlFont = new Font("SansSerif", Font.PLAIN, 13);
 
     private static JLabel createLabel(String text) {
         JLabel label = new JLabel(text);

@@ -119,7 +119,7 @@ public final class XMLUtil {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             if ( includeXAPURL ) {
-                bos.write( XMP_XAP_NS.getBytes( "ASCII" ) );
+                bos.write( XMP_XAP_NS.getBytes( "UTF-8" ) );
                 bos.write( 0 );
             }
             writeDocumentTo( doc, bos );
@@ -283,10 +283,11 @@ public final class XMLUtil {
      */
     public static Document readDocumentFrom( String s ) throws IOException {
         s = TextUtil.trimNulls( s );
-        @SuppressWarnings( { "IOResourceOpenedButNotSafelyClosed" } )
-        final InputStream is = new ByteArrayInputStream( s.getBytes() );
+        final InputStream is = new ByteArrayInputStream( s.getBytes( "UTF-8" ) );
         try {
-            return m_builder.parse( is );
+            synchronized (m_builder) {
+                return m_builder.parse( is );
+            }
         }
         catch ( SAXException e ) {
             final IOException ioe = new IOException( "Couldn't read XML" );
@@ -435,7 +436,12 @@ public final class XMLUtil {
         catch ( Exception e ) {
             throw new IllegalStateException( e );
         }
-        m_xformFactory.setAttribute( "indent-number", "2" );
+        try {
+            m_xformFactory.setAttribute( "indent-number", "2" );
+        }
+        catch (IllegalArgumentException e) {
+            // ignore, file will still be correct.
+        }
     }
 }
 /* vim:set et sw=4 ts=4: */

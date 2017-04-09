@@ -1,5 +1,5 @@
-opt/lightzone
 usr/bin
+usr/lib/lightzone
 usr/share/applications
 usr/share/icons/hicolor/256x256/apps
 usr/share/icons/hicolor/128x128/apps
@@ -7,3 +7,4 @@ usr/share/icons/hicolor/64x64/apps
 usr/share/icons/hicolor/48x48/apps
 usr/share/icons/hicolor/32x32/apps
 usr/share/icons/hicolor/16x16/apps
+usr/share/java/lightzone

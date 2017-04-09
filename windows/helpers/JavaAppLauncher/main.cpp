@@ -13,10 +13,10 @@
 #include <cstdlib>                      /* for exit(3) */
 #include <cstring>
 #include <fstream>
-#include <io.h>                         /* for _open_osfhandle() */
 #include <iostream>
 
 // windows
+#include <io.h>                         /* for _open_osfhandle() */
 #include <shlobj.h>
 #include <tlhelp32.h>
 #include <w32api.h>
@@ -169,7 +169,7 @@ static void checkCPUType() {
     // Before we can check for anything about the CPU, we first need to check
     // for cpuid instruction support.
     //
-    long a, c;
+    INT_PTR a, c;
     asm volatile (
         /* Copy EFLAGS into eax and ecx. */
         "pushf\n\t"
@@ -199,11 +199,12 @@ static void checkCPUType() {
     //
     // but this isn't supported on Windows 2000 (non-Professional).
     //
-    int max_std_level, std_caps;
+    int max_std_level;
     int eax, ebx, ecx, edx;
 
     CPUID( 0, max_std_level, ebx, ecx, edx );
     if ( max_std_level >= 1 ) {
+        int std_caps;
         CPUID( 1, eax, ebx, ecx, std_caps );
         if ( std_caps & (1 << 26) /* SSE2 */ )
             return;
@@ -318,17 +319,37 @@ static void checkWindowsVersion() {
          << "\n    wServicePackMajor=" << info.wServicePackMajor << endl;
     //
     // dwMajorVersion:
-    //  4 = Windows NT 4.0
-    //  5 = Windows Server 2003, Windows 2000, or Windows XP
-    //  6 = Windows Vista
+    //   4 = Windows NT 4.0
+    //   5 = Windows Server 2003, Windows 2000, or Windows XP
+    //   6 = Windows Vista, Windows Server 2008, Windows 7,
+    //       Windows Server 2012, Windows 8, or Windows 8.1
+    //  10 = Windows 10
     //
-    if ( info.dwMajorVersion > 5 ) {
+    if ( info.dwMajorVersion >= 10 ) {
         //
-        // Be optimistic and assume we'll run on Vista or anything later.
+        // Be optimistic and assume we'll run on Windows 10 or anything later.
         //
-        if ( info.dwMajorVersion == 6 )
-            cout << "  = Windows Vista" << endl;
+        cout << "  = Windows 10" << endl;
         return;
+    }
+    if ( info.dwMajorVersion == 6 ) {
+        switch ( info.dwMinorVersion ) {
+            case 0:
+                cout << "  = Windows Vista" << endl;
+                return;
+            case 1:
+                cout << "  = Windows 7" << endl;
+                return;
+            case 2:
+                cout << "  = Windows 8" << endl;
+                return;
+            case 3:
+                cout << "  = Windows 8.1" << endl;
+                return;
+            default:
+                // Assume any future minor versions are OK.
+                return;
+        }
     }
     if ( info.dwMajorVersion == 5 ) {
         switch ( info.dwMinorVersion ) {
@@ -347,9 +368,7 @@ static void checkWindowsVersion() {
                     return;
                 break;
             default:
-                //
                 // Assume any future minor versions are OK.
-                //
                 return;
         }
     }
@@ -439,13 +458,16 @@ static void openFile( LPCWSTR wPathToFile, LPCWSTR wParentExe ) {
         LC_die( TEXT("NewStringUTF() failed.") );
 
     jstring jParentExe = NULL;
-    if ( wPathToFile && *wPathToFile ) {
-        char aParentExe[ 80 ];
+    if ( wParentExe && wPathToFile && *wPathToFile ) {
+        char aParentExe[ MAX_PATH ];
         if ( !LC_toUTF8( wParentExe, aParentExe, sizeof aParentExe ) )
             LC_die( TEXT("WideCharToMultiByte() failed.") );
         jParentExe = env->NewStringUTF( aParentExe );
         if ( !jParentExe )
             LC_die( TEXT("NewStringUTF() failed.") );
+    }
+    else {
+        jParentExe = env->NewStringUTF( "explorer.exe" ); // dummy
     }
 
     env->CallStaticVoidMethod(
@@ -580,7 +602,7 @@ static void redirectOutput() {
     // same log file, we have to convert logHandle to a FILE* then replace
     // stdout and stderr with it.
     //
-    int const logFD = _open_osfhandle( reinterpret_cast<long>( logHandle ), 0 );
+    int const logFD = _open_osfhandle( reinterpret_cast<INT_PTR>( logHandle ), 0 );
     FILE *const logFile = ::_fdopen( logFD, "w" );
     ::setvbuf( logFile, NULL, _IONBF, 0 );
     ::fclose( stdout ); *stdout = *logFile;
@@ -650,13 +672,13 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
                     //
                     // We have a parent process that requested the files to be
                     // opened: prepend the name of the parent process's exe
-                    // followed by a ':' to the command-line.
+                    // followed by a '|' to the command-line.
                     //
                     int const wParentExeLen = ::wcslen( wParentExe );
                     wPipeBufLen = wParentExeLen + 1 + wCommandLineLen;
                     wPipeBuf = new WCHAR[ wPipeBufLen + 1 /* for null */ ];
                     ::wcscpy( wPipeBuf, wParentExe );
-                    ::wcscat( wPipeBuf, TEXT(":" ) );
+                    ::wcscat( wPipeBuf, TEXT("|") );
                     ::wcscat( wPipeBuf, wCommandLine );
                     //
                     // Note: we don't care about delete[]'ing wParentExe since
@@ -736,11 +758,11 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
                 // We got a command-line from a secondary application instance:
                 // first see if it's preceeded by an exe name.
                 //
-                WCHAR *const colon = ::wcschr( wPipeBuf, TEXT(':') );
-                if ( colon ) {
+                WCHAR *const separator = ::wcschr( wPipeBuf, TEXT('|') );
+                if ( separator ) {
                     wParentExe = wPipeBuf;
-                    wCommandLine = colon + 1;
-                    *colon = 0;
+                    wCommandLine = separator + 1;
+                    *separator = 0;
                 } else {
                     wParentExe = NULL;
                     wCommandLine = wPipeBuf;

@@ -48,6 +48,7 @@ import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -152,6 +153,12 @@ public class ComboFrame
         if (LastActiveComboFrame == null) {
             LastActiveComboFrame = this;
         }
+
+        // Mac OS X 10.7 Lion Fullscreen Support
+        if (Platform.isMac()) {
+            enableFullScreenMode(this);
+        }
+
         // Java 1.6 will just use a cofee cup otherwise...
         setIconImage(IconImage);
 
@@ -342,7 +349,7 @@ public class ComboFrame
     // refresh().  Disposes the current browser, creates a new one, initializes
     // its selection, and replaces the old browser with the new one in the
     // layout.
-    private void showFolder(File folder, boolean useCache) {
+    void showFolder(File folder, boolean useCache) {
         unsetBrowser();
         if (images != null) {
             images.stop();
@@ -406,6 +413,10 @@ public class ComboFrame
         }
     }
 
+    public void setImage(ImageInfo imageInfo) {
+        info.setImage(imageInfo);
+    }
+
     // Implementing ImageBrowserListener.  Updates the metadata display,
     // shuts down any open Document, shows a preview if the shutdown was
     // successful, remembers the selection in preferences, and updates the
@@ -414,11 +425,11 @@ public class ComboFrame
         File file = event.getFile();
         if (file != null) {
             ImageInfo imageInfo = ImageInfo.getInstanceFor(file);
-            info.setImage(imageInfo);
+            setImage(imageInfo);
             BrowserSelectionMemory.setRememberedFile(file);
         }
         else {
-            info.setImage(null);
+            setImage(null);
         }
         // Attempt to put away any current editor:
         if (doc != null) {
@@ -657,7 +668,7 @@ public class ComboFrame
             JComponent toolbar = editor.getToolBar();
             toolbar.add(memory);
         }
-        layout.updateEditor(templates, editor, history);
+        layout.updateEditor(templates, editor, history, info);
 
         setContentPane(layout);
         header.update();
@@ -694,7 +705,7 @@ public class ComboFrame
             info,
             header
         );
-        layout.updateEditor(templates, editor, history);
+        layout.updateEditor(templates, editor, history, info);
 
         repaint();
         setContentPane(layout);
@@ -778,6 +789,10 @@ public class ComboFrame
                 isBrowserVisible = true;
             }
             isEditorVisible = false;
+
+            File file = browser.getLeadSelectedFile();
+            ImageInfo imageInfo = ImageInfo.getInstanceFor(file);
+            setImage(imageInfo);
 
             header.setBrowseSelected();
 
@@ -936,6 +951,8 @@ public class ComboFrame
         if (images != null) {
             images.resume();
         }
+        // Encourage JVM to release free heap space
+        System.gc();
     }
 
     public void dispose() {
@@ -1173,16 +1190,9 @@ public class ComboFrame
                             "AutoSaveQuestion", options.getFile().getName()
                         )
                     );
-                    boolean defaultAutoSave =
-                        prefs.getBoolean("DefaultAutoSave", true);
-                    JCheckBox check = new JCheckBox(
-                        LOCALE.get("AlwaysAutoSaveLabel")
-                    );
-                    check.setSelected(defaultAutoSave);
 
                     Box message = Box.createVerticalBox();
                     message.add(prompt);
-                    message.add(check);
                     int dialogOption = UICompliance.showOptionDialog(
                         this,
                         message,
@@ -1198,19 +1208,6 @@ public class ComboFrame
                         },
                         LOCALE.get("AutoSaveSaveOption"), 3
                     );
-                    if (check.isSelected()) {
-                        prefs.putBoolean("AutoSave", true);
-                        AlertDialog alert =
-                            Platform.getPlatform().getAlertDialog();
-                        alert.showAlert(
-                            this,
-                            LOCALE.get("AutoSaveOnMessageMajor"),
-                            LOCALE.get("AutoSaveOnMessageMinor"),
-                            AlertDialog.WARNING_ALERT,
-                            LOCALE.get("AutoSaveOnButton")
-                        );
-                    }
-                    prefs.putBoolean("DefaultAutoSave", check.isSelected());
 
                     switch (dialogOption) {
                         case 0:
@@ -1308,8 +1305,11 @@ public class ComboFrame
     //     This supports the "Recent Folders" mechanism in the File menu.
 
     // Trigger a folder navigation, starting with the folder tree.
-    // Called via the Recent Folders item and Application.openRecentFolder().
-    void showRecentFolder(File folder) {
+    // Called via the Recent Folders item and Application.openFolder().
+    void showFolder(File folder) {
+        if (!folders.goToFolder(folder)) {
+            return;
+        }
         String key = getKeyForFolder(folder);
         folders.restorePath(key);
         // This triggers the selection listener, which updates things.
@@ -1321,10 +1321,10 @@ public class ComboFrame
 
     // Save the currently selected folder tree path, for later access in
     // the Recent Folders item.
-    private void saveFolder(File folder) {
+    void saveFolder(File folder) {
         // Don't rely on folders.getSelection(), which isn't current during the
         // selection listener callback.
-        if (folder != null) {
+        if (folder != null && folders.goToFolder(folder)) {
             String key = getKeyForFolder(folder);
             folders.savePath(key);
         }
@@ -1401,4 +1401,19 @@ public class ComboFrame
     };
 
     // *** Helper interface implementations for use in the browser: end. ***
+
+    public static void enableFullScreenMode(Window window) {
+        try {
+            Class<?> clazz = Class.forName("com.apple.eawt.FullScreenUtilities");
+            Class<?> param[] = new Class<?>[] { Window.class, Boolean.TYPE };
+            Method method = clazz.getMethod("setWindowCanFullScreen", param);
+            method.invoke(clazz, window, true);
+        }
+        catch (ClassNotFoundException e0) {
+	    // Just ignore it, may be the OS is older than 10.7 Lion
+        }
+        catch (Exception e) {
+            System.err.println("Could not enable OS X fullscreen mode " + e);
+        }
+    }
 }

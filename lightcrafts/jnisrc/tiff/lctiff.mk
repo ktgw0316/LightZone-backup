@@ -1,6 +1,6 @@
-ROOT:=			../../..
-COMMON_DIR:=		$(ROOT)/lightcrafts
-include			$(COMMON_DIR)/mk/platform0.mk
+ROOT:=		../../..
+COMMON_DIR:=	$(ROOT)/lightcrafts
+include		$(COMMON_DIR)/mk/platform.mk
 
 HIGH_PERFORMANCE:=	1
 ifeq ($(PLATFORM),MacOSX)
@@ -12,15 +12,13 @@ TARGET_BASE:=		LCTIFF
 # Uncomment to compile in debug mode.
 #DEBUG:=		true
 
-ifeq ($(UNIVERSAL),1)
-  JNI_PPC_INCLUDES:=	-Ilibtiff/arch-powerpc/include
-  JNI_X86_INCLUDES:=	-Ilibtiff/arch-i386/include
-else
-  JNI_EXTRA_INCLUDES=	-Ilibtiff/arch-$(PROCESSOR)/include
-endif
+JNI_WINDOWS_LINK:=	-Wl,-Bdynamic -lLCJNI -ltiff.dll -Wl,-Bstatic -lstdc++
+JNI_LINUX_LINK:=	-lLCJNI -ltiff -lstdc++
+JNI_MACOSX_LINK:=	../jniutils/libLCJNI.a -ltiff
+JNI_MACOSX_INCLUDES:=	-I/usr/local/include
+JNI_MACOSX_LDFLAGS:=	-L/usr/local/lib
 
-JNI_EXTRA_LDFLAGS:=	-L../jpeg/libjpeg/lib -Lzlib/lib -Llibtiff/lib
-JNI_EXTRA_LINK:=	-ltiff -lz -lLCJNI -lstdc++
+JNI_EXTRA_DISTCLEAN:=	autom4te.cache configure config.* tif_config.h
 
 JAVAH_CLASSES:=		com.lightcrafts.image.libs.LCTIFFCommon \
 			com.lightcrafts.image.libs.LCTIFFReader \

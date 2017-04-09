@@ -6,6 +6,8 @@ import com.lightcrafts.platform.AlertDialog;
 import com.lightcrafts.platform.FileChooser;
 import com.lightcrafts.platform.Platform;
 
+import static com.lightcrafts.prefs.Locale.LOCALE;
+
 import javax.swing.*;
 import java.awt.color.ICC_Profile;
 import java.awt.event.ActionEvent;
@@ -31,25 +33,19 @@ class DisplayProfileItem extends PreferencesItem implements ActionListener {
         text = new JTextField(20);
         text.setEditable(false);
 
-        chooserButton = new JButton("Choose");
-        chooserButton.setToolTipText(
-            "Pick a new color profile for this display"
-        );
+        chooserButton = new JButton(LOCALE.get("DisplayProfileItemButton"));
+        chooserButton.setToolTipText(LOCALE.get("DisplayProfileItemToolTip"));
         chooserButton.addActionListener(this);
 
         addHelpListeners();
     }
 
     public String getLabel() {
-        return "Display Color Profile";
+        return LOCALE.get("DisplayProfileItemLabel");
     }
 
     public String getHelp(MouseEvent e) {
-        return
-            "Set the color profile of your display device.  LightZone must " +
-            "know the correct color profile for your display in order to " +
-            "show colors correctly.  If you do not set this option, " +
-            "LightZone will use an sRGB default profile.";
+        return LOCALE.get("DisplayProfileItemHelp");
     }
 
     public boolean requiresRestart() {
@@ -81,6 +77,7 @@ class DisplayProfileItem extends PreferencesItem implements ActionListener {
         }
     }
 
+    // TODO: l10n
     // Conduct the dialog to accept a new color profile.
     public void actionPerformed(ActionEvent event) {
         FileChooser chooser = Platform.getPlatform().getFileChooser();
@@ -94,7 +91,7 @@ class DisplayProfileItem extends PreferencesItem implements ActionListener {
         }
         File file = new File(path);
         file = chooser.openFile(
-            "Display Color Profile", file, null, null
+            LOCALE.get("DisplayProfileDialogTitle"), file, null, null
         );
         if (file != null) {
             if (! file.isFile()) {

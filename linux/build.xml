@@ -7,18 +7,41 @@
   <property name="common-dir" value="../lightcrafts"/>
 
   <!-- The default maxmemory for the run* targets. -->
-  <property name="maxmemory" value="256m"/>
+  <property name="maxmemory" value="512m"/>
 
   <exec executable="cat" vmlauncher="true" failonerror="true"
         outputproperty="app-version">
     <arg value="${common-dir}/version.txt"/>
   </exec>
 
+  <!-- Workaround for Java9. -->
+  <!--
+  <condition property="JVMARG" value="-XaddExports:java.desktop/sun.awt.image=ALL-UNNAMED,java.desktop/sun.java2d=ALL-UNNAMED,java.desktop/sun.print=ALL-UNNAMED,java.base/sun.nio.ch=ALL-UNNAMED,java.base/jdk.internal.ref=ALL-UNNAMED" else="">
+    <equals arg1="${ant.java.version}" arg2="1.9" />
+  </condition>
+  -->
+  <property name="JVMARG" value=""/>
+
   <!--===== Application build ==============================================-->
+
+  <condition property="MAKE" value="make">
+    <not>
+      <or>
+        <os name="freebsd"/>
+        <os name="SunOS"/>
+      </or>
+    </not>
+  </condition>
+  <condition property="MAKE" value="gmake">
+    <or>
+      <os name="freebsd"/>
+      <os name="SunOS"/>
+    </or>
+  </condition>
 
   <target name="common">
     <ant dir="${common-dir}" target="jar"/>
-    <exec executable="make" dir="products" failonerror="true"
+    <exec executable="${MAKE}" dir="products" failonerror="true"
           vmlauncher="true"/>
   </target>
 
@@ -34,12 +57,17 @@
         <fileset dir="lib">
           <include name="*.jar"/>
         </fileset>
+        <fileset dir="/usr">
+          <include name="share/java*/**/*.jar"/>
+          <include name="local/share/java/classes/*.jar"/>
+          <include name="jdk/packages/lib/ext/*.jar"/>
+        </fileset>
       </classpath>
     </javac>
   </target>
 
   <target name="jni">
-    <exec executable="make" dir="jnisrc" failonerror="true" vmlauncher="true"/>
+    <exec executable="${MAKE}" dir="jnisrc" failonerror="true" vmlauncher="true"/>
   </target>
 
   <target name="locales">
@@ -75,9 +103,15 @@
     <java classname="com.lightcrafts.platform.linux.LinuxLauncher"
           dir="products" failonerror="true" fork="true"
           maxmemory="${maxmemory}">
+      <jvmarg line="${JVMARG}"/>
       <classpath>
         <fileset dir="products">
           <include name="*.jar"/>
+        </fileset>
+        <fileset dir="/usr">
+          <include name="share/java*/**/jh.jar"/>
+          <include name="local/share/java/classes/jh.jar"/>
+          <include name="jdk/packages/lib/ext/*.jar"/>
         </fileset>
       </classpath>
       <env key="LD_LIBRARY_PATH" value="."/>
@@ -157,7 +191,10 @@
     <delete dir="build"/>
     <delete dir="webstart"/>
     <delete file="LightZone.tar.gz"/>
-    <exec executable="make" dir="products">
+    <exec executable="${MAKE}" dir="products">
+      <arg value="distclean"/>
+    </exec>
+    <exec executable="${MAKE}" dir="jnisrc">
       <arg value="distclean"/>
     </exec>
   </target>

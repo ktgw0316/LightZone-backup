@@ -7,25 +7,31 @@ import com.lightcrafts.platform.FileChooser;
 import com.lightcrafts.platform.Platform;
 import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.utils.ColorProfileInfo;
+import com.lightcrafts.utils.Version;
 
 import javax.help.HelpSet;
 import javax.help.HelpSetException;
 import javax.help.JHelp;
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.color.ICC_Profile;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LinuxPlatform extends Platform {
+
+    private final static String home = System.getProperty( "user.home" );
 
     // My understanding of the state of standard linux color profile
     // locations comes from:
@@ -37,20 +43,52 @@ public class LinuxPlatform extends Platform {
     );
 
     private final static File UserProfileDir = new File(
-        System.getProperty("user.home"),
-        ".color/icc"
+        home, ".color/icc"
     );
 
     private static Collection<ColorProfileInfo> Profiles;
 
+    @Override
+    public File getDefaultImageDirectory() {
+        ProcessBuilder pb = new ProcessBuilder("xdg-user-dir", "PICTURES");
+        try {
+            Process p = pb.start();
+            BufferedReader br =
+                    new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = br.readLine();
+            br.close();
+            p.waitFor();
+            p.destroy();
+            if (p.exitValue() == 0 && line != null && ! line.equals(home)) {
+                return new File(line);
+            }
+        }
+        catch (IOException e) {
+        }
+        catch (InterruptedException e) {
+        }
+
+        return new File( home, Version.getApplicationName() );
+    }
+
+    @Override
+    public File getLightZoneDocumentsDirectory() {
+        final String appName = Version.getApplicationName();
+        final String path = ".local/share/" + appName;
+        return new File( home, path );
+    }
+
+    @Override
     public LookAndFeel getLookAndFeel() {
         return LightZoneSkin.getLightZoneLookAndFeel();
     }
 
+    @Override
     public FileChooser getFileChooser() {
         return new LinuxFileChooser();
     }
 
+    @Override
     public ICC_Profile getDisplayProfile() {
         Preferences prefs = Preferences.userRoot().node(
             "/com/lightcrafts/platform/linux"
@@ -68,14 +106,17 @@ public class LinuxPlatform extends Platform {
         return null;
     }
 
+    @Override
     public Collection<ColorProfileInfo> getPrinterProfiles() {
         return getColorProfiles();
     }
 
+    @Override
     public Collection<ColorProfileInfo> getExportProfiles() {
         return getColorProfiles();
     }
 
+    @Override
     public boolean isKeyPressed(int keyCode) {
         return LinuxKeyUtil.isKeyPressed(keyCode);
     }
@@ -102,6 +143,9 @@ public class LinuxPlatform extends Platform {
         // Try to interpret every file in there as a color profile:
 
         File[] files = profileDir.listFiles();
+        if (files == null) {
+            return Collections.emptyList(); // Just in case of I/O error
+        }
         for (File file : files) {
             if (file.isDirectory()) {
                 profiles.addAll(getColorProfiles(file));
@@ -135,10 +179,28 @@ public class LinuxPlatform extends Platform {
         return profiles;
     }
 
+    @Override
     public int getPhysicalMemoryInMB() {
-        Pattern pattern = Pattern.compile("MemTotal: *([0-9]*) .*");
+        final String osname = System.getProperty("os.name");
+
+        String[] cmd;
+        String regex;
+        if (osname.indexOf("Linux") >= 0) {
+            cmd = new String[] {"cat", "/proc/meminfo"};
+            regex = "MemTotal: *([0-9]*) .*";
+        } else if (osname.indexOf("SunOS") >= 0) {
+            cmd = new String[] {"prtconf"};
+            regex = "Memory size: *([0-9]*) .*";
+        } else {
+            cmd = new String[] {"dmesg"};
+            regex = "real memory *([0-9]*) .*";
+        }
+        Pattern pattern = Pattern.compile(regex);
+
         try {
-            FileReader reader = new FileReader("/proc/meminfo");
+            Process process = Runtime.getRuntime().exec(cmd);
+            InputStream in = process.getInputStream();
+            InputStreamReader reader = new InputStreamReader(in);
             BufferedReader buffer = new BufferedReader(reader);
             String line = buffer.readLine();
             while (line != null) {
@@ -146,24 +208,32 @@ public class LinuxPlatform extends Platform {
                 if (matcher.matches()) {
                     String text = matcher.replaceAll("$1");
                     int i = Integer.parseInt(text);
-                    return i / 1024;
+                    if (osname.indexOf("Linux") >= 0)
+                        return i / 1024;
+                    else if (osname.indexOf("SunOS") >= 0)
+                        return i;
+                    else
+                        return i / 1048576;
                 }
                 line = buffer.readLine();
             }
+            buffer.close();
         }
         catch (IOException  e) {
-            System.err.println("Can't read /proc/meminfo: " + e.getMessage());
+            System.err.println("Can't get memory size: " + e.getMessage());
         }
         catch (NumberFormatException e) {
-            System.err.println("Malformed MemTotal text: " + e.getMessage());
+            System.err.println("Malformed memory size text: " + e.getMessage());
         }
         return super.getPhysicalMemoryInMB();
     }
 
+    @Override
     public void loadLibraries() throws UnsatisfiedLinkError {
         System.loadLibrary("Linux");
     }
 
+    @Override
     public void makeModal(Dialog dialog) {
         dialog.setModalityType(Dialog.ModalityType.DOCUMENT_MODAL);
     }
@@ -175,7 +245,15 @@ public class LinuxPlatform extends Platform {
             path = file.getParent();
         }
         String[] fileManagers = new String[] {
-            "nautilus", "konqueror" // others?
+            "nautilus",  // Gnome
+            "dolphin",   // KDE
+            "konqueror", // KDE
+            "nemo",      // Cinnamon
+            "caja",      // MATE
+            "thunar",    // Xfce
+            "pcmanfm",   // LXDE
+            "rox-filer"  // RQX
+            // others?
         };
         try {
             Runtime rt = Runtime.getRuntime();
@@ -195,6 +273,7 @@ public class LinuxPlatform extends Platform {
         return false;
     }
 
+    @Override
     public void showHelpTopic(String topic) {
         // TODO: use the "topic" argument to pick an initial page
         try {

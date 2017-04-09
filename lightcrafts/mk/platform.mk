@@ -2,6 +2,7 @@
 # Platform Makefile
 #
 # Paul J. Lucas [paul@lightcrafts.com]
+# Masahiro Kitagawa [arctica0316@gmail.com]
 ##
 
 ifndef PLATFORM0
@@ -15,17 +16,15 @@ endif
 PROCESSOR:=		$(shell uname -m)
 ifeq ($(PROCESSOR),i486)
   PROCESSOR:=		i386
-endif
-ifeq ($(PROCESSOR),i586)
+else ifeq ($(PROCESSOR),i586)
   PROCESSOR:=		i386
-endif
-ifeq ($(PROCESSOR),i686)
+else ifeq ($(PROCESSOR),i686)
   PROCESSOR:=		i386
-endif
-ifeq ($(PROCESSOR),amd64)
+else ifeq ($(PROCESSOR),i86pc)
+  PROCESSOR:=		i386
+else ifeq ($(PROCESSOR),amd64)
   PROCESSOR:=		x86_64
-endif
-ifeq ($(PROCESSOR),"Power Macintosh")
+else ifeq ($(PROCESSOR),"Power Macintosh")
   PROCESSOR:=		powerpc
 endif
 
@@ -37,6 +36,7 @@ CLASSPATH_SEP:=		:
 # The default C and C++ compilers.
 CC:=			gcc
 CXX:=			g++
+PKGCFG:=		pkg-config
 
 # Unset USE_ICC_HERE if the overall USE_ICC flags != 1.
 ifneq ($(USE_ICC),1)
@@ -60,13 +60,19 @@ RM:=			rm -fr
 # Mac OS X
 ##
 ifeq ($(PLATFORM),MacOSX)
-  ifeq ($(PROCESSOR),x86_64)
-    PLATFORM_CFLAGS+=	-m64
+  MACOSX_MINOR_VERSION:=	$(shell sw_vers -productVersion | cut -d. -f2-2)
+  ifeq ($(MACOSX_MINOR_VERSION),6) # Snow Leopard
+    CC:=		gcc
+    CXX:=		g++
+  else ifeq ($(MACOSX_MINOR_VERSION),12) # Sierra
+    CC:=		gcc-6
+    CXX:=		g++-6
   else
-    PLATFORM_CFLAGS+=	-m32
+    CC:=		clang-omp
+    CXX:=		clang-omp++
   endif
+
   MACOSX_DEPLOYMENT_TARGET:= 	$(shell sw_vers -productVersion | cut -d. -f-2)
-  SDKROOT:=		$(shell xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path:/p' | sed 's/^Path: //')
   ifndef EXECUTABLE
     PLATFORM_CFLAGS+=	-fPIC
   endif
@@ -81,12 +87,15 @@ ifeq ($(PLATFORM),MacOSX)
   ##
   # Don't use := here so other makefiles can override SDKROOT.
   ##
-  ifdef USE_ICC_HERE
+  ifeq ($(UNIVERSAL),1)
+    SDKROOT:=		$(shell xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path:/p' | sed 's/^Path: //')
     MACOSX_ISYSROOT=	-isysroot $(SDKROOT)
+    MACOSX_SYSLIBROOT=	-Wl,-syslibroot,$(SDKROOT)
   else
-    MACOSX_ISYSROOT=	-isysroot$(SDKROOT)
+    SDKROOT:=
+    MACOSX_ISYSROOT=
+    MACOSX_SYSLIBROOT=
   endif
-  MACOSX_SYSLIBROOT=	-Wl,-syslibroot,$(SDKROOT)
   PLATFORM_LDFLAGS=	$(MACOSX_SYSLIBROOT)
 
   ##
@@ -94,11 +103,7 @@ ifeq ($(PLATFORM),MacOSX)
   # performance CFLAGS go in the FAST_CFLAGS_* variables below.
   ##
   MACOSX_CFLAGS_PPC:=	-mcpu=G4 -mtune=G5
-  ifeq ($(PROCESSOR),x86_64)
-    MACOSX_CFLAGS_X86:=	-march=athlon64
-  else
-    MACOSX_CFLAGS_X86:=	-march=pentium4
-  endif
+  MACOSX_CFLAGS_X86:=	-march=core2 -mtune=generic
 
   ifdef HIGH_PERFORMANCE
     ##
@@ -143,13 +148,6 @@ ifeq ($(PLATFORM),MacOSX)
     DARWIN_RELEASE:=	$(shell uname -r)
     CONFIG_HOST:=	$(PROCESSOR)-apple-darwin$(DARWIN_RELEASE)
     CONFIG_TARGET:=	$(OTHER_PROCESSOR)-apple-darwin$(DARWIN_RELEASE)
-
-    ##
-    # Ensure we're compiling using gcc/g++ 4.0 in order to build universal
-    # binaries.
-    ##
-    CC:=		gcc-4.0
-    CXX:=		g++-4.0
   else
     ifeq ($(PROCESSOR),powerpc)
       PLATFORM_CFLAGS+=	$(MACOSX_CFLAGS_PPC)
@@ -162,12 +160,8 @@ ifeq ($(PLATFORM),MacOSX)
 
   LIPO:=		lipo
 
-  ##
-  # Note that JAVA_INCLUDES is treated as relative to SDKROOT.
-  ##
   JAVA_HOME=		/Library/Java/Home
-  JAVA_INCLUDES=	-I/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
-  JAVA_LDFLAGS=		-L/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Libraries
+  JAVA_INCLUDES=	-I$(SDKROOT)/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
   JNILIB_PREFIX:=	lib
   JNILIB_EXT:=		.jnilib
   DYLIB_PREFIX:=	$(JNILIB_PREFIX)
@@ -191,10 +185,12 @@ else
   endif
 
   SSE_FLAGS_OFF:=	$(P4_CPU_FLAGS) -mno-sse
-  SSE_FLAGS_ON:=	$(P4_CPU_FLAGS) -msse2
-  SSE_FLAGS:=		$(SSE_FLAGS_OFF)
+  SSE_FLAGS_ON:=	$(P4_CPU_FLAGS) -msse2 -mfpmath=sse
+  # SSE_FLAGS:=		$(SSE_FLAGS_OFF)
+  SSE_FLAGS:=		$(SSE_FLAGS_ON)
 
-  %_sse.o  : SSE_FLAGS:= $(SSE_FLAGS_ON)
+  %_sse.o:
+    SSE_FLAGS:= $(SSE_FLAGS_ON)
 endif
 
 ##
@@ -204,19 +200,24 @@ ifeq ($(PLATFORM),Windows)
   ifndef MSSDK_HOME
     $(error "MSSDK_HOME" must be set)
   endif
+  MSSDK_HOME_W32:=	$(shell cygpath -w "$(MSSDK_HOME)")
 
   NUM_PROCESSORS:=	$(shell grep '^processor' /proc/cpuinfo | wc -l)
   ifeq ($(NUM_PROCESSORS),0)
     NUM_PROCESSORS:=	1
   endif
 
-  MSSDK_HOME_W32:=	$(shell cygpath -w $(MSSDK_HOME))
+  ifeq ($(PROCESSOR),x86_64)
+    MINGW:=		x86_64-w64-mingw32
+  else
+    MINGW:=		i686-w64-mingw32
+  endif
+  CC:=			$(MINGW)-gcc
+  CXX:=			$(MINGW)-g++
+  PKGCFG:=		$(MINGW)-pkg-config
+  PKG_CONFIG_PATH:=	/usr/$(MINGW)/sys-root/mingw/lib/pkgconfig/
+  PLATFORM_CFLAGS+=	$(SSE_FLAGS)
 
-  RC:=			"$(MSSDK_HOME)/Bin/RC.Exe"
-  RC_INCLUDES:=		-i "$(shell cygpath -w /usr/include/w32api)"
-  RC_FLAGS=		$(RC_INCLUDES) -n -fo
-
-  PLATFORM_CFLAGS+=	-mno-cygwin $(SSE_FLAGS)
   ifdef HIGH_PERFORMANCE
     ifdef USE_ICC_HERE
       ICC:=		$(TOOLS_BIN)/lc-icc-w32
@@ -227,7 +228,7 @@ ifeq ($(PLATFORM),Windows)
     else
       PLATFORM_CFLAGS+=	-O3 \
 			-fno-trapping-math \
-			-fomit-frame-pointer
+			-fomit-frame-pointer 
     endif
   else
     PLATFORM_CFLAGS+=	-Os
@@ -249,31 +250,46 @@ ifeq ($(PLATFORM),Windows)
 endif
 
 ##
-# Linux
+# Linux, FreeBSD or OpenIndiana
 ##
-ifeq ($(PLATFORM),Linux)
+ifeq ($(PLATFORM),$(filter $(PLATFORM),Linux FreeBSD SunOS))
   ifeq ($(PROCESSOR),x86_64)
-    PLATFORM_CFLAGS+=	-march=athlon64 -mtune=generic $(SSE_FLAGS_ON) -fPIC
-  else
-    PLATFORM_CFLAGS+=	-march=pentium3 -mtune=pentium4 $(SSE_FLAGS_ON) -fPIC
+    PLATFORM_CFLAGS+=	-march=athlon64 -mtune=generic $(SSE_FLAGS) -fPIC
+  else ifeq ($(PROCESSOR),i386)
+    PLATFORM_CFLAGS+=	-march=pentium4 -mtune=generic $(SSE_FLAGS) -fPIC
+  else ifeq ($(PROCESSOR),ppc)
+    PLATFORM_CFLAGS+=	-mcpu=powerpc -fPIC
+  else ifeq ($(PROCESSOR),ppc64)
+    PLATFORM_CFLAGS+=	-mcpu=powerpc64 -fPIC
   endif
 
   ifdef HIGH_PERFORMANCE
     PLATFORM_CFLAGS+=	-O3 \
 			-fno-trapping-math \
-			-fomit-frame-pointer \
-			-msse2 -mfpmath=sse
+			-fomit-frame-pointer
   else
     PLATFORM_CFLAGS+=	-Os
   endif
-  JAVA_INCLUDES:=	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+
   JAVA_LDFLAGS:=	-L$(JAVA_HOME)/lib
   JNILIB_PREFIX:=	lib
   JNILIB_EXT:=		.so
   DYLIB_PREFIX:=	$(JNILIB_PREFIX)
   DYLIB_EXT:=		$(JNILIB_EXT)
 
-  NUM_PROCESSORS:=	$(shell grep '^processor' /proc/cpuinfo | wc -l)
+  ifeq ($(PLATFORM),Linux)
+    JAVA_INCLUDES:=	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+    NUM_PROCESSORS:=	$(shell grep '^processor' /proc/cpuinfo | wc -l)
+  else ifeq ($(PLATFORM),FreeBSD)
+    PKGCFG:=		pkgconf
+    JAVA_INCLUDES:=	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/freebsd
+    NUM_PROCESSORS:=	$(shell dmesg | grep '^cpu' | wc -l)
+    PLATFORM_INCLUDES=	-I/usr/local/include
+    PLATFORM_LDFLAGS=	-L/usr/local/lib
+  else ifeq ($(PLATFORM),SunOS)
+    JAVA_INCLUDES:=	-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/solaris
+    NUM_PROCESSORS:=	$(shell psrinfo -p)
+  endif
 endif
 
 ##

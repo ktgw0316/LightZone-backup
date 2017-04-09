@@ -5,9 +5,7 @@ package com.lightcrafts.jai.opimage;
 import com.lightcrafts.media.jai.util.ImageUtil;
 import com.lightcrafts.media.jai.util.JDKWorkarounds;
 import com.lightcrafts.jai.LCROIShape;
-
 import com.lightcrafts.mediax.jai.*;
-import com.lightcrafts.model.ColorSelection;
 
 import java.awt.image.*;
 import java.awt.*;
@@ -79,14 +77,14 @@ public class BlendOpImage extends PointOpImage {
         public String getName() { return name; }
     }
 
-    static Map<String, BlendingMode> modes = new HashMap<String, BlendingMode>();
+    private static Map<String, BlendingMode> modes = new HashMap<String, BlendingMode>();
 
     static {
         for (BlendingMode b : BlendingMode.values())
             modes.put(b.name, b);
     }
 
-    public static Set availableModes() {
+    public static Set<String> availableModes() {
         return modes.keySet();
     }
 
@@ -276,10 +274,12 @@ public class BlendOpImage extends PointOpImage {
 
         RasterAccessor cs = null;
         if (colorSelection != null) {
-            // Raster csRaster = colorSelection.getData(destRect);
             int tilex = sources[0].getMinX() / sources[0].getWidth();
             int tiley = sources[0].getMinY() / sources[0].getHeight();
             Raster csRaster = colorSelection.getTile(tilex, tiley);
+            if (csRaster == null) {
+                csRaster = colorSelection.getData(destRect);
+            }
             SampleModel csRasterSM = csRaster.getSampleModel();
             int csRasterFormatTagID = RasterAccessor.findCompatibleTag(null, csRasterSM);
             RasterFormatTag csRasterFormatTag = new RasterFormatTag(csRasterSM, csRasterFormatTagID);

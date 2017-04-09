@@ -484,7 +484,7 @@ public class TIFFMetadataReader extends ImageMetadataReader {
         int length = 0;
         while ( m_buf.get( offset + length ) != '\0' && length < maxLength )
             ++length;
-        return m_buf.getString( offset, length, "ISO-8859-1" );
+        return m_buf.getString( offset, length, "UTF-8" );
     }
 
     /**
@@ -624,7 +624,8 @@ public class TIFFMetadataReader extends ImageMetadataReader {
 
             default:
                 throw new IllegalStateException(
-                    "unknown field type (" + fieldType + ") for tag ID " + tagID
+                    String.format( "unknown field type (0x%x) for tag ID 0x%x",
+                                   fieldType, tagID )
                 );
         }
     }

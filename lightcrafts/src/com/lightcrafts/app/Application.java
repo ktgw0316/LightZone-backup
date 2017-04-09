@@ -2,7 +2,6 @@
 
 package com.lightcrafts.app;
 
-import static com.lightcrafts.app.Locale.LOCALE;
 import com.lightcrafts.app.batch.BatchConfig;
 import com.lightcrafts.app.batch.BatchConfigurator;
 import com.lightcrafts.app.batch.BatchProcessor;
@@ -27,16 +26,17 @@ import com.lightcrafts.splash.SplashWindow;
 import com.lightcrafts.splash.StartupProgress;
 import com.lightcrafts.templates.TemplateDatabase;
 import com.lightcrafts.templates.TemplateKey;
+import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.ui.editor.*;
 import com.lightcrafts.ui.editor.assoc.DocumentDatabase;
 import com.lightcrafts.ui.editor.assoc.DocumentInterpreter;
 import com.lightcrafts.ui.export.ExportLogic;
 import com.lightcrafts.ui.export.ExportNameUtility;
 import com.lightcrafts.ui.export.SaveOptions;
+import com.lightcrafts.ui.help.HelpConstants;
 import com.lightcrafts.ui.print.PrintLayoutDialog;
 import com.lightcrafts.ui.print.PrintLayoutModel;
 import com.lightcrafts.ui.templates.TemplateList;
-import com.lightcrafts.ui.help.HelpConstants;
 import com.lightcrafts.utils.TerseLoggingHandler;
 import com.lightcrafts.utils.UserCanceledException;
 import com.lightcrafts.utils.file.FileUtil;
@@ -65,6 +65,8 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
+import static com.lightcrafts.app.Locale.LOCALE;
 
 /** This class collects static methods and structures for top-level document
   * management.  These methods handle startup processing; window management;
@@ -170,6 +172,10 @@ public class Application {
     }
 
     public static void reOpen(ComboFrame frame) {
+        if (frame == null) {
+            openEmpty();
+	    return;
+        }
         Document doc = frame.getDocument();
         File file = doc.getFile();
         ImageMetadata meta = doc.getMetadata();
@@ -216,6 +222,9 @@ public class Application {
                             // Ensure the source is set before frame init:
                             doc.setSource(otherApp);
                             ComboFrame docFrame = show(doc, frame);
+
+                            ImageInfo imageInfo = ImageInfo.getInstanceFor(file);
+                            docFrame.setImage(imageInfo);
                             // Ensure layout is complete before zoom-to-fit:
                             docFrame.validate();
                             setInitialSize(doc);
@@ -399,14 +408,14 @@ public class Application {
             XmlDocument xml = null;
 
             // First look for default settings in the user-defined templates:
-            TemplateKey template = TemplateDatabase.getDefaultTemplate(meta);
-            if (template != null) {
-                try {
+            try {
+                TemplateKey template = TemplateDatabase.getDefaultTemplate(meta);
+                if (template != null) {
                     xml = TemplateDatabase.getTemplateDocument(template);
                 }
-                catch (TemplateDatabase.TemplateException e) {
-                    // Let xml remain null, try the factory defaults.
-                }
+            }
+            catch (TemplateDatabase.TemplateException e) {
+                // Let xml remain null, try the factory defaults.
             }
             // Then look for factory default settings:
             if (xml == null) {
@@ -492,14 +501,14 @@ public class Application {
             XmlDocument xml = null;
 
             // First look for default settings in the user-defined templates:
-            TemplateKey template = TemplateDatabase.getDefaultTemplate(meta);
-            if (template != null) {
-                try {
+            try {
+                TemplateKey template = TemplateDatabase.getDefaultTemplate(meta);
+                if (template != null) {
                     xml = TemplateDatabase.getTemplateDocument(template);
                 }
-                catch (TemplateDatabase.TemplateException e) {
-                    // Let xml remain null, try the factory defaults.
-                }
+            }
+            catch (TemplateDatabase.TemplateException e) {
+                // Let xml remain null, try the factory defaults.
             }
             // Then look for factory default settings:
             if (xml == null) {
@@ -565,7 +574,7 @@ public class Application {
         return frame;
     }
 
-    public static void openRecentFolder(ComboFrame frame, File folder) {
+    public static void openFolder(ComboFrame frame, File folder) {
         // This can be called from the no-frame menu on the Mac.
         if (frame == null) {
             // See if there's an active frame:
@@ -575,12 +584,11 @@ public class Application {
                 frame = openEmpty();
             }
         }
-        frame.showRecentFolder(folder);
-        addToRecentFolders(folder);
-        savePrefs();
+        frame.showFolder(folder);
+        notifyRecentFolder(folder);
     }
 
-    public static void notifyRecentFolder(File folder) {
+    static void notifyRecentFolder(File folder) {
         addToRecentFolders(folder);
         savePrefs();
     }
@@ -743,7 +751,7 @@ public class Application {
             savePrefs();
             removeFromCurrent(frame);
             frame.dispose();
-            if (Platform.getType() != Platform.MacOSX) {
+            if (!Platform.isMac()) {
                 maybeQuit();
             }
             return true;
@@ -788,9 +796,6 @@ public class Application {
     }
 
     public static void quit() {
-        // In case the 20 second wait before setting the startup flag has
-        // not elapsed, set it here.
-        StartupCrash.startupEnded();
         // Persist open documents in preferences.
         ArrayList<ComboFrame> frames = new ArrayList<ComboFrame>(Current);
         IsQuitting = true;
@@ -803,7 +808,6 @@ public class Application {
             // The last one closing will trigger exit().
         }
         // Unless there are no active ComboFrames.
-        savePrefs();
         System.exit(0);
     }
 
@@ -1426,12 +1430,12 @@ public class Application {
         }
     }
 
-    // Make the ever-present invisible window on the Mac, with a menu.
+    // Make an ever-present dot frame on the Mac, with a menu.
     private static void openMacPlaceholderFrame() {
         JMenuBar menus = new ComboFrameMenuBar();
         JFrame frame = new JFrame();
         frame.setJMenuBar(menus);
-        frame.setBounds(-1000000, -1000000, 0, 0);
+        frame.setBounds(0, 0, 1, 1);
         frame.setUndecorated(true);
         frame.setVisible(true);
     }
@@ -1494,12 +1498,10 @@ public class Application {
                 public void windowClosing(WindowEvent event) {
                     ComboFrame frame = (ComboFrame) event.getWindow();
                     // On the Mac, we can close the last frame without quitting.
-                    if (Platform.getType() != Platform.MacOSX) {
-                        if (Current.size() == 1) {
-                            boolean confirmed = askConfirmQuit(frame);
-                            if (! confirmed) {
-                                return;
-                            }
+                    if (!Platform.isMac() && Current.size() == 1) {
+                        boolean confirmed = askConfirmQuit(frame);
+                        if (! confirmed) {
+                            return;
                         }
                     }
                     // Trigger the standard cleanup, which results in quit:
@@ -2145,7 +2147,24 @@ public class Application {
         );
     }
 
+    private static void addShutdownHook() {
+        final String threadName = "LightZone.shutdownHook";
+        Runtime.getRuntime().addShutdownHook(
+                new Thread( threadName ) {
+                    @Override
+                    public void run() {
+                        // In case the 20 second wait before setting
+                        // the startup flag has not elapsed, set it here.
+                        StartupCrash.startupEnded();
+                        savePrefs();
+                    }
+                }
+        );
+    }
+
     public static void main(final String[] args) {
+        addShutdownHook();
+
         // Catch startup crashes that prevent launching:
         try {
             EventQueue.invokeAndWait(
@@ -2184,11 +2203,35 @@ public class Application {
             EventQueue.invokeLater(
                 new Runnable() {
                     public void run() {
-                        setLookAndFeel();
-                        if (Platform.getType() == Platform.MacOSX) {
+                        new LightZoneSkin();
+                        if (Platform.isMac()) {
+                            // Get a Mac menu bar before setting LaF, then restore.
+                            Object menuBarUI = UIManager.get("MenuBarUI");
+                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
+                            UIManager.put("MenuBarUI", menuBarUI);
+
                             openMacPlaceholderFrame();
                         }
-                        openEmpty();
+                        else {
+                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
+                        }
+
+                        for (final String arg : args) {
+                            final File file = new File(arg);
+                            if (file.isDirectory()) {
+                                openFolder(openEmpty(), file);
+                            }
+                            else /* if (file.isFile()) */ {
+                                final File parent = file.getParentFile();
+                                if (parent != null) {
+                                    notifyRecentFolder(parent);
+                                    open(file, openEmpty(), null);
+                                }
+                            }
+                        }
+                        if (Current.isEmpty()) {
+                            openEmpty();
+                        }
                         Platform.getPlatform().readyToOpenFiles();
 
                         // Make sure this happens good and late, after a

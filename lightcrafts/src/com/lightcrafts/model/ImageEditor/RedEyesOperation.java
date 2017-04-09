@@ -31,17 +31,19 @@ import java.awt.image.RenderedImage;
  */
 
 public class RedEyesOperation extends BlendedOperation implements RedEyeOperation {
-    private final double step = 0.01;
+    private static final String TOLERANCE =  "Tolerance";
 
     public RedEyesOperation(Rendering rendering) {
         super(rendering, type);
-        addSliderKey("Tolerance");
+        addSliderKey(TOLERANCE);
 
         DecimalFormat format = new DecimalFormat("0.00");
 
-        setSliderConfig("Tolerance", new SliderConfig(0.5, 1.5, tolerance, step, false, format));
+        double step = 0.01;
+        setSliderConfig(TOLERANCE, new SliderConfig(0.5, 1.5, tolerance, step, false, format));
     }
 
+    @Override
     public boolean neutralDefault() {
         return false;
     }
@@ -50,18 +52,19 @@ public class RedEyesOperation extends BlendedOperation implements RedEyeOperatio
 
     private double tolerance = 1;
 
+    @Override
     public EditorMode getPreferredMode() {
         return EditorMode.REGION;
     }
 
+    @Override
     public void setSliderValue(String key, double value) {
         value = roundValue(key, value);
 
-        if (key == "Tolerance" && tolerance != value) {
-            tolerance = value;
-        } else
+        if (!key.equals(TOLERANCE) || tolerance == value)
             return;
 
+        tolerance = value;
         super.setSliderValue(key, value);
     }
 
@@ -73,6 +76,7 @@ public class RedEyesOperation extends BlendedOperation implements RedEyeOperatio
             this.op = op;
         }
 
+        @Override
         public PlanarImage setFront() {
             if (hasMask()) {
                 PlanarImage labImage = Functions.toColorSpace(back, new LCMS_ColorSpace(new LCMS.LABProfile()),
@@ -108,18 +112,22 @@ public class RedEyesOperation extends BlendedOperation implements RedEyeOperatio
         }
     }
 
+    @Override
     protected void updateOp(Transform op) {
         op.update();
     }
 
+    @Override
     protected BlendedTransform createBlendedOp(PlanarImage source) {
         return new GaussMask(source, this);
     }
 
+    @Override
     public OperationType getType() {
         return type;
     }
 
+    @Override
     public boolean hasFooter() {
         return false;
     }

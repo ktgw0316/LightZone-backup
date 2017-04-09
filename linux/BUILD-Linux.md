@@ -3,26 +3,24 @@
 ## Install required packages
 Building the LightZone source requires (at least) following packages:
 - __ant__
-- __autoconf__ 2.56 or later
-- __automake__ 1.7 or later
 - __fakeroot__ for linux package creation
 - __g++__
 - __gcc__
 - __git__
 - __javahelp2__ for jhindexer
-- __libtool__ 1.4 or later
-- __libx11-dev__ for X11/xlib.h
+- __liblcms2-dev__
+- __libjpeg-dev__ or __libjpeg-turbo-dev__
+- __libtiff__
 - __make__
-- __nasm__ 2.07 or later
 - __openjdk-6-jdk__ or later
-- __tidy__
+- __pkg-config__
 
 ### Debian and Ubuntu
 _For Debian (>= squeeze, i386/amd64) and Ubuntu (>= 10.04 lucid). See also [Packaging on Debian or Ubuntu](#packaging_deb) below._
 
 Install required packages:
 
-    sudo apt-get install ant autoconf automake build-essential debhelper devscripts git javahelp2 libtool libx11-dev nasm default-jdk default-jre-headless tidy
+    sudo apt-get install debhelper devscripts build-essential ant autoconf git-core javahelp2 default-jdk default-jre-headless libjpeg-turbo8-dev libtiff5-dev libx11-dev
 
 _(Note: gcc, g++, libc6-dev and make shall be installed with the build-essential.)_
 
@@ -33,7 +31,7 @@ Before start the build, you have to set JAVA_HOME environment variable, e.g.
 ### OpenSUSE (>= 12.2)
 Install required packages:
 
-    sudo zypper install ant autoconf automake nasm gcc gcc-c++ libtool make tidy git javahelp2 libX11-devel
+    sudo zypper install ant autoconf gcc gcc-c++ make git javahelp2 libjpeg8-devel libtiff-devel libX11-devel java-1_7_0-openjdk-devel
 
 Set your JAVA_HOME variable to point to installed JDK, e.g.
 
@@ -57,46 +55,93 @@ To check if it works fine before installing:
 
     ant -f linux/build.xml run
 
-## Create a tarball and install
-To create a tarball (.tar.gz) of LightZone, you need Install4J.
-Download and install its debian package from
-http://www.ej-technologies.com/download/install4j/files
-, or:
+## Create a package and install
+### <a name="packaging_deb"/>.deb package (Debian or Ubuntu)
+You need to place an original source tarball in parent directory.
+For instance, if you want to build v4.1.7 in /tmp directory,
 
-    wget http://download-aws.ej-technologies.com/install4j/install4j_linux_5_1_4.deb
-    sudo dpkg -i install4j_linux_5_1_4.deb
+    cd /tmp
+    mkdir lightzone
+    curl -L https://github.com/Aries85/LightZone/tarball/master > lightzone_4.1.7.orig.tar.gz
+    tar xf lightzone_4.1.7.orig.tar.gz -C lightzone --strip-components=1
+    cd lightzone
 
-If you have already installed Install4J, this will create linux/LightZone.tar.gz:
+(If you want to build a package including your modification, you need to create its source tarball by yourself and place the tarball in the parent directory of the source code.)
 
-    ant -f linux/build.xml archive
+Then
 
-To install LightZone, just extract the archive on a directory where you want to place it.
-For example:
+    debuild -uc -us
 
-    mv linux/LightZone.tar.gz ~
-    cd
-    tar zxf LightZone.tar.gz
-    ./LightZone/LightZone &
+will create lightzone-*.deb package in the parent directory,
+To install the package:
+
+    sudo dpkg -i ../lightzone_*.deb
+
+### .rpm package (Fedora, OpenSUSE, CentOS etc.)
+### Re-packaging rpm from a source rpm
+If you already have a .src.rpm for other distro, you can create .rpm for your distro
+from the .src.rpm by yourself.
+
+First of all, you need to install rpm-build using package manager of your distro.
+
+Then extract the containts of the .src.rpm, and copy its source archive to SOURCES
+directory:
+    rpm2cpio lightzone-*.src.rpm | cpio -idmv --no-absolute-filenames
+    cp lightzone-*.tar.bz2 ~/rpmbuild/SOURCES/
+
+Then build an .rpm package using .spec file:
+
+    rpmbuild -b lightzone.spec
+
+If package list for unsatisfied dependency is shown, install the packages via apt-get,
+then execute the rpmbuild command again. Your .rpm package will be created in
+~/rpmbuild/RPMS/i386/ or ~/rpmbuild/RPMS/x86_64/. Install it with
+
+    rpm -ivh ~/rpmbuild/RPMS/x86_64/lightzone-*.rpm
+
+## Build from upstream source and install
+### ebuild (Gentoo Linux)
+Install Lightzone in a local overlay. First you need _app-portage/layman_:
+
+    USE=git emerge app-portage/layman
+
+There is a howto for the local overlay on Gentoo Wiki:
+[Overlay/Local overlay](https://wiki.gentoo.org/wiki/Overlay/Local_overlay)
+
+In the local overlay use the portage groups:
+
+    mkdir media-gfx/lightroom
+
+Put _linux/lightzone_9999.ebuild_ in the local overlay.
+If you need to build specific version, replace the _9999_ in the filename with the version number such as _4.1.5_.
+
+Move into the new directory _media-gfx/lightroom_ and do:
+
+    repoman manifest
+    popd
+
+Now you are ready to 
+
+    emerge media-gfx/lightzone
+
+In my case I had to keyword lightzone....
+
+### PKGBUILD (Arch Linux)
+There is a build script: _linux/PKGBUILD_
+
+### Ports (FreeBSD etc.)
+There are build scripts in _freebsd-ports/graphics/lightzone/_ directory.
 
 ## Miscellaneous
 ### If you prefer Oracle Java to OpenJDK
-You can use __Oracle Java JRE version 6, 7, or 8__ instead of openjdk-7-jdk.
+You can use _Oracle Java JRE version 6, 7, 8 or 9_ instead of openjdk-7-jdk.
 
 Easiest way to setup one of these on Ubuntu is, for example:
 
     sudo add-apt-repository ppa:webupd8team/java
     sudo apt-get update
-    sudo apt-get install oracle-java7-installer
+    sudo apt-get install oracle-java8-installer
 
 Set your JAVA_HOME variable to point to installed JDK, e.g.
 
-    export JAVA_HOME=/usr/lib/jvm/java-7-oracle
-
-### <a name="packaging_deb"/>Packaging on Debian or Ubuntu
-    debuild -uc -us
-
-will create lightzone-*.deb package in parent directory,
-To install the package:
-
-    sudo dpkg -i ../lightzone-*.deb
-
+    export JAVA_HOME=/usr/lib/jvm/java-8-oracle

@@ -7,7 +7,6 @@ import com.lightcrafts.model.Operation;
 import com.lightcrafts.model.OperationType;
 import com.lightcrafts.model.SliderConfig;
 import com.lightcrafts.ui.help.HelpConstants;
-import com.lightcrafts.ui.layout.Box;
 import com.lightcrafts.ui.operation.OpControl;
 import com.lightcrafts.ui.operation.OpStack;
 import com.lightcrafts.utils.xml.XMLException;
@@ -146,6 +145,20 @@ public class GenericControl extends OpControl {
                     }
                 }
             );
+            choice.addMouseWheelListener(
+                new MouseWheelListener() {
+                    public void mouseWheelMoved(MouseWheelEvent e) {
+                        JComboBox source = (JComboBox) e.getComponent();
+                        if (!source.hasFocus()) {
+                            return;
+                        }
+                        int ni = source.getSelectedIndex() + e.getWheelRotation();
+                        if (ni >= 0 && ni < source.getItemCount()) {
+                            source.setSelectedIndex(ni);
+                        }
+                    }
+                }
+            );
             JComboBox oldChoice = (JComboBox) choices.get(key);
             if (oldChoice != null) {
                 choice.setSelectedItem(oldChoice.getSelectedItem());
@@ -176,7 +189,7 @@ public class GenericControl extends OpControl {
     private String getUserPresentableKey(String key) {
         OperationType type = op.getType();
         String name = type.getName();
-        name = name.replaceAll(" ", "");
+        name = name.replaceAll(" ", "").replaceAll("V[0-9]+\\Z", "");
         String propKey = name + "-" + key;
         try {
             return Resources.getString(propKey);

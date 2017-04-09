@@ -65,7 +65,7 @@ else
 endif
 
 DEFINES:=		-DJNILIB $(JNI_EXTRA_DEFINES)
-INCLUDES:=		$(JAVA_INCLUDES) \
+INCLUDES:=		$(PLATFORM_INCLUDES) $(JAVA_INCLUDES) \
 			-I$(COMMON_DIR)/jnisrc/jniutils $(JNI_EXTRA_INCLUDES)
 LDFLAGS:=		$(PLATFORM_LDFLAGS) $(JAVA_LDFLAGS) \
 			-L$(COMMON_DIR)/products $(JNI_EXTRA_LDFLAGS)
@@ -81,6 +81,10 @@ ifeq ($(PLATFORM),MacOSX)
   ifdef JNI_MACOSX_DYLIB
     JNILIB_EXT:=	$(DYLIB_EXT)
     LINK+=		-install_name $(DYLIB_PREFIX)$(TARGET_BASE)$(DYLIB_EXT)
+  else
+    ifdef JNI_MACOSX_SHAREDLIB
+      JNILIB_EXT:=	.a
+    endif
   endif
   ifeq ($(UNIVERSAL),1)
     CFLAGS_PPC+=	$(JNI_MACOSX_CFLAGS) $(JNI_PPC_CFLAGS)
@@ -108,7 +112,7 @@ ifeq ($(PLATFORM),Windows)
   CFLAGS+=		$(JNI_WINDOWS_CFLAGS)
   DEFINES+=		$(JNI_WINDOWS_DEFINES)
   INCLUDES+=		$(JNI_WINDOWS_INCLUDES)
-  LDFLAGS+=		-shared -Wl,--add-stdcall-alias $(JNI_WINDOWS_LDFLAGS)
+  LDFLAGS+=		-shared -Wl,--add-stdcall-alias -static-libgcc -static-libstdc++ $(JNI_WINDOWS_LDFLAGS)
   ifdef JNI_WINDOWS_IMPLIB
     TARGET_IMPLIB:=	$(TARGET_DIR)/$(TARGET_BASE)-implib.a
     ifeq ($(USE_ICC),1)
@@ -120,7 +124,7 @@ ifeq ($(PLATFORM),Windows)
   JNI_EXTRA_DISTCLEAN+=	$(JNI_WINDOWS_DISTCLEAN)
 endif
 
-ifeq ($(PLATFORM),Linux)
+ifeq ($(PLATFORM),$(filter $(PLATFORM),Linux FreeBSD SunOS))
   CFLAGS+= 		$(JNI_LINUX_CFLAGS)
   DEFINES+=		$(JNI_LINUX_DEFINES)
   INCLUDES+= 		$(JNI_LINUX_INCLUDES)
@@ -213,21 +217,40 @@ ifeq ($(PLATFORM),MacOSX)
 endif
 
 ifndef JNI_MANUAL_TARGET
+ifdef JNI_MACOSX_SHAREDLIB
+$(TARGET_PPC): $(OBJECTS_PPC) $(BUILT_LIBS)
+	ar -rc $@ *-ppc.o
+	-ranlib $@
+else
 $(TARGET_PPC): $(OBJECTS_PPC) $(LOCAL_RANLIBS) $(BUILT_LIBS)
 	$(CC_LINK) $(CFLAGS_PPC) $(LDFLAGS) -o $@ *-ppc.o $(LINK)
+endif
 
+ifdef JNI_MACOSX_SHAREDLIB
+$(TARGET_X86): $(OBJECTS_X86) $(BUILT_LIBS)
+	ar -rc $@ *-x86.o
+	-ranlib $@
+else
 $(TARGET_X86): $(OBJECTS_X86) $(LOCAL_RANLIBS) $(BUILT_LIBS)
 	$(CC_LINK) $(CFLAGS_X86) $(LDFLAGS) -o $@ *-x86.o $(LINK)
+endif
 endif
 
 else	# UNIVERSAL
 
 ifndef JNI_MANUAL_TARGET
+ifdef JNI_MACOSX_SHAREDLIB
+$(TARGET): $(OBJECTS) $(RC_OBJECTS) $(BUILT_LIBS)
+	-$(MKDIR) $(TARGET_DIR)
+	ar -rc $@ *.o
+	-ranlib $@
+else
 $(TARGET): $(OBJECTS) $(RC_OBJECTS) $(LOCAL_RANLIBS) $(BUILT_LIBS)
 	-$(MKDIR) $(TARGET_DIR)
 	$(CC_LINK) $(CFLAGS) $(LDFLAGS) $(RC_OBJECTS) -o $@ *.o $(LINK)
 ifeq ($(PLATFORM),MacOSX)
 	cp -p $@ $(TARGET_DIR)
+endif
 endif
 endif
 

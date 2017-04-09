@@ -2,27 +2,82 @@
 #
 # LightZone startscript
 #
-echo Starting LightZone version 4.0.0 ...
+echo Starting LightZone version 4.1.7 ...
 echo with options : ${@}
+java -version
 
-totalmem=`cat /proc/meminfo | grep MemTotal | sed -r 's/.* ([0-9]+) .*/\1/'`
-if [ $totalmem -ge 1024000 ]; then
-        maxmem=$(( $totalmem / 2 ))
+arch=`getconf LONG_BIT`
+PLATFORM=`uname`
+if [ "${PLATFORM}" = "Linux" ]; then
+  totalmem=`cat /proc/meminfo | grep 'MemTotal: ' | sed -r 's/.* ([0-9]+) .*/\1/'`
+  usrdir=/usr
+elif [ "${PLATFORM}" = "SunOS" ]; then
+  totalmem=`prtconf | grep 'Memory size:' | sed -r 's/.* ([0-9]+) .*/\1/'`
+  totalmem=`expr $totalmem \* 1024`
+  usrdir=/usr
+elif [ "${PLATFORM}" = "FreeBSD" ]; then
+  totalmem=`sysctl -n hw.physmem`
+  totalmem=`expr $totalmem / 1024`
+  usrdir=%%LOCALBASE%%
+fi
+
+if [ -d ${usrdir}/share/java/lightzone ]; then
+  pkgjavadir=${usrdir}/share/java/lightzone
 else
-        maxmem=512000
+  # Gentoo
+  pkgjavadir=${usrdir}/share/lightzone/lib
 fi
 
-# workaround for loading problem with liblzma.so
-archpath=/lib/`uname -p`-linux-gnu
-if [ -d "$archpath" ]; then
-  lzmalibrary=`find $archpath -name "liblzma.so*" | head -1`
+if [ -d ${usrdir}/libexec/lightzone ]; then
+  pkglibexecdir=${usrdir}/libexec/lightzone
+elif [ -d ${usrdir}/lib64/lightzone ]; then
+  pkglibexecdir=${usrdir}/lib64/lightzone
+else
+  pkglibexecdir=${usrdir}/lib/lightzone
 fi
-if [ -z "$lzmalibrary" ]; then
-  lzmalibrary=`find /lib /usr/lib -name "liblzma.so*" | head -1`
-  if [ -z "$lzmalibrary" ]; then
-    echo "liblzma was not found on the system; exiting"
-    exit 1
+
+if   [ -f ${usrdir}/share/java/jh.jar ]; then        # Debian, Ubuntu
+   jhpath=${usrdir}/share/java/jh.jar
+elif [ -f ${usrdir}/share/java/javahelp2.jar ]; then # Fedora, OpenSUSE, PCLinuxOS
+   jhpath=${usrdir}/share/java/javahelp2.jar
+elif [ -f ${usrdir}/share/java/javahelp/jh.jar ]; then      # Arch
+   jhpath=${usrdir}/share/java/javahelp/jh.jar
+elif [ -f ${usrdir}/share/javahelp/lib/jh.jar ]; then  # Gentoo
+   jhpath=${usrdir}/share/javahelp/lib/jh.jar
+elif [ -f ${usrdir}/share/java/classes/jh.jar ]; then # FreeBSD
+   jhpath=${usrdir}/share/java/classes/jh.jar
+elif [ -f ${usrdir}/j2se/opt/javahelp/lib/jhall.jar ]; then # OpenIndiana
+   jhpath=${usrdir}/j2se/opt/javahelp/lib/jhall.jar
+else
+  echo "jh.jar was not found."
+fi
+
+if [ $totalmem -ge 1048576 ]; then
+  maxmem=$(( $totalmem / 2 ))
+  # on 32-bit architectures there is ~2GB limit for maximum Java heap size
+  if [ $arch = "32" -a $totalmem -ge 4194304 ]; then
+    maxmem=2097152
   fi
+else
+    maxmem=524288
 fi
 
-(cd "/opt/lightzone" && LD_PRELOAD="$lzmalibrary" LD_LIBRARY_PATH="/opt/lightzone" exec java -Xmx${maxmem}k -Djava.library.path="/opt/lightzone" -Dfile.encoding=UTF8 -classpath "/opt/lightzone/*" com.lightcrafts.platform.linux.LinuxLauncher ${@} )
+# IFS should be \n to handle filenames that include space.
+IFS="
+"
+file=""
+for i in "$@"; do
+  if [ -f $i ] ; then
+    file=file $(cd $(dirname $i) && pwd)/$(basename $i)
+  fi
+done
+
+(cd $pkgjavadir && LD_LIBRARY_PATH=$pkglibexecdir exec java \
+-classpath ".:${pkgjavadir}/*:${jhpath}" \
+-XX:+UseG1GC \
+-XX:MinHeapFreeRatio=30 \
+-XX:MaxHeapFreeRatio=30 \
+-Xmx${maxmem}k \
+-Djava.library.path=$pkglibexecdir \
+-Dfile.encoding=UTF8 \
+com.lightcrafts.platform.linux.LinuxLauncher ${file} ${@} )

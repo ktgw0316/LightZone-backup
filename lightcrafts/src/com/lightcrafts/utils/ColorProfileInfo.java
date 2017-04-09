@@ -46,13 +46,22 @@ public final class ColorProfileInfo implements Comparable {
      */
     public static List<ColorProfileInfo>
     arrangeForMenu( Collection<ColorProfileInfo> profiles ) {
+        if ( profiles == null ) {
+            return new ArrayList<ColorProfileInfo>(); // empty list
+        }
         //
         // Must sort the profiles by path first.
         //
         final TreeMap<String,String> sortedByPath =
             new TreeMap<String, String>();
-        for ( ColorProfileInfo cpi : profiles )
-            sortedByPath.put( cpi.getPath(), cpi.getName() );
+        for ( ColorProfileInfo cpi : profiles ) {
+            String ppath = cpi.getPath();
+            String pname = cpi.getName();
+            if ( pname.length() == 0 )
+                pname = new File(ppath).getName();
+
+            sortedByPath.put( ppath, pname );
+        }
 
         //
         // Then clump the profiles by path.
@@ -139,9 +148,13 @@ public final class ColorProfileInfo implements Comparable {
     public static ICC_Profile getExportICCProfileFor( String name ) {
         final Collection<ColorProfileInfo> exportProfiles =
             Platform.getPlatform().getExportProfiles();
-        for ( ColorProfileInfo cpi : exportProfiles )
-            if ( cpi.getName().equals( name ) )
-                return cpi.getICCProfile();
+        if (exportProfiles != null) {
+            for ( ColorProfileInfo cpi : exportProfiles ) {
+                if ( cpi.getName().equals( name ) ) {
+                    return cpi.getICCProfile();
+                }
+            }
+        }
         return null;
    }
 

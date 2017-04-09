@@ -615,7 +615,7 @@ public abstract class AbstractImageBrowser
         return null;
     }
 
-    void addContinuousSelected(ImageDatum datum) {
+    void addContinuousSelected(ImageDatum datum, boolean isAppendix) {
         ImageDatum leadSelected = selection.getLeadSelected();
         if (leadSelected == null) {
             return;
@@ -635,7 +635,17 @@ public abstract class AbstractImageBrowser
                     selected.add(d);
                 }
             }
-            selection.setSelected(selected);
+            if (isAppendix) {
+                if (selection.isSelected(leadSelected)) {
+                    selection.addSelected(selected);
+                }
+                else {
+                    selection.removeSelected(selected);
+                }
+            }
+            else {
+                selection.setSelected(selected);
+            }
         }
     }
 
@@ -680,7 +690,7 @@ public abstract class AbstractImageBrowser
             JMenuItem ratingItem = new JMenuItem(action);
             String name = (String) action.getValue(Action.NAME);
             // On Windogs only the core fonts seem to see stars
-            if (Platform.getType() == Platform.Windows) {
+            if (Platform.isWindows()) {
                 char star = '\u2605';
                 if (name.length() > 0 && name.charAt(0) == star)
                     ratingItem.setFont(new Font("Serif", Font.PLAIN, 14));

@@ -8,8 +8,13 @@
 
 // standard
 #include <jni.h>
-#define _POSIX_C_SOURCE                 /* makes stat have the right fields */
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199506L         /* makes stat have the right fields */
+#endif
 #include <sys/stat.h>                   /* for stat(2) */
+#if HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>                  /* for __DARWIN_C_LEVEL */
+#endif
 
 #ifdef DEBUG
 #include <iostream>

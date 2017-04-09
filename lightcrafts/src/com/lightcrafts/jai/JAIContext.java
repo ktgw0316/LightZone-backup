@@ -6,7 +6,6 @@ import com.lightcrafts.jai.operator.*;
 import com.lightcrafts.jai.opimage.*;
 import com.lightcrafts.jai.utils.LCTileCache;
 import com.lightcrafts.jai.utils.LCRecyclingTileFactory;
-import com.lightcrafts.jai.utils.LCTileScheduler;
 import com.lightcrafts.utils.ColorScience;
 import com.lightcrafts.utils.ColorProfileInfo;
 import com.lightcrafts.platform.Platform;
@@ -24,9 +23,7 @@ import java.awt.image.renderable.ContextualRenderedImageFactory;
 import java.awt.image.renderable.RenderedImageFactory;
 import java.io.*;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.ArrayList;
-import java.util.prefs.Preferences;
 
 /**
  * Created by IntelliJ IDEA.
@@ -75,8 +72,8 @@ public class JAIContext {
     public static final TileCache defaultTileCache;
 
     /** Tile dimensions. */
-    public static final int TILE_WIDTH = 256;
-    public static final int TILE_HEIGHT = 256;
+    public static final int TILE_WIDTH = 512;
+    public static final int TILE_HEIGHT = 512;
 
     // public static final int fastMode = DataBuffer.TYPE_BYTE;
     // public static final int preciseMode = DataBuffer.TYPE_USHORT;
@@ -86,15 +83,16 @@ public class JAIContext {
         byte[] data = profile.getData(tag);
         if (data != null) {
             System.out.print(name + " (" + data.length + ") :");
-            for (int i = 0; i < data.length; i++)
-                System.out.print(" " + (int) (data[i] & 0xFF));
+            for (byte aData : data)
+                System.out.print(" " + (aData & 0xFF));
             System.out.println();
 
-            for (int i = 0; i < data.length; i++)
-                System.out.print((char) (data[i] & 0xFF));
+            for (byte aData : data)
+                System.out.print((char) (aData & 0xFF));
             System.out.println();
-        } else
+        } else {
             System.out.println("no " + name + " info");
+        }
     }
 
     /**
@@ -167,9 +165,9 @@ public class JAIContext {
     }
 
     static {
-        long maxMemory = Runtime.getRuntime().maxMemory();
-        System.out.println("Max Memory: " + maxMemory);
-        System.out.println("Total Memory: " + Runtime.getRuntime().totalMemory());
+        final long maxMemory = Runtime.getRuntime().maxMemory();
+        System.out.printf("Max Memory:   %11d%n", maxMemory);
+        System.out.printf("Total Memory: %11d%n", Runtime.getRuntime().totalMemory());
 
         JAI jaiInstance = JAI.getDefaultInstance();
 
@@ -191,12 +189,14 @@ public class JAIContext {
         // don't use more than 2 processors, it uses too much memory,
         // and use 2 procs only if we have more than 750MB of heap
 
-        if (maxMemory >= 400 * 1024 * 1024)
+        final int MB = 1024 * 1024;
+
+        if (maxMemory >= 400 * MB)
             jaiInstance.getTileScheduler().setParallelism(processors);
         else
             jaiInstance.getTileScheduler().setParallelism(1);
 
-        fileCache = new LCTileCache(maxMemory/2, true);
+        fileCache = new LCTileCache(maxMemory <= 1024 * MB ? maxMemory/2 : maxMemory -  512 * MB, true);
         // fileCache.setMemoryThreshold(0.5f);
         jaiInstance.setTileCache(fileCache);
         fileCacheHint = new RenderingHints(JAI.KEY_TILE_CACHE, fileCache);
@@ -277,11 +277,19 @@ public class JAIContext {
 
         JAI.setDefaultTileSize(new Dimension(JAIContext.TILE_WIDTH, JAIContext.TILE_HEIGHT));
 
-        systemProfiles = new ArrayList<ColorProfileInfo>(Platform.getPlatform().getExportProfiles());
-        systemProfiles.addAll(Platform.getPlatform().getPrinterProfiles());
+        systemProfiles = new ArrayList<ColorProfileInfo>();
+        final Collection<ColorProfileInfo> exportProfiles =
+            Platform.getPlatform().getExportProfiles();
+        if (exportProfiles != null) {
+            systemProfiles.addAll(exportProfiles);
+        }
+        final Collection<ColorProfileInfo> printerProfiles =
+            Platform.getPlatform().getPrinterProfiles();
+        if (printerProfiles != null) {
+            systemProfiles.addAll(printerProfiles);
+        }
 
         ICC_Profile _sRGBColorProfile = null;
-        Iterator it = systemProfiles.iterator();
         for (ColorProfileInfo cpi : systemProfiles) {
             if ((cpi.getName().equals("sRGB Profile") || cpi.getName().equals("sRGB IEC61966-2.1"))) {
                 try {
@@ -296,7 +304,7 @@ public class JAIContext {
         }
 
         if (_sRGBColorProfile == null) {
-            InputStream in = JAIContext.class.getResourceAsStream("resources/sRGB Color Space Profile.ICM");
+            InputStream in = JAIContext.class.getResourceAsStream("resources/sRGB.icc");
             try {
                 _sRGBColorProfile = ICC_Profile.getInstance(in);
             } catch (IOException e) {
@@ -356,7 +364,7 @@ public class JAIContext {
             _gray22Profile = ICC_Profile.getInstance(in);
             _gray22ColorSpace = new ICC_ColorSpace(_gray22Profile);
 
-            in = JAIContext.class.getResourceAsStream("resources/AdobeRGB1998.icc");
+            in = JAIContext.class.getResourceAsStream("resources/compatibleWithAdobeRGB1998.icc");
             _adobeRGBProfile = ICC_Profile.getInstance(in);
             _adobeRGBColorSpace = new ICC_ColorSpace(_adobeRGBProfile);
 
@@ -390,8 +398,9 @@ public class JAIContext {
             _systemProfile = _sRGBColorProfile;
 
             try {
-                if (Platform.getPlatform().getDisplayProfile() != null) {
-                    _systemProfile = Platform.getPlatform().getDisplayProfile();
+                final ICC_Profile displayProfile = Platform.getPlatform().getDisplayProfile();
+                if (displayProfile != null) {
+                    _systemProfile = displayProfile;
                     _systemColorSpace = new ICC_ColorSpace(_systemProfile);
                     _systemColorModel = RasterFactory.createComponentColorModel(DataBuffer.TYPE_BYTE,
                                                                                 _systemColorSpace,

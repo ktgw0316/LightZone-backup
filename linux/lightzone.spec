@@ -3,38 +3,88 @@
 #
 
 Name:           lightzone
-Version:	4.0.0
-Release:	1
+# Do not use hyphens in Version tag. OBS doesn't handle it properly.
+# Use 4.1.0.beta2 for betas and 4.1.0.0 for final, since RPM sorts A-Z before 0-9.
+Version:	4.1.2
+Release:	0%{?dist}
 License:	BSD-3-Clause
 Summary:	Open-source professional-level digital darkroom software
 Url:		http://lightzoneproject.org/
 Group:		Productivity/Graphics/Convertors 
 Source:		%{name}-%{version}.tar.bz2
-BuildRequires:	ant, autoconf, automake, nasm, gcc, gcc-c++, libtool, make, tidy, git, javahelp2
+
+%if 0%{?rhel}
+%if 0%{?rhel} >= 7
+%define java_version 1.7.0-openjdk
+%else
+%define java_version 1.6.0-openjdk
+%endif
+%define lcms2_devel lcms2-devel
+%define libjpeg_devel libjpeg-turbo-devel
+%define libX11_devel libX11-devel
+%define pkg_config pkgconfig
+%define debug_package %{nil}
+%endif
 
 %if 0%{?fedora}
-BuildRequires: java-1.7.0-openjdk-devel, libX11-devel, xz-libs
+%if 0%{?fedora} >= 20
+%define java_version 1.8.0-openjdk
+%else
+%define java_version 1.7.0-openjdk
+%endif
+%define lcms2_devel lcms2-devel
+%define libjpeg_devel libjpeg-turbo-devel
+%define libX11_devel libX11-devel
+%define pkg_config pkgconfig
 %define debug_package %{nil}
-%endif
-%if 0%{?sles_version}
-BuildRequires: java-1_6_0-openjdk-devel, xorg-x11-libX11-devel, liblzma5, update-desktop-files
-%endif
-%if 0%{?suse_version} == 1210
-BuildRequires: java-1_6_0-openjdk-devel, xorg-x11-libX11-devel, liblzma5
-%endif
-%if 0%{?suse_version} > 1210
-BuildRequires: java-1_7_0-openjdk-devel, libX11-devel, liblzma5
-%endif
-%if 0%{?centos_version}
-BuildRequires: java-1.6.0-openjdk-devel, libX11-devel, liblzma5
-%define debug_package %{nil}
-%endif
-%if 0%{?mdkversion}
-BuildRequires: java-1.6.0-openjdk-devel, libX11-devel, liblzma5
 %endif
 
-Requires:	java >= 1.6.0, liblzma5
+%if 0%{?sles_version}
+%define java_version 1_7_0-openjdk
+%define lcms2_devel liblcms2-devel
+%define libjpeg_devel libjpeg8-devel
+%define libX11_devel xorg-x11-libX11-devel
+%define pkg_config pkg-config
+BuildRequires: update-desktop-files
+%endif
+
+%if 0%{?suse_version}
+%if 0%{?suse_version} > 1210
+%define java_version 1_7_0-openjdk
+%define libX11_devel libX11-devel
+%else
+%define java_version 1_6_0-openjdk
+%define libX11_devel xorg-x11-libX11-devel
+%endif
+%define lcms2_devel liblcms2-devel
+%define libjpeg_devel libjpeg8-devel
+%define pkg_config pkg-config
+%endif
+
+%if 0%{?mdkversion} || 0%{?pclinuxos}
+%define java_version 1.8.0-sun
+%define lcms2_devel liblcms2-devel
+%define libjpeg_devel libjpeg8-devel
+%define libX11_devel libX11-devel
+%define pkg_config pkg-config
+%endif
+
+BuildRequires:	java-%{java_version}-devel, %{libX11_devel}, ant, autoconf, gcc, gcc-c++, make, git, javahelp2, %{lcms2_devel}, %{libjpeg_devel}, libtiff-devel, %{pkg_config}, rsync
+%if 0%{?mdkversion} || 0%{?pclinuxos}
+BuildRequires:	java-rpmbuild, libgomp-devel
+%endif
+
+Requires:	java-%{java_version}, javahelp2, lcms2
+%if 0%{?suse_version} >= 1320
+Requires:	xerces-j2-xml-apis
+%else
+%if 0%{?mdkversion} || 0%{?pclinuxos}
+Requires:	libgomp1
+%endif
+%endif
+
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+
 %description
 LightZone is open-source professional-level digital darkroom software for Windows, Mac OS X, and Linux. Rather than using layers as many other photo editors do, LightZone lets the user build up a stack of tools which can be rearranged, turned off and on, and removed from the stack. It's a non-destructive editor, where any of the tools can be re-adjusted or modified later — even in a different editing session. A tool stack can be copied to a batch of photos at one time. LightZone operates in a 16-bit linear color space with the wide gamut of ProPhoto RGB.
 
@@ -49,33 +99,20 @@ LightZone is open-source professional-level digital darkroom software for Window
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 %endif
 
-%define instdir /opt/%{name}
-install -dm 0755 "%buildroot/%{instdir}"
-cp -rpH lightcrafts/products/dcraw "%buildroot/%{instdir}"
-cp -rpH lightcrafts/products/LightZone-forkd "%buildroot/%{instdir}"
-cp -rpH linux/products/*.so "%buildroot/%{instdir}"
-cp -rpH linux/products/*.jar "%buildroot/%{instdir}"
-cp -rpH linux/products/lightzone "%buildroot/%{instdir}"
+install -dm 0755 "%buildroot/%{_libexecdir}/%{name}"
+cp -pH lightcrafts/products/dcraw_lz "%buildroot/%{_libexecdir}/%{name}"
+cp -pH lightcrafts/products/LightZone-forkd "%buildroot/%{_libexecdir}/%{name}"
+cp -pH linux/products/*.so "%buildroot/%{_libexecdir}/%{name}"
+
+install -dm 0755 "%buildroot/%{_javadir}/%{name}"
+cp -pH linux/products/*.jar "%buildroot/%{_javadir}/%{name}"
 
 # create icons and shortcuts
-%define icondir %{_datadir}/icons/hicolor
 install -dm 0755 "%buildroot/%{_datadir}/applications"
-install -dm 0755 "%buildroot/%{icondir}/256x256/apps"
-install -dm 0755 "%buildroot/%{icondir}/128x128/apps"
-install -dm 0755 "%buildroot/%{icondir}/64x64/apps"
-install -dm 0755 "%buildroot/%{icondir}/48x48/apps"
-install -dm 0755 "%buildroot/%{icondir}/32x32/apps"
-install -dm 0755 "%buildroot/%{icondir}/16x16/apps"
+install -m 644 linux/products/lightzone.desktop "%buildroot/%{_datadir}/applications/"
+cp -pHR linux/icons "%buildroot/%{_datadir}/"
 
-cp -rpH linux/products/lightzone.desktop "%buildroot/%{_datadir}/applications/"
-cp -rpH linux/icons/LightZone_256x256.png "%buildroot/%{icondir}/256x256/apps/LightZone.png"
-cp -rpH linux/icons/LightZone_128x128.png "%buildroot/%{icondir}/128x128/apps/LightZone.png"
-cp -rpH linux/icons/LightZone_64x64.png "%buildroot/%{icondir}/64x64/apps/LightZone.png"
-cp -rpH linux/icons/LightZone_48x48.png "%buildroot/%{icondir}/48x48/apps/LightZone.png"
-cp -rpH linux/icons/LightZone_32x32.png "%buildroot/%{icondir}/32x32/apps/LightZone.png"
-cp -rpH linux/icons/LightZone_16x16.png "%buildroot/%{icondir}/16x16/apps/LightZone.png"
-
-install -d -m 755 %{buildroot}/%{_bindir}
+install -dm 755 %{buildroot}/%{_bindir}
 install -m 755 linux/products/%{name} %{buildroot}/%{_bindir}
 
 %if 0%{?sles_version}
@@ -85,10 +122,13 @@ install -m 755 linux/products/%{name} %{buildroot}/%{_bindir}
 %files
 %defattr(-,root,root)
 %doc COPYING README.md linux/BUILD-Linux.md
-%dir %{instdir}
-%{instdir}/*
+%dir %{_libexecdir}/%{name}
+%{_libexecdir}/%{name}/*
+%dir %{_javadir}/%{name}
+%{_javadir}/%{name}/*
 %{_bindir}/%{name}
-%{_datadir}/applications/lightzone.desktop
+%{_datadir}/applications/%{name}.desktop
+%define icondir %{_datadir}/icons/hicolor
 %dir %{icondir}
 %dir %{icondir}/256x256
 %dir %{icondir}/256x256/apps
@@ -102,11 +142,11 @@ install -m 755 linux/products/%{name} %{buildroot}/%{_bindir}
 %dir %{icondir}/32x32/apps
 %dir %{icondir}/16x16
 %dir %{icondir}/16x16/apps
-%{icondir}/256x256/apps/LightZone.png
-%{icondir}/128x128/apps/LightZone.png
-%{icondir}/64x64/apps/LightZone.png
-%{icondir}/48x48/apps/LightZone.png
-%{icondir}/32x32/apps/LightZone.png
-%{icondir}/16x16/apps/LightZone.png
+%{icondir}/256x256/apps/%{name}.png
+%{icondir}/128x128/apps/%{name}.png
+%{icondir}/64x64/apps/%{name}.png
+%{icondir}/48x48/apps/%{name}.png
+%{icondir}/32x32/apps/%{name}.png
+%{icondir}/16x16/apps/%{name}.png
 
 %changelog

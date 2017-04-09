@@ -40,28 +40,30 @@ public class ModeManager
     // Look for the special key events to enter and exit the pan mode,
     // taking care to filter out auto-repeat events:
 
-    private static int PanKeyCode = KeyEvent.VK_SPACE;
+    private static int PanKeyCode = Platform.isMac()
+            ? KeyEvent.VK_META
+            : KeyEvent.VK_CONTROL;
 
     private KeyEventPostProcessor panModeKeyProcessor =
         new KeyEventPostProcessor() {
             private boolean isPanMode;
             public boolean postProcessKeyEvent(KeyEvent e) {
-                final boolean wasPanMode = isPanMode;
+                final boolean wasPanMode = (overlay.peekMode() == transientPanMode);
                 if (e.getKeyCode() == PanKeyCode) {
                     if (e.getID() == KeyEvent.KEY_PRESSED) {
                         isPanMode = true;
                     }
                     if (e.getID() == KeyEvent.KEY_RELEASED) {
-                        if (Platform.getType() != Platform.MacOSX) {
+                        if (Platform.isMac()) {
+                            isPanMode = false;
+                        }
+                        else {
                             // Detect and ignore auto-repeat release events
                             final boolean isReallyPressed =
                                 Platform.getPlatform().isKeyPressed(
                                     PanKeyCode
                                 );
                             isPanMode = isReallyPressed;
-                        }
-                        else {
-                            isPanMode = false;
                         }
                     }
                 }

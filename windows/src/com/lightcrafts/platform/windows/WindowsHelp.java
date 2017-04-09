@@ -49,7 +49,13 @@ public final class WindowsHelp {
     static {
         System.loadLibrary( "Windows" );
 
-        m_availableISO639LangCodes.add( "en" );
+        m_availableISO639LangCodes.add( "en" ); // English
+        m_availableISO639LangCodes.add( "da" ); // Danish
+        m_availableISO639LangCodes.add( "nl" ); // Dutch
+        m_availableISO639LangCodes.add( "fr" ); // French
+        m_availableISO639LangCodes.add( "it" ); // Italian
+        m_availableISO639LangCodes.add( "ja" ); // Japanese
+        m_availableISO639LangCodes.add( "es" ); // Spanish
     }
 }
 /* vim:set et sw=4 ts=4: */

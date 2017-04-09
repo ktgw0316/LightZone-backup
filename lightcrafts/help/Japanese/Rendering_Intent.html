@@ -1,0 +1,66 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>LightZone: レンダリング インテント</title><!--[if lt IE 7]>
+    <script defer type="text/javascript" src="IE_PNG.js"></script>
+    <link rel="stylesheet" type="text/css" href="IE.css" media="all"/>
+    <![endif]-->
+    <meta name="description" content="レンダリング インテントの詳細"/>
+    <link rel="stylesheet" type="text/css" href="Help.css" media="all"/>
+    <link rel="stylesheet" type="text/css" href="Platform.css" media="all"/>
+    
+  </head>
+
+  <body>
+    <div id="banner">
+      <div id="banner_left">
+        <a href="index.html">LightZone ヘルプ</a>
+      </div>
+      <div id="banner_right">
+        <a href="index/index.html">索引</a>
+      </div>
+    </div><!-- LC_Index: converting images > rendering intent and --><!-- LC_Index: printing > rendering intent and --><!-- LC_Index: rendering intent -->
+
+    
+    
+    
+    <a name="Rendering_Intent"></a>
+    <img src="images/app_icon-32.png" width="32" height="32"
+      class="title_icon"/>
+    <h1>レンダリング インテント</h1>
+
+    <p>
+      アプリケーションで管理された色を用いて写真を<a href="Converting.html">変換</a>または<a href="Printing.html">印刷</a>する際に、<em>レンダリング インテント</em>を選択することができます。以下では選択できるレンダリング インテントについて説明します。
+    </p>
+
+    <dl>
+
+      <dt>絶対的な色域を維持</dt>
+      <dd>
+        変換先の色域に収まる色を変化させません。色域外の色はクリップされます。変換先の白色点に向けた色の伸縮を行いません。このインテントは色の正確さを維持するために色同士の関係を犠牲にします。特定のデバイスの出力をシミュレートするためのプルーフに適しています。このインテントは紙の色がプリントにどう影響するかをプレビューするのに特に便利です。
+      </dd>
+
+      <dt>相対的な色域を維持</dt>
+      <dd>
+        元の色空間と変換先の色空間とで特に明るい部分を比較し、それに従ってすべての色をシフトさせます。色域外の色は変換先の色空間で再現可能な最も近い色に変換されます。このインテントは「知覚的」よりもたくさんの元の色を維持します。(<a href="Black_Point_Compensation.html">黒点の補正</a>も参照。)
+      </dd>
+
+      <dt>知覚的</dt>
+      <dd>
+        色同士の関係を維持して人間の目に自然に見えるようにします。ただし、色の値自体は変化する場合があります。このインテントは色域外の色がたくさんある写真に適しています。
+      </dd>
+
+      <dt>彩度</dt>
+      <dd>
+        写真を鮮やかな色にするために、色の正確さを犠牲にします。このインテントが適しているのは、グラフや図といったビジネス向けグラフィックなど、明るい色彩に満ちた色の方が実際の色同士の関係よりも重要な場合です。
+      </dd>
+
+    </dl>
+
+  </body>
+</html><!-- vim:set et sw=2 ts=2: -->
+

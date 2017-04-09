@@ -113,20 +113,15 @@ class MenuFactory {
     final static ResourceBundle Resources = ResourceBundle.getBundle(
         "com/lightcrafts/app/menu/MenuFactory"
     );
+    final static ResourceBundle Resources_ALL = ResourceBundle.getBundle(
+        "com/lightcrafts/app/menu/MenuFactory_ALL"
+    );
 
-    private static String PlatformSuffix = "";
-
-    static {
-        if ( Platform.getType() == Platform.Linux ) {
-            PlatformSuffix = "_Linux";
-        }
-        else if (Platform.getType() == Platform.MacOSX) {
-            PlatformSuffix = "_Mac";
-        }
-        else if (Platform.getType() == Platform.Windows) {
-            PlatformSuffix = "_Win";
-        }
-    }
+    private static String PlatformSuffix
+            = Platform.isWindows() ? "_Win"
+            : Platform.isMac()     ? "_Mac"
+            : Platform.isLinux()   ? "_Linux"
+            : "";
 
     private final static String NameSuffix = "_Name";
 
@@ -135,13 +130,16 @@ class MenuFactory {
     private final static String MnemonicSuffix = "_Mnemonic";
 
     private static final String AcceleratorModifier =
-        Platform.getType() == Platform.MacOSX ? "meta" : "ctrl";
+        Platform.isMac() ? "meta" : "ctrl";
     // I didn't use Toolkit.getMenuShortcutKeyMask(),
     // because I couldn't find a way to combine integer key masks with
     // the modifier syntax of KeyStroke ("shift", "ctrl", etc.).
 
     private static String getName(String key) {
         String s = getPlatformString(key + NameSuffix);
+        if ((! useMacMnemonics) && Platform.isMac()) {
+            s = s.replaceAll("\\([A-Z0-9]\\)$", "");
+        }
         return s;
     }
 
@@ -154,12 +152,11 @@ class MenuFactory {
     }
 
     private static int getMnemonic(String key) {
-        if ((! useMacMnemonics) && Platform.getType() == Platform.MacOSX) {
+        if ((! useMacMnemonics) && Platform.isMac()) {
             return -1;
         }
         String s = getPlatformString(key + MnemonicSuffix);
-        int code = getKeyCode(s);
-        return code;
+        return getKeyCode(s);
     }
 
     private static String getPlatformString(String key) {
@@ -174,7 +171,11 @@ class MenuFactory {
         try {
             return Resources.getString(key);
         } catch (MissingResourceException e) {
-            return null;
+            try {
+                return Resources_ALL.getString(key);
+            } catch (MissingResourceException e2) {
+                return null;
+            }
         }
     }
 

@@ -22,6 +22,8 @@ extern "C" int tiffcp( TIFF*, TIFF* );
 
 char const AppName[] = "LightZone";
 
+#define	N(a)	(sizeof (a) / sizeof (a[0]))
+
 ////////// Local functions ////////////////////////////////////////////////////
 
 /**
@@ -90,6 +92,12 @@ JNIEXPORT void JNICALL LCTIFFWriter_METHOD(openForWriting)
     LC_setNativePtr( env, jLCTIFFWriter, LC_TIFFOpen( cFileName, "w" ) );
 }
 
+/* Define the extended Tag field info */
+static const TIFFFieldInfo xtiffFieldInfo[] = {
+    { TIFFTAG_LIGHTZONE, -1, -1, TIFF_BYTE, FIELD_CUSTOM, 1, 1, const_cast<char*>( "LightZone" ) },
+    { TIFFTAG_MS_RATING, -1, -1, TIFF_SHORT, FIELD_CUSTOM, 1, 1, const_cast<char*>( "Rating" ) },
+};
+
 /**
  * Set the given byte metadata field.
  */
@@ -99,12 +107,15 @@ JNIEXPORT jboolean JNICALL LCTIFFWriter_METHOD(setByteField)
     TIFF *const tiff = getNativePtr( env, jLCTIFFWriter );
     LC_TIFFFieldValue value;
 
+    /* Install the extended Tag field info */
+    TIFFMergeFieldInfo(tiff, xtiffFieldInfo, N(xtiffFieldInfo));
+
     jarray_to_c<jbyte> const cArray( env, jArray );
     switch ( tagID ) {
 
         case TIFFTAG_ICCPROFILE:
         case TIFFTAG_JPEGTABLES:
-        case TIFFTAG_LIGHTCRAFTS_LIGHTZONE:
+        case TIFFTAG_LIGHTZONE:
         case TIFFTAG_PHOTOSHOP:
         case TIFFTAG_RICHTIFFIPTC:
         case TIFFTAG_XMLPACKET:
@@ -146,6 +157,10 @@ JNIEXPORT jboolean JNICALL LCTIFFWriter_METHOD(setIntField)
 {
     TIFF *const tiff = getNativePtr( env, jLCTIFFWriter );
     LC_TIFFFieldValue value;
+
+    /* Install the extended Tag field info */
+    TIFFMergeFieldInfo(tiff, xtiffFieldInfo, N(xtiffFieldInfo));
+
     switch ( tagID ) {
 
         case TIFFTAG_BADFAXLINES:
@@ -259,7 +274,7 @@ JNIEXPORT jint JNICALL LCTIFFWriter_METHOD(writeStripByte)
         return 0;
     }
     return TIFFWriteEncodedStrip(
-        getNativePtr( env, jLCTIFFWriter ), stripIndex, cBuf + offset, stripSize
+        getNativePtr( env, jLCTIFFWriter ), stripIndex, (jbyte*)cBuf + offset, stripSize
     );
 }
 
@@ -276,7 +291,7 @@ JNIEXPORT jint JNICALL LCTIFFWriter_METHOD(writeStripShort)
         return 0;
     }
     return TIFFWriteEncodedStrip(
-        getNativePtr( env, jLCTIFFWriter ), stripIndex, cBuf + offset, stripSize
+        getNativePtr( env, jLCTIFFWriter ), stripIndex, (jshort*)cBuf + offset, stripSize
     );
 }
 
@@ -293,7 +308,7 @@ JNIEXPORT jint JNICALL LCTIFFWriter_METHOD(writeTileByte)
         return 0;
     }
     return TIFFWriteEncodedTile(
-        getNativePtr( env, jLCTIFFWriter ), tileIndex, cBuf + offset, tileSize
+        getNativePtr( env, jLCTIFFWriter ), tileIndex, (jbyte*)cBuf + offset, tileSize
     );
 }
 
@@ -310,7 +325,7 @@ JNIEXPORT jint JNICALL LCTIFFWriter_METHOD(writeTileShort)
         return 0;
     }
     return TIFFWriteEncodedTile(
-        getNativePtr( env, jLCTIFFWriter ), tileIndex, cBuf + offset, tileSize
+        getNativePtr( env, jLCTIFFWriter ), tileIndex, (jshort*)cBuf + offset, tileSize
     );
 }
 

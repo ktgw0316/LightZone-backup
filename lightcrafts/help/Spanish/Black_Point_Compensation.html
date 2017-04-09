@@ -1,0 +1,43 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es-ES" xml:lang="es-ES">
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <title>LightZone: Compensacion del punto negro</title>
+    <meta name="description" content="Descripcion de la compensacion del punto negro."/>
+    <link rel="stylesheet" type="text/css" href="Help.css" media="all"/>
+    <link rel="stylesheet" type="text/css" href="Platform.css" media="all"/>
+    <!--[if lt IE 7]>
+    <script defer type="text/javascript" src="IE_PNG.js"></script>
+    <link rel="stylesheet" type="text/css" href="IE.css" media="all"/>
+    <![endif]-->
+  </head>
+
+  <body>
+    <div id="banner">
+      <div id="banner_left">
+        <a href="index.html">Ayuda de LightZone</a>
+      </div>
+      <div id="banner_right">
+        <a href="index/index.html">Indice</a>
+      </div>
+    </div>
+
+    <!-- LC_Index: black point > compensation -->
+    <!-- LC_Index: converting images > black point compensation and -->
+    <!-- LC_Index: printing > black point compensation and -->
+    <a name="Black_Point_Compensation"/>
+    <img src="images/app_icon-32.png" width="32" height="32" class="title_icon"/>
+    <h1>Compensacion del punto negro</h1>
+
+    <p>Tanto  <a href="Converting.html">convirtiendo</a> o <a href="Printing.html">imprimiendo</a> tus fotos usando una aplicacion con gestion de color, tu puedes activar <em>la compensacion del punto negro</em> cuando el <a href="Rendering_Intent.html">intento de renderizado</a> es Relativo Colorimetrico.</p>
+    <p>El modelo de color RGB puede representar luminosidades desde 100% blanco hasta 100% negro. Perifericos de salida (como impresoras o monitores) suelen tener limitaciones en como de negro puede renderizarse el negro mas oscuro. La compensacion del punto negro trata de resolver las diferencias entre el negro mas oscuro de tu foto y el negro mas oscuro de un periferico en concreto.</p>
+    <p>
+      <img src="images/Black_Point_Compensation-en.png" width="207" height="133" class="inline_right"/>Si no hay compensacion del punto negro, el detalle en las areas de sombras mas oscuras se pierde porque las areas mas alla del negro mas oscuro que el periferico puede renderizar son recortadas.</p>
+    <p>Por otro lado, si la compensacion del punto negro se lleva a cabo, el rango luminoso de tu foto es comprimido para igualarse al rango luminosos del periferico. Por lo tanto, el negro mas oscuro de tu foto para a ser el negro mas oscuro que el periferico puede renderizar.</p>
+    <p>Sin embargo, debido a que el rango de luminosidad se comprime, informacion de tu foto se pierde: la pérdida se extiende justo de manera uniforme a lo largo de toda la gama de luminosidad (y por lo tanto menos perceptible) en lugar de ser recortado en el extremo negro.</p>
+
+  </body>
+</html><!-- vim:set et sw=2 ts=2: -->

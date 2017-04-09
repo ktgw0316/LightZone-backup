@@ -60,39 +60,42 @@ class ImageBrowserMouseListener implements MouseInputListener {
             Rectangle bounds = browser.getBounds(index);
             browser.scrollRectToVisible(bounds);
 
+            // This is ctrl-click on windows/linux, command-click on
+            // mac, filtering out synthetic command-clicks from multi-
+            // button mice.
+            boolean isCtrlDown = ((! Platform.isMac()) && event.isControlDown()) ||
+                     (Platform.isMac() && event.isMetaDown() && ! event.isPopupTrigger());
+
             // Figure out how to update the selection state:
             if (event.isShiftDown()) {
-                browser.addContinuousSelected(datum);
+                browser.addContinuousSelected(datum, isCtrlDown);
             }
-            else if (
-                ((! isMac()) && event.isControlDown()) ||
-                 (isMac() && event.isMetaDown() && ! event.isPopupTrigger())) {
-                // This is ctrl-click on windows/linux, command-click on
-                // mac, filtering out synthetic command-clicks from multi-
-                // button mice.
+            else if (isCtrlDown) {
                 if (selection.isSelected(datum)) {
                     selection.removeSelected(datum);
                 }
                 else {
                     selection.addSelected(datum);
                 }
+                selection.setLeadSelected(datum, false);
             }
             else {
                 if (
                     event.isPopupTrigger() ||
-                    (isWindows() && (event.getButton() != MouseEvent.BUTTON1))
+                    (Platform.isWindows() && (event.getButton() != MouseEvent.BUTTON1))
                 ) {
                     // A popup trigger on a selected ImageDatum does nothing
                     // to selection, but a popup trigger on an unselected
                     // ImageDatum selects it and unselects everything else.
                     if (! selection.isSelected(datum)) {
                         selection.setSelected(Collections.singletonList(datum));
-                        selection.setLeadSelected(datum);
+
+                        selection.setLeadSelected(datum, false);
                     }
                 }
                 else if (! selection.isSelected(datum)) {
-                    // All other mouse presses select the ImageDatum.
-                    selection.setLeadSelected(datum);
+                    // All other mouse presses select only the ImageDatum.
+                    selection.setLeadSelected(datum, true);
                 }
             }
         }
@@ -128,13 +131,5 @@ class ImageBrowserMouseListener implements MouseInputListener {
         if (controller.isControllerEvent(event)) {
             controller.handleEvent(event);
         }
-    }
-
-    private static boolean isMac() {
-        return Platform.getType() == Platform.MacOSX;
-    }
-
-    private static boolean isWindows() {
-        return Platform.getType() == Platform.Windows;
     }
 }

@@ -19,6 +19,8 @@ import java.awt.*;
 import java.awt.color.ICC_Profile;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.Collection;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -30,7 +32,7 @@ import java.util.prefs.Preferences;
  */
 final class ProofSelectableControl extends SelectableControl {
 
-    private static Collection PrinterProfiles =
+    private static Collection<ColorProfileInfo> PrinterProfiles =
         Platform.getPlatform().getPrinterProfiles();
 
     private static Preferences Prefs =
@@ -79,23 +81,24 @@ final class ProofSelectableControl extends SelectableControl {
 
     private void initPrinterProfile() {
         printerProfile = new WidePopupComboBox();
-        printerProfile.setFocusable(false);
 
-        final List<ColorProfileInfo> profiles =
-            ColorProfileInfo.arrangeForMenu(PrinterProfiles);
-        for (ColorProfileInfo profile : profiles) {
-            printerProfile.addItem(profile);
-        }
-        // Initialize the printerProfile selection from Preferences:
-        final String initProfile = Prefs.get(ProofProfileKey, null);
-        if (initProfile != null) {
+        if (PrinterProfiles != null) {
+            final List<ColorProfileInfo> profiles =
+                ColorProfileInfo.arrangeForMenu(PrinterProfiles);
             for (ColorProfileInfo profile : profiles) {
-                if (profile != null) {
-                    // Don't require strict equality for ColorProfileInfo's.
-                    // Just ask that the names match:
-                    if (profile.getName().equals(initProfile)) {
-                        printerProfile.setSelectedItem(profile);
-                        settings.setColorProfile(profile.getICCProfile());
+                printerProfile.addItem(profile);
+            }
+            // Initialize the printerProfile selection from Preferences:
+            final String initProfile = Prefs.get(ProofProfileKey, null);
+            if (initProfile != null) {
+                for (ColorProfileInfo profile : profiles) {
+                    if (profile != null) {
+                        // Don't require strict equality for ColorProfileInfo's.
+                        // Just ask that the names match:
+                        if (profile.getName().equals(initProfile)) {
+                            printerProfile.setSelectedItem(profile);
+                            settings.setColorProfile(profile.getICCProfile());
+                        }
                     }
                 }
             }
@@ -117,11 +120,24 @@ final class ProofSelectableControl extends SelectableControl {
                 }
             }
         );
+        printerProfile.addMouseWheelListener(
+            new MouseWheelListener() {
+                public void mouseWheelMoved(MouseWheelEvent e) {
+                    JComboBox source = (JComboBox) e.getComponent();
+                    if (!source.hasFocus()) {
+                        return;
+                    }
+                    int ni = source.getSelectedIndex() + e.getWheelRotation();
+                    if (ni >= 0 && ni < source.getItemCount()) {
+                        source.setSelectedIndex(ni);
+                    }
+                }
+            }
+        );
     }
 
     private void initRenderingIntent() {
         renderingIntent = new WidePopupComboBox();
-        renderingIntent.setFocusable(false);
 
         RenderingIntent[] intents = RenderingIntent.getAll();
         for (RenderingIntent intent : intents) {
@@ -146,6 +162,20 @@ final class ProofSelectableControl extends SelectableControl {
                         settings.setRenderingIntent(intent);
                         engine.preview(settings);
                         Prefs.put(ProofIntentKey, intent.toString());
+                    }
+                }
+            }
+        );
+        renderingIntent.addMouseWheelListener(
+            new MouseWheelListener() {
+                public void mouseWheelMoved(MouseWheelEvent e) {
+                    JComboBox source = (JComboBox) e.getComponent();
+                    if (!source.hasFocus()) {
+                        return;
+                    }
+                    int ni = source.getSelectedIndex() + e.getWheelRotation();
+                    if (ni >= 0 && ni < source.getItemCount()) {
+                        source.setSelectedIndex(ni);
                     }
                 }
             }

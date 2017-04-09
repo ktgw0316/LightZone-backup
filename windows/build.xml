@@ -7,12 +7,23 @@
   <property name="common-dir" value="../lightcrafts"/>
   <property file="${common-dir}/resources/com/lightcrafts/utils/resources/Version.properties"/>
 
-  <property name="installer-name" value="${app-name}-Installer.exe"/>
+  <exec executable="uname" vmlauncher="false" failonerror="true"
+        outputproperty="processor">
+    <arg value="-m"/>
+  </exec>
+  <condition property="64bit">
+    <matches string="${processor}" pattern="^.*64$"/>
+  </condition>
+  <condition property="jre-arch" value="amd64" else="x86">
+    <isset property="64bit"/>
+  </condition>
+
+  <property name="installer-name" value="${app-name}-Installer-${jre-arch}.exe"/>
   <property name="licensetype" value="ESD"/>
   <property name="windows-jar" value="products/lightcrafts-windows.jar"/>
 
   <!-- The default maxmemory for the run* targets. -->
-  <property name="maxmemory" value="256m"/>
+  <property name="maxmemory" value="512m"/>
 
   <exec executable="cat" vmlauncher="false" failonerror="true"
         outputproperty="app-version">
@@ -33,7 +44,7 @@
 
   <target name="javac" depends="common">
     <mkdir dir="build"/>
-    <javac destdir="build" source="1.6" target="1.6" debug="true">
+    <javac destdir="build" source="1.8" target="1.8" debug="true">
       <src path="src"/>
       <classpath>
         <fileset dir="${common-dir}/products">
@@ -133,7 +144,7 @@
            latter, even if there's a space in it, will be given as a single
            argument containing a space and not as two seperate arguments. -->
       <arg line="-D LC_VERSION=${app-version}"/>
-      <arg file="lightzone.install4j"/>
+      <arg file="lightzone-${jre-arch}.install4j"/>
     </exec>
 
     <exec executable="make" dir="resources/sign" failonerror="true"

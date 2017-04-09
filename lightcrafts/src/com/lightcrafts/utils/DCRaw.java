@@ -9,6 +9,7 @@ import com.lightcrafts.image.libs.LCTIFFReader;
 import com.lightcrafts.image.metadata.providers.*;
 import com.lightcrafts.image.metadata.MetadataUtil;
 import com.lightcrafts.jai.JAIContext;
+import com.lightcrafts.utils.bytebuffer.ByteBufferUtil;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
@@ -17,10 +18,10 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-
-import sun.nio.ch.DirectBuffer;
 
 /**
  * Get raw image data by inrerfacing with dcraw as a coprocess.
@@ -71,6 +72,7 @@ public final class DCRaw implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public float getAperture() {
         return m_aperture;
     }
@@ -78,6 +80,7 @@ public final class DCRaw implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getCameraMake( boolean includeModel ) {
         String make = getMake();
         final String model = getModel();
@@ -120,6 +123,7 @@ public final class DCRaw implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public Date getCaptureDateTime() {
         return  m_captureDateTime > 0 ?
                 new Date( m_captureDateTime * 1000 ) : null;
@@ -132,6 +136,7 @@ public final class DCRaw implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public float getFocalLength() {
         return m_focalLength;
     }
@@ -139,6 +144,7 @@ public final class DCRaw implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getImageHeight() {
         return m_height;
     }
@@ -146,6 +152,7 @@ public final class DCRaw implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getImageWidth() {
         return m_width;
     }
@@ -195,6 +202,7 @@ public final class DCRaw implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getISO() {
         return m_iso;
     }
@@ -254,11 +262,15 @@ public final class DCRaw implements
     private final static String CAMERA_RGB_PROFILE = "Camera RGB Profile: ";
     private final static String CAMERA_XYZ_PROFILE = "Camera XYZ Profile: ";
 
-    private static String DCRAW_PATH = "./dcraw";
+    private static final String DCRAW_NAME = "dcraw_lz";
+    private static String DCRAW_PATH;
     static {
-        String appDir = System.getProperty("install4j.appDir");
-        if (appDir != null) {
-            DCRAW_PATH = appDir + "/dcraw";
+        DCRAW_PATH = System.getProperty("java.library.path") + File.separatorChar + DCRAW_NAME;
+        if (! new File(DCRAW_PATH).canExecute()) {
+            String dir = System.getProperty("install4j.appDir");
+            if (dir == null)
+                dir = ".";
+            DCRAW_PATH = dir + File.separatorChar + DCRAW_NAME;
         }
     }
 
@@ -309,11 +321,16 @@ public final class DCRaw implements
                         m_secondary_cam_mul[3] = Float.parseFloat(multipliers[3]);
                     }
                 } else {
-                    if (line.startsWith(search = FILENAME)) {
-                        String filename = line.substring(search.length());
-                    } else if (line.startsWith(search = TIMESTAMP)) {
+                    // if (line.startsWith(search = FILENAME)) {
+                    //     String filename = line.substring(search.length());
+                    // } else
+                    if (line.startsWith(search = TIMESTAMP)) {
                         String timestamp = line.substring(search.length());
-                        m_captureDateTime = new Date(timestamp).getTime();
+                        try {
+                            m_captureDateTime = new SimpleDateFormat().parse(timestamp).getTime();
+                        } catch (ParseException e) {
+                            m_captureDateTime = 0;
+                        }
                     } else if (line.startsWith(search = CAMERA)) {
                         String camera = line.substring(search.length());
                         m_make = camera.substring(0, camera.indexOf(' '));
@@ -339,11 +356,10 @@ public final class DCRaw implements
                         try {
                             m_focalLength = Float.valueOf(focalLenght.substring(0, focalLenght.indexOf(" mm")));
                         } catch (NumberFormatException e) { }
-                    } else if (line.startsWith(search = NUM_RAW_IMAGES)) {
-                        String numRawImages = line.substring(search.length());
-                        m_secondaryPixels = numRawImages.startsWith("2");
-                    } else if (line.startsWith(search = EMBEDDED_ICC_PROFILE)) {
-                        String embeddedICCProfile = line.substring(search.length());
+                    // } else if (line.startsWith(search = NUM_RAW_IMAGES)) {
+                    //     String numRawImages = line.substring(search.length());
+                    // } else if (line.startsWith(search = EMBEDDED_ICC_PROFILE)) {
+                    //     String embeddedICCProfile = line.substring(search.length());
                     } else if (line.startsWith(CANNOT_DECODE)) {
                         m_decodable = false;
                     } else if ((args = match(line, THUMB_SIZE)) != null) {
@@ -367,13 +383,15 @@ public final class DCRaw implements
                         m_rawColors = Integer.decode(rawColors);
                     } else if (line.startsWith(search = FILTER_PATTERN)) {
                         String pattern = line.substring(search.length());
-                        if (pattern.startsWith("BGGR"))
+                        if (pattern.length() >= 8 && !pattern.substring(0,4).equals(pattern.substring(4,8)))
+                            m_filters = -1;
+                        else if (pattern.startsWith("BG/GR"))
                             m_filters = 0x16161616;
-                        else if (pattern.startsWith("GRBG"))
+                        else if (pattern.startsWith("GR/BG"))
                             m_filters = 0x61616161;
-                        else if (pattern.startsWith("GBRG"))
+                        else if (pattern.startsWith("GB/RG"))
                             m_filters = 0x49494949;
-                        else if (pattern.startsWith("RGGB"))
+                        else if (pattern.startsWith("RG/GB"))
                             m_filters = 0x94949494;
                         else
                             m_filters = -1;
@@ -418,8 +436,9 @@ public final class DCRaw implements
                 }
                 m_error = p.exitValue();
                 p.destroy();
-            } else
+            } else {
                 m_error = 0;
+            }
         }
     }
 
@@ -466,8 +485,8 @@ public final class DCRaw implements
                 String HEIGHT = "HEIGHT ";
                 String DEPTH = "DEPTH ";
                 String MAXVAL = "MAXVAL ";
-                String TUPLTYPE = "TUPLTYPE ";
-                String ENDHDR = "ENDHDR";
+                // String TUPLTYPE = "TUPLTYPE ";
+                // String ENDHDR = "ENDHDR";
                 String SWIDTH = readln(s);
                 width = Integer.parseInt(SWIDTH.substring(WIDTH.length()));
                 String SHEIGHT = readln(s);
@@ -478,11 +497,12 @@ public final class DCRaw implements
                 dataType = SMAXVAL.substring(MAXVAL.length()).equals("65535")
                            ? DataBuffer.TYPE_USHORT
                            : DataBuffer.TYPE_BYTE;
-                String STUPLTYPE = readln(s);
-                String SENDHDR = readln(s);
+                // String STUPLTYPE = readln(s);
+                // String SENDHDR = readln(s);
                 imageData = new ImageData(width, height, bands, dataType);
-            } else
+            } else {
                 return null;
+            }
 
             int totalData = width * height * bands * (dataType == DataBuffer.TYPE_BYTE ? 1 : 2);
 
@@ -496,13 +516,19 @@ public final class DCRaw implements
             ByteBuffer bb = c.map(FileChannel.MapMode.READ_ONLY, c.position(), totalData);
 
             if (dataType == DataBuffer.TYPE_USHORT) {
-                bb.order(ByteOrder.BIG_ENDIAN);
+                // bb.order(ByteOrder.BIG_ENDIAN);
+                bb.order(ByteOrder.nativeOrder());
                 bb.asShortBuffer().get((short[]) imageData.data);
-            } else
-                bb.get((byte[]) imageData.data);
 
-            if (bb instanceof DirectBuffer)
-                ((DirectBuffer) bb).cleaner().clean();
+                // Darty hack to prevent crash on Arch Linux (issue #125)
+                if (ByteOrder.nativeOrder() != ByteOrder.BIG_ENDIAN)
+                    for (int i = 0; i < ((short[]) imageData.data).length; ++i)
+                        ((short[]) imageData.data)[i] = Short.reverseBytes(((short[]) imageData.data)[i]);
+            } else {
+                bb.get((byte[]) imageData.data);
+            }
+
+            ByteBufferUtil.clean(bb);
 
             c.close();
         } catch (Exception e) {
@@ -597,7 +623,7 @@ public final class DCRaw implements
                 String line, args;
                 // output expected on stderr
                 while ((line = readln(dcrawStdErr)) != null) {
-                    // System.out.println(line);
+                    System.out.println(line);
 
                     if ((args = match(line, DCRAW_OUTPUT)) != null)
                         ofName = args.substring(0, args.indexOf(" ..."));
@@ -605,7 +631,7 @@ public final class DCRaw implements
 
                 // Flush stdout just in case...
                 while ((line = readln(dcrawStdOut)) != null)
-                    ; // System.out.println(line);
+                    System.out.println(line);
 
                 if (p != null) {
                     dcrawStdErr.close();
@@ -617,8 +643,9 @@ public final class DCRaw implements
                     }
                     m_error = p.exitValue();
                     p.destroy();
-                } else
+                } else {
                     m_error = 0;
+                }
             }
 
             System.out.println("dcraw value: " + m_error);
@@ -628,7 +655,10 @@ public final class DCRaw implements
                 throw new BadImageFileException(of);
             }
 
-            if (!ofName.equals(of.getPath())) {
+            if (ofName == null) {
+                ofName = of.getPath();
+                System.out.println("Cannot get output filename. Falling back to: " + ofName);
+            } else if (!ofName.equals(of.getPath())) {
                 of.delete();
                 of = new File(ofName);
             }
@@ -729,13 +759,10 @@ public final class DCRaw implements
         return m_filters;
     }
 
-    public boolean getSecondaryPixels() {
-        return m_secondaryPixels;
-    }
-
     /**
      * {@inheritDoc}
      */
+    @Override
     public float getShutterSpeed() {
         return m_shutterSpeed;
     }
@@ -781,8 +808,6 @@ public final class DCRaw implements
     private int m_filters;
 
     private int m_rawColors;
-
-    private boolean m_secondaryPixels;
 
     private float m_cam_mul[] = new float[4];
     private float m_pre_mul[] = new float[4];

@@ -30,7 +30,6 @@ import static com.lightcrafts.image.types.AdobeConstants.*;
  *
  * @author Paul J. Lucas [paul@lightcrafts.com]
  */
-@SuppressWarnings({"CloneableClassWithoutClone"})
 public final class IPTCDirectory extends ImageMetadataDirectory implements
     ArtistProvider, CaptureDateTimeProvider, CopyrightProvider, TitleProvider {
 
@@ -475,7 +474,7 @@ public final class IPTCDirectory extends ImageMetadataDirectory implements
                 case META_STRING:
                     for ( String s : imValue.getValues() ) {
                         try {
-                            final byte[] b = s.getBytes( "ISO-8859-1" );
+                            final byte[] b = s.getBytes( "UTF-8" );
                             size += IPTC_ENTRY_HEADER_SIZE + b.length;
                         }
                         catch ( UnsupportedEncodingException e ) {
@@ -589,7 +588,7 @@ public final class IPTCDirectory extends ImageMetadataDirectory implements
      */
     private static void encodeString( ByteBuffer buf, String s ) {
         try {
-            final byte[] b = s.getBytes( "ISO-8859-1" );
+            final byte[] b = s.getBytes( "UTF-8" );
             buf.putShort( (short)b.length );
             buf.put( b );
         }
@@ -717,6 +716,7 @@ public final class IPTCDirectory extends ImageMetadataDirectory implements
         add( IPTC_CAPTION_ABSTRACT, "Caption/Abstract", META_STRING, true, 0 );
         add( IPTC_CATEGORY, "Category", META_STRING, true, 0 );
         add( IPTC_CITY, "City", META_STRING, true, 0 );
+        add( IPTC_CODED_CHARACTER_SET, "CodedCharacterSet", META_STRING, true, 0 );
         add( IPTC_CONTACT, "Contact", META_STRING, true, IPTC_TAG_MULTIVALUE );
         add( IPTC_CONTENT_LOCATION_CODE, "ContentLocationCode", META_STRING, true, IPTC_TAG_MULTIVALUE );
         add( IPTC_CONTENT_LOCATION_NAME, "ContentLocationName", META_STRING, true, IPTC_TAG_MULTIVALUE );

@@ -5,7 +5,7 @@ package com.lightcrafts.ui.operation;
 import com.lightcrafts.model.LayerMode;
 import com.lightcrafts.model.Operation;
 import com.lightcrafts.ui.LightZoneSkin;
-import com.lightcrafts.ui.layout.Box;
+
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
@@ -14,6 +14,7 @@ import org.pushingpixels.substance.internal.utils.SubstanceCoreUtilities;
 import org.pushingpixels.substance.internal.utils.SubstanceSizeUtils;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -117,6 +118,7 @@ class OpFooter extends Box implements PropertyChangeListener {
 
         tabPane = new JTabbedPane();
         tabPane.setFont(LightZoneSkin.fontSet.getSmallFont());
+        tabPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPane.add(LOCALE.get( "ToolSettingsTabName" ), blendBox);
         tabPane.add(LOCALE.get( "ColorSelectionTabName"), colorControls);
 

@@ -31,13 +31,17 @@ float const DefaultMaxMemoryPercentage = 0.3;
 /**
  * Insist on at least this much RAM.
  */
-int const   JavaMinMemoryInMB = 256;
+int const   JavaMinMemoryInMB = 512;
 
 /**
  * Limit the JVM heap size because we now use non-heap memory for things like
  * tile caches.
  */
-int const   JavaMaxMemoryInMB = 768;
+#if _WIN64 || __amd64__
+int const   JavaMaxMemoryInMB = 32768;
+#else
+int const   JavaMaxMemoryInMB = 1024;
+#endif
 
 /**
  * Copy a C string to a newly allocated C buffer.

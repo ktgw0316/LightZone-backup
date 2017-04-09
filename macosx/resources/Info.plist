@@ -8,8 +8,8 @@
     <string>US</string>
     <key>CFBundleExecutable</key>
     <string>@APPNAME@</string>
-    <key>CFBundleGetInfoString</key>
-    <string>@APPNAME@ @VERSION@ (@BUILD@), Copyright 2005-2007 Light Crafts, Inc. All Rights Reserved.</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>@APPNAME@ @VERSION@ (@BUILD@), Copyright 2005-2011 Light Crafts, Inc. All Rights Reserved. Copyright 2013- The LightZone Project. All Rights Reserved.</string>
     <key>CFBundleHelpBookFolder</key>
     <string>LightZone_Help</string>
     <key>CFBundleHelpBookName</key>
@@ -82,6 +82,8 @@
     </array>
     <key>CFBundleIconFile</key>
     <string>LightZone.icns</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
 
     <!-- Java stuff -->
 
@@ -90,24 +92,32 @@
         <key>MainClass</key>
         <string>com.lightcrafts.platform.macosx.MacOSXLauncher</string>
         <key>JVMVersion</key>
-        <string>1.5*</string>
+        <string>1.6+</string>
         <key>ClassPath</key>
         <array>
+            <string>.</string>
+            <string>asm-all-2.2.2.jar</string>
+            <string>laf-widget.jar</string>
+            <string>lcjai.jar</string>
             <string>lightcrafts-apple.jar</string>
             <string>lightcrafts.jar</string>
             <string>quaqua.jar</string>
-            <string>lcjai.jar</string>
             <string>substance-lite.jar</string>
             <string>/System/Library/Java</string>
         </array>
         <key>VMOptions</key>
         <array>
             <string>-Xrs</string>
+            <string>-XX:UseG1GC</string>
+            <string>-XX:MinHeapFreeRatio=30</string>
+            <string>-XX:MaxHeapFreeRatio=30</string>
         </array>
         <key>Properties</key>
         <dict>
-            <key>apple.awt.graphics.UseQuartz</key>
+            <key>apple.laf.useScreenMenuBar</key>
             <string>true</string>
+            <key>apple.awt.graphics.UseQuartz</key>
+            <string>false</string>
             <key>file.encoding</key>
             <string>utf-8</string>
         </dict>
