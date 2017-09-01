@@ -9,6 +9,10 @@ EXCLUDED_LIBS:=		$(wildcard \
 			../lib/annotations*.jar \
 			../lib/*-javadoc.jar \
 			../lib/*-sources.jar \
+			../lib/kotlin-ant.jar \
+			../lib/kotlin-compiler.jar \
+			../lib/kotlin-preloader.jar \
+			../lib/kotlin-script-runtime.jar \
 			)
 DEST_EXCLUDED_LIBS:=	$(notdir $(EXCLUDED_LIBS))
 COMMON_LIBS:=		$(wildcard ../lib/*.jar)

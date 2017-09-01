@@ -62,7 +62,18 @@
     <property name="ivy.initialized" value="true"/>
   </target>
 
-  <target name="javac" depends="resolve">
+  <property name="kotlin.version" value="1.2.41"/>
+
+  <target name="init-kotlin" depends="resolve">
+    <move todir="${ivy.jar.dir}">
+      <fileset dir="${ivy.jar.dir}"/>
+      <mapper type="glob" from="kotlin-*-${kotlin.version}.jar" to="kotlin-*.jar"/>
+    </move>
+    <typedef resource="org/jetbrains/kotlin/ant/antlib.xml"
+             classpath="lib/kotlin-ant.jar"/>
+  </target>
+
+  <target name="javac" depends="init-kotlin">
     <exec executable="${MAKE}" dir="products" failonerror="true"
           vmlauncher="false"/>
     <mkdir dir="build"/>
@@ -74,6 +85,7 @@
           <include name="*.jar"/>
         </fileset>
       </classpath>
+      <withKotlin/>
     </javac>
   </target>
 
