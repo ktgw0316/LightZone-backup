@@ -215,6 +215,6 @@ public class HDROpImage2 extends PointOpImage {
                   dstwidth, dstheight, srcLineStride, srcPixelStride,
                   maskLineStride, maskPixelStride, dstLineStride, dstPixelStride,
                   (float) shadows, (float) detail, (float) highlights,
-                  ColorScience.Wr, ColorScience.Wg, ColorScience.Wb);
+                ColorScience.INSTANCE.getWr(), ColorScience.INSTANCE.getWg(), ColorScience.INSTANCE.getWb());
     }
 }

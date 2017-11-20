@@ -187,7 +187,7 @@ public class ZoneFinder extends Preview implements PaintListener {
             ColorScience.ICC_ProfileParameters pp = new ColorScience.ICC_ProfileParameters(rgb_profile);
 
             double[][] transform = {
-                {pp.W[0], pp.W[1], pp.W[2], 0}
+                {pp.getW()[0], pp.getW()[1], pp.getW()[2], 0}
             };
 
             ParameterBlock pb = new ParameterBlock();

@@ -134,9 +134,9 @@ public class LightnessLookupTable extends LookupTableJAI {
 
             int minOffset = Math.min(srcBandOffsets[0], Math.min(srcBandOffsets[1], srcBandOffsets[2]));
 
-            int wr = (int) (ColorScience.W[srcBandOffsets[0] - minOffset] * scale);
-            int wg = (int) (ColorScience.W[srcBandOffsets[1] - minOffset] * scale);
-            int wb = (int) (ColorScience.W[srcBandOffsets[2] - minOffset] * scale);
+            int wr = (int) (ColorScience.INSTANCE.getW()[srcBandOffsets[0] - minOffset] * scale);
+            int wg = (int) (ColorScience.INSTANCE.getW()[srcBandOffsets[1] - minOffset] * scale);
+            int wb = (int) (ColorScience.INSTANCE.getW()[srcBandOffsets[2] - minOffset] * scale);
 
             for (int w = 0; w < width; w++) {
                 int sr = sd[srcPixelOffset + 0] & 0xFFFF;

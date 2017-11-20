@@ -146,7 +146,7 @@ public class UnSharpMaskOperation extends BlendedOperation {
     static class LuminanceUSMProcessor implements ImageProcessor {
         @Override
         public RenderedOp process(RenderedImage source) {
-            double[][] yChannel = new double[][]{{ColorScience.Wr, ColorScience.Wg, ColorScience.Wb, 0}};
+            double[][] yChannel = new double[][]{{ColorScience.INSTANCE.getWr(), ColorScience.INSTANCE.getWg(), ColorScience.INSTANCE.getWb(), 0}};
 
             ParameterBlock pb = new ParameterBlock();
             pb.addSource( source );

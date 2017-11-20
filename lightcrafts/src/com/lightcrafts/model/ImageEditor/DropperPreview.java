@@ -134,7 +134,7 @@ class DropperPreview extends Preview {
         gg.drawAlignedString(LOCALE.get("Sampler_GreenLabel"), green, minx + 50, 12 + 4 * textHeight);
         gg.drawAlignedString(LOCALE.get("Sampler_BlueLabel"),  blue,  minx + 50, 12 + 5 * textHeight);
 
-        double lightness = ColorScience.Wr * red + ColorScience.Wg * green + ColorScience.Wb * blue;
+        double lightness = ColorScience.INSTANCE.getWr() * red + ColorScience.INSTANCE.getWg() * green + ColorScience.INSTANCE.getWb() * blue;
 
         gg.drawAlignedString(LOCALE.get("Sampler_LuminosityLabel"), (int) lightness, minx + gap + 50, miny + 2 + textHeight);
 

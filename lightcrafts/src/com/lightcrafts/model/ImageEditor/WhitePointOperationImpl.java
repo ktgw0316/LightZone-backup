@@ -121,7 +121,7 @@ class WhitePointOperationImpl extends BlendedOperation implements WhitePointOper
                 double tgreen = pixel[1] / 2 - pixel[0] / 4 - pixel[2] / 4;
                 double tblue = pixel[2] / 2 - pixel[0] / 4 - pixel[1] / 4;
 
-                double lum = (ColorScience.Wr * pixel[0] + ColorScience.Wg * pixel[1] + ColorScience.Wb * pixel[2]) / (double) 0xffff;
+                double lum = (ColorScience.INSTANCE.getWr() * pixel[0] + ColorScience.INSTANCE.getWg() * pixel[1] + ColorScience.INSTANCE.getWb() * pixel[2]) / (double) 0xffff;
 
                 double[][] polygon = {
                         {0, 0},

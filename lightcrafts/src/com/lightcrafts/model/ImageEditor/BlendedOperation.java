@@ -144,9 +144,9 @@ public abstract class BlendedOperation extends GenericOperationImpl implements C
 
             float feather = 0.1f;
 
-            float luminosity = (float) (Math.log1p(0xff * ColorScience.Wr * r +
-                                                   0xff * ColorScience.Wg * g +
-                                                   0xff * ColorScience.Wb * b) / (8 * Math.log(2)));
+            float luminosity = (float) (Math.log1p(0xff * ColorScience.INSTANCE.getWr() * r +
+                                                   0xff * ColorScience.INSTANCE.getWg() * g +
+                                                   0xff * ColorScience.INSTANCE.getWb() * b) / (8 * Math.log(2)));
 
             float minLuminosity = Math.max(luminosity-feather, 0);
             float minLuminosityFeather = Math.min(minLuminosity, feather);
@@ -391,7 +391,7 @@ public abstract class BlendedOperation extends GenericOperationImpl implements C
 
                 pb = new ParameterBlock();
                 pb.addSource(back);
-                pb.add(new double[][]{{ColorScience.Wr, ColorScience.Wg, ColorScience.Wb, 0}});
+                pb.add(new double[][]{{ColorScience.INSTANCE.getWr(), ColorScience.INSTANCE.getWg(), ColorScience.INSTANCE.getWb(), 0}});
                 PlanarImage monochrome = JAI.create("BandCombine", pb, null);
 
                 RenderingHints layoutHints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, Functions.getImageLayout(labImage));

@@ -160,7 +160,7 @@ public class JAIContext {
             zero = cs.fromCIEXYZ(new float[] {0, 0, 0});
         }
         System.out.println("zero: "  + zero[0] + " : " + zero[1] + " : " + zero[2]);
-        double zlum = ColorScience.Wr * zero[0] + ColorScience.Wg * zero[1] + ColorScience.Wb * zero[2];
+        double zlum = ColorScience.INSTANCE.getWr() * zero[0] + ColorScience.INSTANCE.getWg() * zero[1] + ColorScience.INSTANCE.getWb() * zero[2];
         System.out.println("zero lum: " + zlum);
     }
 

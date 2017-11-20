@@ -69,7 +69,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
         return matrix;
     }
 
-    private static final ColorScience.CAMethod caMethod = ColorScience.CAMethod.Mixed;
+    private static final ColorScience.CAMethod caMethod = ColorScience.INSTANCE.CAMethod.Mixed;
 
     static final OperationType typeV1 = new OperationTypeImpl("RAW Adjustments");
     static final OperationType typeV2 = new OperationTypeImpl("RAW Adjustments V2");
@@ -359,7 +359,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
                             for (int j = 0; j < 3; j++)
                                 newPixel[j] += (int) (pixel[i] * cameraRGB(temperature)[j][i]);
 
-                        float[] n = WhiteBalanceV2.neutralize(newPixel, caMethod, temperature, daylightTemperature);
+                        float n[] = WhiteBalanceV2.Companion.neutralize(newPixel, caMethod, temperature, daylightTemperature);
 
                         lightness = newPixel[1]/255.0f;
 
@@ -388,7 +388,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
             front.setProperty(JAIContext.PERSISTENT_CACHE_TAG, Boolean.TRUE);
 
             if (tint != 0)
-                front = WhiteBalanceV2.tintCast(front, tint, lightness);
+                front = WhiteBalanceV2.Companion.tintCast(front, tint, lightness);
 
             front.setProperty(JAIContext.PERSISTENT_CACHE_TAG, Boolean.TRUE);
 

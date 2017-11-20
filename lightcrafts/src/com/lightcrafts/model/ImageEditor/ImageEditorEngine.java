@@ -312,8 +312,8 @@ public class ImageEditorEngine implements Engine {
         operationsSet.put(HDROperationV2.typeV4, HDROperationV2.class);
         operationsSet.put(HDROperationV3.typeV5, HDROperationV3.class);
         operationsSet.put(ContrastMaskOperation.type, ContrastMaskOperation.class);
-        operationsSet.put(WhiteBalanceV2.typeV2, WhiteBalanceV2.class);
-        operationsSet.put(WhiteBalanceV2.typeV3, WhiteBalanceV2.class);
+        operationsSet.put(WhiteBalanceV2.Companion.getTypeV2(), WhiteBalanceV2.class);
+        operationsSet.put(WhiteBalanceV2.Companion.getTypeV3(), WhiteBalanceV2.class);
         operationsSet.put(WhiteBalance.type, WhiteBalance.class);
         operationsSet.put(ChannelMixer.type, ChannelMixer.class);
         operationsSet.put(ChannelMixerV2.typeV2, ChannelMixerV2.class);

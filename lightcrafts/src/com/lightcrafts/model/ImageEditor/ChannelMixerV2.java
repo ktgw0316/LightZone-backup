@@ -100,7 +100,7 @@ public class ChannelMixerV2 extends BlendedOperation implements com.lightcrafts.
             float green = 1 - filter[1];
             float blue = 1 - filter[2];
 
-            double tred = ColorScience.Wr, tgreen = ColorScience.Wg, tblue = ColorScience.Wb;
+            double tred = ColorScience.INSTANCE.getWr(), tgreen = ColorScience.INSTANCE.getWg(), tblue = ColorScience.INSTANCE.getWb();
 
             if (red != 0) {
                 tred -= strenght * red/2;
