@@ -2,16 +2,10 @@
 
 package com.lightcrafts.image.metadata;
 
-import java.io.*;
-import java.util.*;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-
-import com.lightcrafts.image.metadata.providers.*;
-import com.lightcrafts.image.metadata.values.*;
 import com.lightcrafts.image.ImageInfo;
 import com.lightcrafts.image.metadata.makernotes.MakerNotesDirectory;
+import com.lightcrafts.image.metadata.providers.*;
+import com.lightcrafts.image.metadata.values.*;
 import com.lightcrafts.image.types.ImageType;
 import com.lightcrafts.image.types.JPEGImageType;
 import com.lightcrafts.image.types.TIFFImageType;
@@ -19,12 +13,19 @@ import com.lightcrafts.utils.CollectionUtil;
 import com.lightcrafts.utils.LightCraftsException;
 import com.lightcrafts.utils.Version;
 import com.lightcrafts.utils.xml.XMLUtil;
+import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import java.io.*;
+import java.util.*;
 
 import static com.lightcrafts.image.metadata.CoreTags.*;
-import static com.lightcrafts.image.metadata.EXIFConstants.*;
+import static com.lightcrafts.image.metadata.EXIFConstants.EXIF_SUBEXIF_TAG_ID_START;
 import static com.lightcrafts.image.metadata.EXIFTags.*;
-import static com.lightcrafts.image.metadata.ImageOrientation.*;
 import static com.lightcrafts.image.metadata.IPTCTags.*;
+import static com.lightcrafts.image.metadata.ImageOrientation.ORIENTATION_LANDSCAPE;
+import static com.lightcrafts.image.metadata.ImageOrientation.ORIENTATION_UNKNOWN;
 import static com.lightcrafts.image.metadata.TIFFTags.*;
 import static com.lightcrafts.image.metadata.XMPConstants.XMP_DC_NS;
 import static com.lightcrafts.image.metadata.XMPConstants.XMP_DC_PREFIX;
@@ -423,6 +424,7 @@ public class ImageMetadata implements
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public String getGPSLatitudeDMS() {
         final Collection<ImageMetadataDirectory> dirs =
@@ -438,6 +440,7 @@ public class ImageMetadata implements
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public String getGPSLongitudeDMS() {
         final Collection<ImageMetadataDirectory> dirs =
