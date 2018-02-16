@@ -2,18 +2,20 @@
 
 package com.lightcrafts.model.ImageEditor;
 
-import static com.lightcrafts.model.ImageEditor.Locale.LOCALE;
+import com.lightcrafts.jai.JAIContext;
+import com.lightcrafts.jai.utils.Functions;
 import com.lightcrafts.model.Preview;
 import com.lightcrafts.model.Region;
-import com.lightcrafts.jai.utils.Functions;
-import com.lightcrafts.jai.JAIContext;
+import lombok.val;
 
-import javax.media.jai.*;
-
+import javax.media.jai.Histogram;
+import javax.media.jai.PlanarImage;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.Raster;
+
+import static com.lightcrafts.model.ImageEditor.Locale.LOCALE;
 
 public class HistogramPreview extends Preview implements PaintListener {
     private int bins[][] = null;
@@ -32,12 +34,22 @@ public class HistogramPreview extends Preview implements PaintListener {
 
     @Override
     public void setDropper(Point p) {
+        if (p == null || engine == null)
+            return;
 
+        Color sample = engine.getPixelValue(p.x, p.y);
+        final int zone;
+        if (sample == null) {
+            zone = -1;
+        } else {
+            val lightness = calcLightness(sample.getRed(), sample.getGreen(), sample.getBlue());
+            zone = (int) calcZone(lightness);
+        }
+        setFocusedZone(zone, null);
     }
 
     @Override
     public void setRegion(Region region) {
-
     }
 
     @Override
