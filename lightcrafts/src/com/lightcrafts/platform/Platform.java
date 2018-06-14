@@ -14,6 +14,7 @@ import java.awt.color.ICC_Profile;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -193,7 +194,9 @@ public class Platform {
      * @return Returns the amount of memory in megabytes.
      */
     public int getPhysicalMemoryInMB() {
-        return 0;
+        com.sun.management.OperatingSystemMXBean os =
+            (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        return (int) os.getTotalPhysicalMemorySize() / 1048576;
     }
 
     /**
@@ -285,13 +288,12 @@ public class Platform {
      * @param hostName The fully qualified name of the desired host to connect
      * to.
      * @return Returns <code>true</code> only if this computer currently has
-     * an active internet connection and thus can reach the specified host.
+     * an active internet connection and can reach the specified host.
      */
-    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     public boolean hasInternetConnectionTo( String hostName ) {
         try {
-            InetAddress.getByName( hostName );
-            return true;
+            final InetAddress address = InetAddress.getByName(hostName);
+            return address.isReachable(2000);
         }
         catch (Throwable t) {
             return false;

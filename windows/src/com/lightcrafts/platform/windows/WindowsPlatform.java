@@ -139,18 +139,8 @@ public final class WindowsPlatform extends Platform {
     }
 
     @Override
-    public int getPhysicalMemoryInMB() {
-        return WindowsMemory.getPhysicalMemoryInMB();
-    }
-
-    @Override
     public Collection<ColorProfileInfo> getPrinterProfiles() {
         return getColorProfiles();
-    }
-
-    @Override
-    public boolean hasInternetConnectionTo( String hostName ) {
-        return WindowsInternetConnection.hasConnection();
     }
 
     @Override

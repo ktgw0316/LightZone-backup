@@ -125,11 +125,6 @@ public final class MacOSXPlatform extends Platform {
     }
 
     @Override
-    public int getPhysicalMemoryInMB() {
-        return MacOSXMemory.getPhysicalMemoryInMB();
-    }
-
-    @Override
     public Collection<ColorProfileInfo> getPrinterProfiles() {
         return getExportProfiles();
         /* return MacOSXColorProfileManager.getProfilesFor(
@@ -140,11 +135,6 @@ public final class MacOSXPlatform extends Platform {
     @Override
     public ProgressDialog getProgressDialog() {
         return new DefaultProgressDialog(); // new MacOSXProgressDialog();
-    }
-
-    @Override
-    public boolean hasInternetConnectionTo( String hostName ) {
-        return MacOSXInternetConnection.hasConnectionTo( hostName );
     }
 
     @Override
