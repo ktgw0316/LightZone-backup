@@ -73,12 +73,12 @@ void LC_JPEGReader::setFields( JNIEnv *env, jobject jLCJPEGReader ) {
          <<                      ", colorSpace=" << cinfo.out_color_space
          << endl;
 #endif
-    LC_setIntField( env, jLCJPEGReader, "m_width" , cinfo.output_width );
-    LC_setIntField( env, jLCJPEGReader, "m_height", cinfo.output_height );
+    LC_setIntField( env, jLCJPEGReader, "width" , cinfo.output_width );
+    LC_setIntField( env, jLCJPEGReader, "height", cinfo.output_height );
     LC_setIntField(
-        env, jLCJPEGReader, "m_colorsPerPixel", cinfo.output_components
+        env, jLCJPEGReader, "colorsPerPixel", cinfo.output_components
     );
-    LC_setIntField( env, jLCJPEGReader, "m_colorSpace", cinfo.out_color_space );
+    LC_setIntField( env, jLCJPEGReader, "colorSpace", cinfo.out_color_space );
 }
 
 /**

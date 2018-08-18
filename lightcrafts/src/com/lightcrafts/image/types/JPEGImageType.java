@@ -707,7 +707,7 @@ public class JPEGImageType extends ImageType implements TrueImageTypeProvider {
         try {
             final int numComponents = image.getColorModel().getNumComponents();
             final int colorSpace =
-                LCJPEGWriter.getColorSpaceFromNumComponents( numComponents );
+                LCJPEGWriter.Companion.getColorSpaceFromNumComponents( numComponents );
             if ( colorSpace == CS_UNKNOWN )
                 throw new LCImageLibException(
                     "Unsupported number of components: " + numComponents
