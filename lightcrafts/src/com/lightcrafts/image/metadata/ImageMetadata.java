@@ -9,7 +9,6 @@ import com.lightcrafts.image.metadata.values.*;
 import com.lightcrafts.image.types.ImageType;
 import com.lightcrafts.image.types.JPEGImageType;
 import com.lightcrafts.image.types.TIFFImageType;
-import com.lightcrafts.utils.CollectionUtil;
 import com.lightcrafts.utils.LightCraftsException;
 import com.lightcrafts.utils.Version;
 import com.lightcrafts.utils.xml.XMLUtil;
@@ -884,13 +883,6 @@ public class ImageMetadata implements
                 }
                 metadata.removeDirectory( SubEXIFDirectory.class );
             }
-
-            //
-            // Move those tags that are common between TIFF and EXIF metadata
-            // from the EXIF directory to the TIFF directory since, for a TIFF
-            // file, they *must* be there.
-            //
-            ImageMetadataDirectory.moveValuesFromTo( exifDir, tiffDir );
         }
 
         ////////// Values that are always put.
@@ -1303,13 +1295,26 @@ public class ImageMetadata implements
      * orientation of the image; otherwise just use landscape.
      * @param includeXMPPacket If <code>true</code>, XMP packet processing
      * instructions are included in the new document.
+     * @return Returns said document.
+     */
+    public Document toXMP(boolean useActualOrientation, boolean includeXMPPacket) {
+        return toXMP(useActualOrientation, includeXMPPacket, null);
+    }
+
+    /**
+     * Convert all the metadata into an XMP XML document.
+     *
+     * @param useActualOrientation If <code>true</code>, use the actual
+     * orientation of the image; otherwise just use landscape.
+     * @param includeXMPPacket If <code>true</code>, XMP packet processing
+     * instructions are included in the new document.
      * @param dirClass The set of directories to include or <code>null</code>
      * for all.
      * @return Returns said document.
      */
     public Document toXMP( boolean useActualOrientation,
                            boolean includeXMPPacket,
-                           Class<? extends ImageMetadataDirectory>... dirClass )
+                           Class<? extends ImageMetadataDirectory> dirClass)
     {
         final ImageMetadata metadata = prepForXMP( useActualOrientation );
         final Document doc = XMPUtil.createEmptyXMPDocument( includeXMPPacket );
@@ -1324,22 +1329,17 @@ public class ImageMetadata implements
      * @param dirClass The set of directories to include or <code>null</code>
      * for all.
      */
-    public void toXMP( Document xmpDoc,
-                       Class<? extends ImageMetadataDirectory>... dirClass ) {
-        final Set<Class<? extends ImageMetadataDirectory>> dirSet =
-            CollectionUtil.asSet( dirClass );
-
+    private void toXMP( Document xmpDoc,
+                       Class<? extends ImageMetadataDirectory> dirClass ) {
         final Element rdfElement = XMPUtil.getRDFElementOf( xmpDoc );
         for ( ImageMetadataDirectory dir : getDirectories() ) {
-            if ( dirSet != null && !dirSet.isEmpty() &&
-                 !dirSet.contains( dir.getClass() ) )
-                continue;
-            final Collection<Element> rdfDescElements = dir.toXMP( xmpDoc );
-            if ( rdfDescElements != null )
-                for ( Element element : rdfDescElements )
-                    rdfElement.appendChild( element );
+            if (dirClass == null || dirClass == dir.getClass()) {
+                final Collection<Element> rdfDescElements = dir.toXMP(xmpDoc);
+                if (rdfDescElements != null)
+                    for (Element element : rdfDescElements)
+                        rdfElement.appendChild(element);
+            }
         }
-
         final Element dcRDFDescElement = toDublinCoreXMP( xmpDoc );
         if ( dcRDFDescElement != null )
             rdfElement.appendChild( dcRDFDescElement );
