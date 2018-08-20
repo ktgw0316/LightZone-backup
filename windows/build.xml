@@ -54,9 +54,7 @@
 
   <target name="javac" depends="common">
     <mkdir dir="build"/>
-    <mkdir dir="javah"/>
-    <javac destdir="build" debug="true"
-           source="1.8" target="1.8" nativeheaderdir="javah">
+    <javac destdir="build" source="1.8" target="1.8" debug="true">
       <src path="src"/>
       <classpath>
         <fileset dir="${common-dir}/products">
@@ -214,7 +212,6 @@
   <target name="clean-up">
     <ant dir="${common-dir}" target="${clean-method}"/>
     <delete dir="build"/>
-    <delete dir="javah"/>
     <delete file="${installer-name}"/>
     <exec executable="make" dir="helpers">
       <arg value="${clean-method}"/>
