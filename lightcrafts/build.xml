@@ -62,7 +62,7 @@
     <property name="ivy.initialized" value="true"/>
   </target>
 
-  <property name="kotlin.version" value="1.2.41"/>
+  <property name="kotlin.version" value="1.2.61"/>
 
   <target name="init-kotlin" depends="resolve">
     <move todir="${ivy.jar.dir}">
@@ -85,7 +85,9 @@
           <include name="*.jar"/>
         </fileset>
       </classpath>
-      <withKotlin/>
+      <withKotlin>
+        <compilerarg line="-jvm-target 1.8"/>
+      </withKotlin>
     </javac>
   </target>
 
