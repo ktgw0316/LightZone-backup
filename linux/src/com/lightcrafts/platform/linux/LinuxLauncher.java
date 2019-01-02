@@ -4,11 +4,13 @@ package com.lightcrafts.platform.linux;
 
 import com.lightcrafts.platform.Launcher;
 
+import javax.swing.SwingUtilities;
+
 public final class LinuxLauncher extends Launcher {
 
     public static void main(String[] args) {
         final Launcher launcher = new LinuxLauncher();
-        launcher.init(args);
+        SwingUtilities.invokeLater(() -> launcher.init(args));
     }
 
     @Override

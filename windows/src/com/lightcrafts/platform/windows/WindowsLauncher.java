@@ -10,6 +10,7 @@ import com.lightcrafts.platform.Launcher;
 
 import java.awt.EventQueue;
 import java.io.File;
+import javax.swing.SwingUtilities;
 
 /**
  * Launch LightZone for Windows.
@@ -20,7 +21,7 @@ public final class WindowsLauncher extends Launcher {
 
     public static void main(String[] args) {
         final Launcher launcher = new WindowsLauncher();
-        launcher.init(args);
+        SwingUtilities.invokeLater(() -> launcher.init(args));
     }
 
     /**
