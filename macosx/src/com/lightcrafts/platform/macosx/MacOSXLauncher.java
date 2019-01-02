@@ -14,6 +14,7 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import javax.swing.SwingUtilities;
 
 import java.awt.Desktop;
 import java.awt.desktop.AboutEvent;
@@ -39,7 +40,7 @@ public final class MacOSXLauncher extends Launcher {
 
     public static void main(String[] args) {
         final Launcher launcher = new MacOSXLauncher();
-        launcher.init(args);
+        SwingUtilities.invokeLater(() -> launcher.init(args));
     }
 
     /**

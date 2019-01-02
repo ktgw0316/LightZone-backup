@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2013-     Masahiro Kitagawa */
 
 package com.lightcrafts.app;
 
@@ -2194,75 +2195,63 @@ public class Application {
             initDocumentDatabase();
             Startup.startupMessage(LOCALE.get("StartupOpeningMessage"));
 
-            EventQueue.invokeLater(
-                new Runnable() {
-                    public void run() {
-                        new LightZoneSkin();
-                        if (Platform.isMac()) {
-                            // Get a Mac menu bar before setting LaF, then restore.
-                            Object menuBarUI = UIManager.get("MenuBarUI");
-                            LightZoneSkin.setLightZoneLookAndFeel();
-                            UIManager.put("MenuBarUI", menuBarUI);
+            SwingUtilities.invokeLater(() -> {
+                new LightZoneSkin();
+                if (Platform.isMac()) {
+                    // Get a Mac menu bar before setting LaF, then restore.
+                    Object menuBarUI = UIManager.get("MenuBarUI");
+                    LightZoneSkin.setLightZoneLookAndFeel();
+                    UIManager.put("MenuBarUI", menuBarUI);
 
-                            openMacPlaceholderFrame();
-                        }
-                        else {
-                            LightZoneSkin.setLightZoneLookAndFeel();
-                        }
+                    openMacPlaceholderFrame();
+                }
+                else {
+                    LightZoneSkin.setLightZoneLookAndFeel();
+                }
 
-                        for (final String arg : args) {
-                            final File file = new File(arg);
-                            if (file.isDirectory()) {
-                                openFolder(openEmpty(), file);
-                            }
-                            else /* if (file.isFile()) */ {
-                                final File parent = file.getParentFile();
-                                if (parent != null) {
-                                    notifyRecentFolder(parent);
-                                    open(file, openEmpty(), null);
-                                }
-                            }
+                for (final String arg : args) {
+                    final File file = new File(arg);
+                    if (file.isDirectory()) {
+                        openFolder(openEmpty(), file);
+                    }
+                    else /* if (file.isFile()) */ {
+                        final File parent = file.getParentFile();
+                        if (parent != null) {
+                            notifyRecentFolder(parent);
+                            open(file, openEmpty(), null);
                         }
-                        if (Current.isEmpty()) {
-                            openEmpty();
-                        }
-                        Platform.getPlatform().readyToOpenFiles();
-
-                        // Make sure this happens good and late, after a
-                        // frame is visible.
-                        EventQueue.invokeLater(
-                            new Runnable() {
-                                public void run() {
-                                    showFirstTimeHelp();
-                                }
-                            }
-                        );
-                        // Wait twenty seconds after all initialization has
-                        // completed before declaring a successful startup,
-                        // since crashes that would be fixed by cleared
-                        // settings sometimes happen much later, during
-                        // queued browser thumbnail tasks.
-                        new Thread(
-                            new Runnable() {
-                                public void run() {
-                                    try {
-                                        Thread.sleep(20000);
-                                    }
-                                    catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                    StartupCrash.startupEnded();
-                                }
-                            },
-                            "StartupSuccessWait"
-                        ).start();
                     }
                 }
-            );
+                if (Current.isEmpty()) {
+                    openEmpty();
+                }
+                Platform.getPlatform().readyToOpenFiles();
+
+                // Make sure this happens good and late, after a
+                // frame is visible.
+                showFirstTimeHelp();
+
+                // Wait twenty seconds after all initialization has
+                // completed before declaring a successful startup,
+                // since crashes that would be fixed by cleared
+                // settings sometimes happen much later, during
+                // queued browser thumbnail tasks.
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(20000);
+                    }
+                    catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    StartupCrash.startupEnded();
+                },
+                        "StartupSuccessWait"
+                ).start();
+            });
             AwtWatchdog.spawn();
         }
         catch (Throwable e) {
-            (new ExceptionDialog()).handle(e);
+            SwingUtilities.invokeLater(() -> (new ExceptionDialog()).handle(e));
         }
     }
 }

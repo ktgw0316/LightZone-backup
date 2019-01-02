@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2013-     Masahiro Kitagawa */
 
 package com.lightcrafts.ui.editor;
 
@@ -24,6 +25,7 @@ import com.lightcrafts.utils.xml.XmlNode;
 
 import javax.imageio.ImageIO;
 import javax.swing.Action;
+import javax.swing.SwingUtilities;
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.io.*;
@@ -253,29 +255,36 @@ public class Document {
 
         xform = new XFormModel(engine);
 
-        regionManager = new RegionManager();
-        crop = new CropRotateManager(engine, xform);
-
-        scaleModel = new ScaleModel(engine);
         val scaleNode = root.getChild(ScaleTag);
         val s = new Scale(scaleNode);
-        scaleModel.setScale(s);
-
-        editor = new Editor(engine, scaleModel, xform, regionManager, crop, this);
-        editor.showWait(LOCALE.get("EditorWaitText"));
-        crop.setEditor( editor );
 
         val controlNode = root.getChild(ControlTag);
 
-        // this does the inverse of save(XmlNode):
         try {
-            editor.restore(controlNode);
-        } catch (XMLException e) {
-            dispose();
-            throw e;
-        }
+            SwingUtilities.invokeLater(() -> {
+                regionManager = new RegionManager();
+                crop = new CropRotateManager(engine, xform);
 
-        commonInitialization();
+                scaleModel = new ScaleModel(engine);
+                scaleModel.setScale(s);
+
+                editor = new Editor(engine, scaleModel, xform, regionManager, crop, this);
+                editor.showWait(LOCALE.get("EditorWaitText"));
+                crop.setEditor(editor);
+
+                // this does the inverse of save(XmlNode):
+                try {
+                    editor.restore(controlNode);
+                } catch (XMLException e) {
+                    throw new UncheckedIOException(e);
+                }
+
+                commonInitialization();
+            });
+        } catch (UncheckedIOException e) {
+            dispose();
+            throw new XMLException(e);
+        }
 
         if (root.hasChild(SaveTag)) {
             val saveNode = root.getChild(SaveTag);
@@ -323,14 +332,17 @@ public class Document {
         engine = EngineFactory.createEngine(meta, null, thread);
 
         xform = new XFormModel(engine);
-        regionManager = new RegionManager();
-        scaleModel = new ScaleModel(engine);
 
-        crop = new CropRotateManager(engine, xform);
-        editor = new Editor(engine, scaleModel, xform, regionManager, crop, this);
-        crop.setEditor( editor );
-        editor.showWait(LOCALE.get("EditorWaitText"));
-        commonInitialization();
+        SwingUtilities.invokeLater(() -> {
+            regionManager = new RegionManager();
+            scaleModel = new ScaleModel(engine);
+
+            crop = new CropRotateManager(engine, xform);
+            editor = new Editor(engine, scaleModel, xform, regionManager, crop, this);
+            crop.setEditor(editor);
+            editor.showWait(LOCALE.get("EditorWaitText"));
+            commonInitialization();
+        });
     }
 
     private void commonInitialization() {
