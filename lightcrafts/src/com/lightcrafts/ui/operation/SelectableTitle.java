@@ -9,6 +9,7 @@ import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.ui.editor.CurveTypeButtons;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,8 +19,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 class SelectableTitle extends JPanel implements MouseListener {
 
@@ -189,8 +188,8 @@ class SelectableTitle extends JPanel implements MouseListener {
         button.setSize(size.width, size.height);
         
         if (selected) {
-            button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-            button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+//            button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//            button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
         }
         button.paint(g);
 

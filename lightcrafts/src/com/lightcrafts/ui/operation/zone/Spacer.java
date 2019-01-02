@@ -2,7 +2,7 @@
 
 package com.lightcrafts.ui.operation.zone;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,7 +64,7 @@ class Spacer extends JPanel
         unstickButton.setRolloverEnabled(true);
         unstickButton.setRolloverIcon(highlightIcon);
         unstickButton.setBorder(null);
-        unstickButton.putClientProperty(SubstanceLookAndFeel.BUTTON_PAINT_NEVER_PROPERTY, Boolean.TRUE);
+//        unstickButton.putClientProperty(SubstanceLookAndFeel.BUTTON_PAINT_NEVER_PROPERTY, Boolean.TRUE);
         unstickButton.setBorderPainted(false);
         unstickButton.setRolloverEnabled(true);
         unstickButton.setOpaque(false);

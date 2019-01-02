@@ -1,26 +1,26 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2018-     Masahiro Kitagawa */
 
 package com.lightcrafts.ui.operation;
 
 import com.lightcrafts.model.LayerMode;
 import com.lightcrafts.model.Operation;
 import com.lightcrafts.ui.LightZoneSkin;
-
-import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
-import org.jvnet.substance.color.ColorScheme;
-import org.jvnet.substance.utils.SubstanceCoreUtilities;
-import org.jvnet.substance.utils.SubstanceSizeUtils;
+import org.pushingpixels.substance.api.colorscheme.SubstanceColorScheme;
+import org.pushingpixels.substance.internal.utils.SubstanceCoreUtilities;
+import org.pushingpixels.substance.internal.utils.SubstanceSizeUtils;
 
 import javax.swing.*;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
+
+import static com.lightcrafts.ui.operation.Locale.LOCALE;
 
 class OpFooter extends Box implements PropertyChangeListener {
     private LayerControls layerControls;
@@ -43,7 +43,7 @@ class OpFooter extends Box implements PropertyChangeListener {
         }
     }
 
-    private static Icon getThemeIcon(ColorScheme colorScheme, boolean square) {
+    private static Icon getThemeIcon(SubstanceColorScheme colorScheme, boolean square) {
         int iSize = SubstanceSizeUtils.getTitlePaneIconSize();
         BufferedImage result = SubstanceCoreUtilities.getBlankImage(iSize, iSize);
         Graphics2D graphics = (Graphics2D) result.getGraphics().create();
@@ -97,13 +97,13 @@ class OpFooter extends Box implements PropertyChangeListener {
         return new ImageIcon(result);
     }
 
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport( this );
-
-    ColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
+    private SubstanceColorScheme orangeScheme =
+            new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
 
     OpFooter(OpControl control, List<LayerMode> layerModes) {
         super(BoxLayout.X_AXIS);
 
+        final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
         layerControls = new LayerControls(control, layerModes, pcs);
         invertRegionSwitch = new InvertRegionCheckBox(control, pcs);
         colorControls = new ColorSelectionControls(control, pcs);

@@ -5,11 +5,10 @@ package com.lightcrafts.app.batch;
 import com.lightcrafts.utils.ProgressIndicator;
 import com.lightcrafts.utils.thread.ProgressThread;
 import com.lightcrafts.ui.LightZoneSkin;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;
-
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 class BatchProgressBar extends ProgressThread {
 
@@ -18,7 +17,7 @@ class BatchProgressBar extends ProgressThread {
         JProgressBar bar = new JProgressBar();
 
         BatchProgressIndicator() {
-            bar.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//            bar.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
             bar.setBorder(null);
         }
 

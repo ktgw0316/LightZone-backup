@@ -1,38 +1,36 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2013-     Masahiro Kitagawa */
 
 package com.lightcrafts.ui;
 
-import org.jvnet.substance.theme.SubstanceTheme;
-import org.jvnet.substance.theme.SubstanceComplexTheme;
-import org.jvnet.substance.theme.SubstanceEbonyTheme;
-import org.jvnet.substance.color.BaseColorScheme;
-import org.jvnet.substance.color.ColorScheme;
-import org.jvnet.substance.skin.SubstanceAbstractSkin;
-import org.jvnet.substance.painter.SimplisticSoftBorderReverseGradientPainter;
-import org.jvnet.substance.painter.GlassGradientPainter;
-import org.jvnet.substance.painter.AlphaControlBackgroundComposite;
-import org.jvnet.substance.button.ClassicButtonShaper;
-import org.jvnet.substance.watermark.SubstanceNoneWatermark;
-import org.jvnet.substance.title.ArcHeaderPainter;
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.SubstanceToggleButtonUI;
-import org.jvnet.substance.SubstanceButtonUI;
-import org.jvnet.substance.SubstanceLabelUI;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.pushingpixels.neon.font.FontPolicy;
+import org.pushingpixels.neon.font.FontSet;
+import org.pushingpixels.substance.api.*;
+import org.pushingpixels.substance.api.colorscheme.EbonyColorScheme;
+import org.pushingpixels.substance.api.colorscheme.BaseColorScheme;
+import org.pushingpixels.substance.api.colorscheme.SubstanceColorScheme;
+import org.pushingpixels.substance.api.painter.border.FlatBorderPainter;
+import org.pushingpixels.substance.api.painter.decoration.FlatDecorationPainter;
+import org.pushingpixels.substance.api.painter.fill.MatteFillPainter;
+import org.pushingpixels.substance.api.painter.highlight.ClassicHighlightPainter;
+import org.pushingpixels.substance.api.shaper.ClassicButtonShaper;
 
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.plaf.FontUIResource;
-import javax.swing.plaf.ComponentUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 
-import contrib.com.jgoodies.looks.common.FontSet;
-import contrib.com.jgoodies.looks.common.FontPolicy;
 import javax.media.jai.IHSColorSpace;
 
-public class LightZoneSkin extends SubstanceAbstractSkin {
-    public static String NAME = "LightZone";
+import static org.pushingpixels.substance.api.SubstanceSlices.*;
+
+public class LightZoneSkin extends SubstanceSkin {
+    public static final String NAME = "LightZone";
 
     public static class Colors {
         public final static Color NeutralGray;
@@ -76,7 +74,7 @@ public class LightZoneSkin extends SubstanceAbstractSkin {
         public final static Color SelectedToolBorder = relight(LZOrange, 0.7f);
     }
 
-    static Color relight(Color color, float amount) {
+    private static Color relight(Color color, float amount) {
         IHSColorSpace ihs = IHSColorSpace.getInstance();
 
         float components[] = new float[3];
@@ -86,228 +84,148 @@ public class LightZoneSkin extends SubstanceAbstractSkin {
         return new Color(components[0], components[1], components[2]);
     }
 
+    @Getter
     public static class CustomColorScheme extends BaseColorScheme {
-        private final Color mainUltraLightColor;
-        private final Color mainExtraLightColor;
-        private final Color mainLightColor;
-        private final Color mainMidColor;
-        private final Color mainDarkColor;
-        private final Color mainUltraDarkColor;
+        private final Color ultraLightColor;
+        private final Color extraLightColor;
+        private final Color lightColor;
+        private final Color midColor;
+        private final Color darkColor;
+        private final Color ultraDarkColor;
         private final Color foregroundColor;
 
         public CustomColorScheme(Color baseColor) {
-            mainUltraLightColor = relight(baseColor, 0.95f);
-            mainExtraLightColor = relight(baseColor, 0.85f);
-            mainLightColor = relight(baseColor, 0.7f);
-            mainMidColor = relight(baseColor, 0.6f);
-            mainDarkColor = relight(baseColor, 0.5f);
-            mainUltraDarkColor = relight(baseColor, 0.4f);
+            super("Custom", false);
+
+            ultraLightColor = relight(baseColor, 0.95f);
+            extraLightColor = relight(baseColor, 0.85f);
+            lightColor = relight(baseColor, 0.7f);
+            midColor = relight(baseColor, 0.6f);
+            darkColor = relight(baseColor, 0.5f);
+            ultraDarkColor = relight(baseColor, 0.4f);
             foregroundColor = Color.white;
         }
-
-        public Color getForegroundColor() { return foregroundColor; }
-        public Color getUltraLightColor() { return mainUltraLightColor; }
-        public Color getExtraLightColor() { return mainExtraLightColor; }
-        public Color getLightColor() { return mainLightColor; }
-        public Color getMidColor() { return mainMidColor; }
-        public Color getDarkColor() { return mainDarkColor; }
-        public Color getUltraDarkColor() { return mainUltraDarkColor; }
     }
-
-    public static SubstanceTheme makeTheme(ColorScheme colorScheme, String name) {
-        SubstanceTheme activeTheme = new SubstanceTheme(colorScheme, name, SubstanceTheme.ThemeKind.DARK);
-
-        SubstanceTheme basicTheme = new SubstanceEbonyTheme().tint(0.05);
-        SubstanceTheme defaultTheme = basicTheme.shade(0.2);
-        SubstanceTheme disabledTheme = basicTheme.shade(0.3);
-        SubstanceTheme activeTitleTheme = defaultTheme;
-
-        SubstanceComplexTheme theme = new SubstanceComplexTheme(name + " Theme",
-                                                                SubstanceTheme.ThemeKind.DARK, activeTheme, defaultTheme, disabledTheme,
-                                                                activeTitleTheme);
-
-        theme.setNonActivePainter(new SimplisticSoftBorderReverseGradientPainter());
-        theme.setSelectedTabFadeStart(0.4);
-        theme.setSelectedTabFadeEnd(0.7);
-        theme.setCellRendererBackgroundTheme(new SubstanceEbonyTheme());
-
-        return theme;
-    }
-
-    public static final SubstanceTheme orangeTheme = makeTheme(new CustomColorScheme(Colors.LZOrange), "Orange");
 
     public LightZoneSkin() {
-        SubstanceTheme activeTheme = new SubstanceEbonyTheme();
-        SubstanceTheme defaultTheme = activeTheme.shade(0.2);
-        SubstanceTheme disabledTheme = activeTheme.shade(0.3);
-        SubstanceTheme activeTitleTheme = defaultTheme;
+        SubstanceColorScheme activeScheme = new EbonyColorScheme();
+        SubstanceColorScheme enabledScheme = activeScheme.shade(0.2);
+        SubstanceColorScheme disabledScheme = activeScheme.shade(0.6);
 
-        SubstanceComplexTheme theme = new SubstanceComplexTheme(NAME,
-                                                                SubstanceTheme.ThemeKind.DARK, activeTheme, defaultTheme, disabledTheme,
-                                                                activeTitleTheme);
-        theme.setNonActivePainter(new SimplisticSoftBorderReverseGradientPainter());
-        theme.setSelectedTabFadeStart(0.3);
-        theme.setSelectedTabFadeEnd(0.6);
-        theme.setCellRendererBackgroundTheme(new SubstanceEbonyTheme());
+        SubstanceColorSchemeBundle defaultSchemeBundle = new SubstanceColorSchemeBundle(
+                activeScheme, enabledScheme, disabledScheme);
 
-        this.theme = theme;
-        this.shaper = new ClassicButtonShaper();
-        this.watermark = new SubstanceNoneWatermark();
-        this.gradientPainter = new GlassGradientPainter();
-        this.titlePainter = new ArcHeaderPainter();
-        this.tabBackgroundComposite = new AlphaControlBackgroundComposite(0.5f);
+        SubstanceColorScheme highlightScheme = activeScheme;
+        defaultSchemeBundle.registerHighlightColorScheme(highlightScheme, 0.6f,
+                ComponentState.ROLLOVER_UNSELECTED);
+        defaultSchemeBundle.registerHighlightColorScheme(highlightScheme, 0.8f,
+                ComponentState.SELECTED);
+        defaultSchemeBundle.registerHighlightColorScheme(highlightScheme, 1.0f,
+                ComponentState.ROLLOVER_SELECTED);
+        defaultSchemeBundle.registerHighlightColorScheme(highlightScheme,
+                0.75f, ComponentState.ARMED, ComponentState.ROLLOVER_ARMED);
+
+
+        defaultSchemeBundle.registerColorScheme(new EbonyColorScheme(),
+                ColorSchemeAssociationKind.HIGHLIGHT_BORDER, ComponentState.getActiveStates());
+
+        defaultSchemeBundle.registerColorScheme(disabledScheme, 0.5f,
+                ComponentState.DISABLED_UNSELECTED);
+        defaultSchemeBundle.registerColorScheme(highlightScheme, 0.5f,
+                ComponentState.DISABLED_SELECTED);
+
+        defaultSchemeBundle.registerColorScheme(activeScheme,
+                ColorSchemeAssociationKind.BORDER,
+                ComponentState.DISABLED_SELECTED);
+
+
+
+        this.registerDecorationAreaSchemeBundle(defaultSchemeBundle, DecorationAreaType.NONE);
+        this.registerAsDecorationArea(activeScheme,
+            DecorationAreaType.PRIMARY_TITLE_PANE,
+            DecorationAreaType.SECONDARY_TITLE_PANE);
+
+        this.registerAsDecorationArea(enabledScheme,
+                DecorationAreaType.PRIMARY_TITLE_PANE,
+                DecorationAreaType.SECONDARY_TITLE_PANE,
+                DecorationAreaType.HEADER, DecorationAreaType.FOOTER,
+                DecorationAreaType.GENERAL, DecorationAreaType.TOOLBAR);
+
+        this.watermarkScheme = activeScheme.shade(0.4);
+
+        this.setTabFadeStart(0.3);
+        this.setTabFadeEnd(0.6);
+
+        this.buttonShaper = new ClassicButtonShaper();
+        this.fillPainter = new MatteFillPainter();
+        this.decorationPainter = new FlatDecorationPainter();
+        this.highlightPainter = new ClassicHighlightPainter();
+        this.borderPainter = new FlatBorderPainter();
     }
 
+    @Override
     public String getDisplayName() {
         return NAME;
     }
 
-    public static class LightZoneFontSet implements FontSet {
-        FontUIResource controlFont;
-        FontUIResource menuFont;
-        FontUIResource titleFont;
-        FontUIResource windowTitleFont;
-        FontUIResource smallFont;
-        FontUIResource messageFont;
+    @Getter
+    @RequiredArgsConstructor(access= AccessLevel.PRIVATE)
+    private static class LightZoneFontSet implements FontSet {
+        private final FontUIResource controlFont;
+        private final FontUIResource menuFont;
+        private final FontUIResource titleFont;
+        private final FontUIResource windowTitleFont;
+        private final FontUIResource smallFont;
+        private final FontUIResource messageFont;
 
-        String fontFamily = Font.SANS_SERIF;
+        private static final String fontFamily = Font.SANS_SERIF;
 
         public LightZoneFontSet() {
-            controlFont = new FontUIResource(fontFamily, Font.PLAIN, 13);
-            menuFont = new FontUIResource(fontFamily, Font.PLAIN, 13);
-            titleFont = new FontUIResource(fontFamily, Font.BOLD, 11);
-            windowTitleFont = new FontUIResource(fontFamily, Font.BOLD, 16);
-            smallFont = new FontUIResource(fontFamily, Font.PLAIN, 13);
-            messageFont = new FontUIResource(fontFamily, Font.BOLD, 13);
-        }
-
-        public FontUIResource getControlFont() {
-            return controlFont;
-        }
-
-        public FontUIResource getMenuFont() {
-            return menuFont;
-        }
-
-        public FontUIResource getTitleFont() {
-            return titleFont;
-        }
-
-        public FontUIResource getWindowTitleFont() {
-            return windowTitleFont;
-        }
-
-        public FontUIResource getSmallFont() {
-            return smallFont;
-        }
-
-        public FontUIResource getMessageFont() {
-            return messageFont;
+            this(new FontUIResource(fontFamily, Font.PLAIN, 13),
+                    new FontUIResource(fontFamily, Font.PLAIN, 13),
+                    new FontUIResource(fontFamily, Font.BOLD, 11),
+                    new FontUIResource(fontFamily, Font.BOLD, 16),
+                    new FontUIResource(fontFamily, Font.PLAIN, 13),
+                    new FontUIResource(fontFamily, Font.BOLD, 13));
         }
     }
 
     public static final FontSet fontSet = new LightZoneFontSet();
 
     public static Border getImageBorder() {
-        return getPaneBorder(); // new CompoundBorder(getPaneBorder(), new MatteBorder(6, 6, 6, 6, Colors.EditorBackground));
+        return getPaneBorder();
     }
 
     public static Border getPaneBorder() {
         return new EtchedBorder(EtchedBorder.LOWERED, new Color(48, 48, 48), new Color(23, 23, 23));
     }
 
-    private static final RenderingHints aliasingRenderHints;
-
-    static {
-        aliasingRenderHints = new RenderingHints(
-            RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON
-        );
-        aliasingRenderHints.put(
-            RenderingHints.KEY_TEXT_ANTIALIASING,
-            RenderingHints.VALUE_TEXT_ANTIALIAS_ON
-        );
-        aliasingRenderHints.put(
-            RenderingHints.KEY_RENDERING,
-            RenderingHints.VALUE_RENDER_QUALITY
-        );
-    }
-
-    public static class LightZoneButtonUI extends SubstanceButtonUI {
-        public static ComponentUI createUI(JComponent b) {
-            AbstractButton button = (AbstractButton) b;
-            button.setRolloverEnabled(true);
-            button.setOpaque(false);
-            button.setFocusable(false);
-            button.setFocusPainted(false);
-            return new LightZoneButtonUI();
-        }
-
-        // On Windows text aliasing is off for some reason...
-        public void paint(java.awt.Graphics graphics, javax.swing.JComponent jComponent) {
-            Graphics2D g = (Graphics2D) graphics;
-            g.setRenderingHints(aliasingRenderHints);
-            super.paint(graphics, jComponent);
-        }
-
-        public void installDefaults(final AbstractButton b) {
-            super.installDefaults(b);
-            b.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
-        }
-    }
-
-    public static class LightZoneToggleButtonUI extends SubstanceToggleButtonUI {
-        public static ComponentUI createUI(JComponent b) {
-            AbstractButton button = (AbstractButton) b;
-            button.setRolloverEnabled(true);
-            button.setFocusable(false);
-            button.setFocusPainted(false);
-            return new LightZoneToggleButtonUI();
-        }
-
-        // On Windows text aliasing is off for some reason...
-        public void paint(java.awt.Graphics graphics, javax.swing.JComponent jComponent) {
-            Graphics2D g = (Graphics2D) graphics;
-            g.setRenderingHints(aliasingRenderHints);
-            super.paint(graphics, jComponent);
-        }
-
-        public void installDefaults(final AbstractButton b) {
-            super.installDefaults(b);
-            b.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
-        }
-    }
-
     public static class LightZoneLookAndFeel extends SubstanceLookAndFeel {
-        protected void initClassDefaults(UIDefaults table) {
-            super.initClassDefaults(table);
-            Object[] uiDefaults = {
-                "ButtonUI", LightZoneButtonUI.class.getName(),
-                "ToggleButtonUI", LightZoneToggleButtonUI.class.getName()
-            };
-            table.putDefaults(uiDefaults);
+        public LightZoneLookAndFeel() {
+            super(new LightZoneSkin());
         }
     }
+
+    private static final LookAndFeel substance = new LightZoneLookAndFeel();
 
     public static LookAndFeel getLightZoneLookAndFeel() {
-        LookAndFeel substance = new LightZoneLookAndFeel();
+        return substance;
+    }
 
-        LightZoneLookAndFeel.setSkin(new LightZoneSkin());
-
-        FontPolicy newFontPolicy = new FontPolicy() {
-            public FontSet getFontSet(String lafName,
-                                      UIDefaults table) {
-                return new LightZoneSkin.LightZoneFontSet();
-            }
-        };
-
-        LightZoneLookAndFeel.setFontPolicy(newFontPolicy);
-
-        UIManager.put(SubstanceLookAndFeel.NO_EXTRA_ELEMENTS, Boolean.TRUE);
+    public static void setLightZoneLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(substance);
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 
         UIManager.put("ToolTip.backgroundInactive", substance.getDefaults().get("ToolTip.background"));
         UIManager.put("ToolTip.foregroundInactive", substance.getDefaults().get("ToolTip.foreground"));
 
-        return substance;
+        SwingUtilities.invokeLater(() -> {
+            SubstanceCortex.GlobalScope.setSkin(new LightZoneSkin());
+            final FontPolicy newFontPolicy = uiDefaults -> new LightZoneFontSet();
+            SubstanceCortex.GlobalScope.setFontPolicy(newFontPolicy);
+        });
     }
 }

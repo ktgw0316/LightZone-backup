@@ -1,15 +1,12 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2018-     Masahiro Kitagawa */
 
 package com.lightcrafts.app;
-
-import com.lightcrafts.ui.toolkit.TextAreaFactory;
-import com.lightcrafts.utils.ErrorLogger;
 
 import static com.lightcrafts.app.Locale.LOCALE;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -38,7 +35,6 @@ public class ExceptionDialog extends JOptionPane {
     private JRadioButton exitButton;
 
     public ExceptionDialog() {
-
         message = new JTextArea();
         message.setBackground(getBackground());
         message.setWrapStyleWord(true);
@@ -127,7 +123,7 @@ public class ExceptionDialog extends JOptionPane {
         System.setProperty("sun.awt.exception.handler", null);
     }
 
-    void showError(Component parent, Throwable t) {
+    private void showError(Component parent, Throwable t) {
         if (isDisplayed) {
             // Just drop errors that arrive during the error display:
             return;
@@ -143,14 +139,12 @@ public class ExceptionDialog extends JOptionPane {
         createDialog(null, "");
         final JDialog display = createDialog(parent, LOCALE.get("CrashTitle"));
 
-        ActionListener detailsAction = new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                JOptionPane pane = new JOptionPane(detailsScroll);
-                JDialog details = pane.createDialog(
-                    display, LOCALE.get("CrashDetailTitle")
-                );
-                details.setVisible(true);
-            }
+        ActionListener detailsAction = event -> {
+            JOptionPane pane = new JOptionPane(detailsScroll);
+            JDialog details = pane.createDialog(
+                display, LOCALE.get("CrashDetailTitle")
+            );
+            details.setVisible(true);
         };
         detailsButton.addActionListener(detailsAction);
         isDisplayed = true;

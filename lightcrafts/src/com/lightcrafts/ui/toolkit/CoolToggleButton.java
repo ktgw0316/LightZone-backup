@@ -13,15 +13,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.utils.SubstanceConstants;
+import org.pushingpixels.substance.api.SubstanceSlices;
+import org.pushingpixels.substance.internal.SubstanceSynapse;
 
 public class CoolToggleButton extends JToggleButton {
-
-    private CoolButton.ButtonStyle style;
 
     private CoolButtonBackground bkgnd;
 
@@ -47,8 +45,8 @@ public class CoolToggleButton extends JToggleButton {
         super.setIcon(icon);
 
         if (icon != null) {
-            if (style == CoolButton.ButtonStyle.NORMAL)
-                putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
+//            if (style == CoolButton.ButtonStyle.NORMAL)
+//                putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
 
             BufferedImage iconImage = new BufferedImage(icon.getIconWidth(),
                                                         icon.getIconHeight(),
@@ -81,9 +79,8 @@ public class CoolToggleButton extends JToggleButton {
     // The ButtonStyle effects the background, which determines the order
     // insets on this button.  Setting the style resets the border.
     public void setStyle(CoolButton.ButtonStyle style) {
-        this.style = style;
 
-        Set<SubstanceConstants.Side> openSides = new HashSet<SubstanceConstants.Side>();
+        Set<SubstanceSlices.Side> openSides = new HashSet<>();
 
         switch (style) {
             case NORMAL:
@@ -91,23 +88,22 @@ public class CoolToggleButton extends JToggleButton {
                 break;
 
             case LEFT:
-                // putClientProperty(SubstanceLookAndFeel.BUTTON_SIDE_PROPERTY, SubstanceConstants.Side.LEFT.name());
-                openSides.add(SubstanceConstants.Side.RIGHT);
-                putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
+                // putClientProperty(SubstanceLookAndFeel.BUTTON_SIDE_PROPERTY, SubstanceSlices.Side.LEFT.name());
+                openSides.add(SubstanceSlices.Side.RIGHT);
+                putClientProperty(SubstanceSynapse.BUTTON_OPEN_SIDE, openSides);
                 bkgnd = new CoolButtonLeftBackground(this);
                 break;
 
             case CENTER:
-	        openSides.add(SubstanceConstants.Side.LEFT);
-                openSides.add(SubstanceConstants.Side.RIGHT);
-	        putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
+	        openSides.add(SubstanceSlices.Side.LEFT);
+                openSides.add(SubstanceSlices.Side.RIGHT);
+	        putClientProperty(SubstanceSynapse.BUTTON_OPEN_SIDE, openSides);
                 bkgnd = new CoolButtonCenterBackground(this);
                 break;
 
             case RIGHT:
-                // putClientProperty(SubstanceLookAndFeel.BUTTON_SIDE_PROPERTY, SubstanceConstants.Side.RIGHT.name());
-                openSides.add(SubstanceConstants.Side.LEFT);
-                putClientProperty(SubstanceLookAndFeel.BUTTON_OPEN_SIDE_PROPERTY, openSides);
+                openSides.add(SubstanceSlices.Side.LEFT);
+                putClientProperty(SubstanceSynapse.BUTTON_OPEN_SIDE, openSides);
                 bkgnd = new CoolButtonRightBackground(this);
                 break;
         }

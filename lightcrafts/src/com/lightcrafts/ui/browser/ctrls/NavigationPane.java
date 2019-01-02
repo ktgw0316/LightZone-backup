@@ -19,8 +19,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-
 /**
  * Copyright (C) 2007 Light Crafts, Inc.
  * User: fabio

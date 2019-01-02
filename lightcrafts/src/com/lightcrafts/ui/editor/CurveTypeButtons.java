@@ -1,20 +1,23 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2018-     Masahiro Kitagawa */
 
 package com.lightcrafts.ui.editor;
 
-import static com.lightcrafts.ui.editor.Locale.LOCALE;
+import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.ui.region.CurveFactory;
 import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.CoolToggleButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
-import com.lightcrafts.ui.LightZoneSkin;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
+import org.pushingpixels.substance.api.colorscheme.SubstanceColorScheme;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.color.ColorScheme;
+import static com.lightcrafts.ui.editor.Locale.LOCALE;
 
 /**
  * A group of three toggle buttons that control the Curve implementation
@@ -57,51 +60,39 @@ public class CurveTypeButtons extends Box {
 
         ButtonGroup group = new ButtonGroup();
 
-        polygon.addItemListener(
-            new ItemListener() {
-                public void itemStateChanged(ItemEvent event) {
-                    if (event.getStateChange() == ItemEvent.SELECTED) {
-                        RegionManager regions =
-                            CurveTypeButtons.this.regions;
-                        isUpdating = true;
-                        regions.setCurveType(CurveFactory.Polygon);
-                        isUpdating = false;
-                    }
-                }
+        polygon.addItemListener(event -> {
+            if (event.getStateChange() == ItemEvent.SELECTED) {
+                RegionManager regions1 =
+                        CurveTypeButtons.this.regions;
+                isUpdating = true;
+                regions1.setCurveType(CurveFactory.Polygon);
+                isUpdating = false;
             }
-        );
+        });
         group.add(polygon);
         add(polygon);
 
-        basis.addItemListener(
-            new ItemListener() {
-                public void itemStateChanged(ItemEvent event) {
-                    if (event.getStateChange() == ItemEvent.SELECTED) {
-                        RegionManager regions =
-                            CurveTypeButtons.this.regions;
-                        isUpdating = true;
-                        regions.setCurveType(CurveFactory.CubicBasis);
-                        isUpdating = false;
-                    }
-                }
+        basis.addItemListener(event -> {
+            if (event.getStateChange() == ItemEvent.SELECTED) {
+                RegionManager regions12 =
+                        CurveTypeButtons.this.regions;
+                isUpdating = true;
+                regions12.setCurveType(CurveFactory.CubicBasis);
+                isUpdating = false;
             }
-        );
+        });
         group.add(basis);
         add(basis);
 
-        bezier.addItemListener(
-            new ItemListener() {
-                public void itemStateChanged(ItemEvent event) {
-                    if (event.getStateChange() == ItemEvent.SELECTED) {
-                        RegionManager regions =
-                            CurveTypeButtons.this.regions;
-                        isUpdating = true;
-                        regions.setCurveType(CurveFactory.CubicBezier);
-                        isUpdating = false;
-                    }
-                }
+        bezier.addItemListener(event -> {
+            if (event.getStateChange() == ItemEvent.SELECTED) {
+                RegionManager regions13 =
+                    CurveTypeButtons.this.regions;
+                isUpdating = true;
+                regions13.setCurveType(CurveFactory.CubicBezier);
+                isUpdating = false;
             }
-        );
+        });
         group.add(bezier);
         add(bezier);
     }
@@ -135,8 +126,6 @@ public class CurveTypeButtons extends Box {
         }
     }
 
-    ColorScheme orangeScheme = new LightZoneSkin.CustomColorScheme(LightZoneSkin.Colors.LZOrange);
-
     private void initButtons() {
         polygon = new CoolToggleButton(CoolButton.ButtonStyle.LEFT);
         polygon.setIcon(PolygonIcon);
@@ -146,9 +135,9 @@ public class CurveTypeButtons extends Box {
         bezier.setIcon(BezierIcon);
 
         // bezier.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.TRUE);
-        polygon.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-        basis.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-        bezier.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        polygon.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        basis.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        bezier.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
 
         polygon.setToolTipText(PolygonToolTip);
         basis.setToolTipText(BasisToolTip);

@@ -4,12 +4,11 @@ package com.lightcrafts.ui.operation;
 
 import com.lightcrafts.ui.action.ToggleAction;
 import com.lightcrafts.ui.toolkit.ImageOnlyButton;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 class CollapseExpandButton extends JToggleButton {
 
@@ -19,7 +18,7 @@ class CollapseExpandButton extends JToggleButton {
         setPressedIcon(pressed);
         setText(null);
         ImageOnlyButton.setStyle(this);
-        putClientProperty(SubstanceLookAndFeel.BUTTON_NO_MIN_SIZE_PROPERTY, Boolean.TRUE);
+//        putClientProperty(SubstanceLookAndFeel.BUTTON_NO_MIN_SIZE_PROPERTY, Boolean.TRUE);
     }
 
     protected PropertyChangeListener createActionPropertyChangeListener(

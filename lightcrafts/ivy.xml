@@ -11,7 +11,8 @@
     <dependency org="org.slf4j" name="slf4j-simple" rev="1.7.12" conf="default"/>
     <dependency org="javax.xml.bind" name="jaxb-api" rev="2.3.0"/>
     <dependency org="org.glassfish.jaxb" name="jaxb-runtime" rev="2.3.0.1"/>
-    <dependency org="javax.activation" name="javax.activation-api" rev="1.2.0"/>    
+    <dependency org="javax.activation" name="javax.activation-api" rev="1.2.0"/>
+    <dependency org="org.pushing-pixels" name="radiance-substance" rev="1.0.2"/>
   </dependencies>
 </ivy-module>
 

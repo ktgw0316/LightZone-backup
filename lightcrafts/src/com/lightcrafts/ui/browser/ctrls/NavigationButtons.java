@@ -9,6 +9,7 @@ import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
 import com.lightcrafts.ui.toolkit.MenuButton;
 import com.lightcrafts.ui.LightZoneSkin;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -19,8 +20,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 public class NavigationButtons extends JPanel {
 
@@ -74,7 +73,7 @@ public class NavigationButtons extends JPanel {
         btnForward.setEnabled(false);
 
         btnPath.setIcon(imgPath);
-        btnPath.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
+//        btnPath.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
         btnPath.setToolTipText(LOCALE.get("PathToolTip"));
     }
 
