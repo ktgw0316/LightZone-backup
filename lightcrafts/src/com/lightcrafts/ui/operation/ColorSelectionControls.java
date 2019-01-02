@@ -1,37 +1,42 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2018-     Masahiro Kitagawa */
 
 package com.lightcrafts.ui.operation;
 
-import java.awt.event.*;
-import java.awt.geom.Point2D;
-import java.awt.*;
-import java.beans.PropertyChangeSupport;
-import java.util.Enumeration;
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.undo.AbstractUndoableEdit;
-
+import com.lightcrafts.app.ComboFrame;
+import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.model.ColorSelection;
 import com.lightcrafts.model.Operation;
 import com.lightcrafts.model.RGBColorSelection;
 import com.lightcrafts.model.RGBColorSelectionPreset;
 import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.ui.editor.EditorMode;
-import com.lightcrafts.ui.toolkit.LCSliderUI;
-import com.lightcrafts.ui.toolkit.DropperButton;
 import com.lightcrafts.ui.mode.DropperMode;
-import com.lightcrafts.ui.swing.*;
+import com.lightcrafts.ui.swing.ColorSwatch;
+import com.lightcrafts.ui.swing.RangeSelector;
+import com.lightcrafts.ui.swing.RangeSelectorZoneTrack;
+import com.lightcrafts.ui.toolkit.DropperButton;
+import com.lightcrafts.ui.toolkit.LCSliderUI;
+import com.lightcrafts.utils.LCMS;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
-import com.lightcrafts.utils.LCMS;
+
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.undo.AbstractUndoableEdit;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.beans.PropertyChangeSupport;
+import java.util.Enumeration;
 
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
-import com.lightcrafts.jai.JAIContext;
-import com.lightcrafts.app.ComboFrame;
-import org.jvnet.substance.SubstanceLookAndFeel;
-import org.jvnet.substance.theme.SubstanceTheme;
-import org.jvnet.substance.color.ColorScheme;
 
 /**
  * A <code>ColorSelectionControls</code> is-a {@link Box} that contains all
@@ -40,7 +45,7 @@ import org.jvnet.substance.color.ColorScheme;
 final class ColorSelectionControls extends Box {
     private final PropertyChangeSupport pcs;
 
-    public static final String COLOR_SELECTION = "Color Selection";
+    static final String COLOR_SELECTION = "Color Selection";
 
     private static LCMS.Transform ts = new LCMS.Transform(
         new LCMS.Profile( JAIContext.linearProfile ), LCMS.TYPE_RGB_8,
@@ -102,26 +107,24 @@ final class ColorSelectionControls extends Box {
                                                 0xff & systemColor[1],
                                                 0xff & systemColor[2]);
 
-                        final ColorScheme colorScheme = new LightZoneSkin.CustomColorScheme(color);
-                        final SubstanceTheme theme = LightZoneSkin.makeTheme(colorScheme, p.name());
+//                        final SubstanceColorScheme colorScheme = new LightZoneSkin.CustomColorScheme(color);
+//                        final SubstanceTheme theme = LightZoneSkin.makeTheme(colorScheme, p.name());
 
-                        button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, theme);
-                        button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+//                        button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, theme);
+//                        button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+                        button.putClientProperty(SubstanceLookAndFeel.COLORIZATION_FACTOR, 1.0);
+                        button.setBackground(color);
 
                         button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
                     }
 
-                    button.addItemListener(
-                        new ItemListener() {
-                            public void itemStateChanged( ItemEvent ie ) {
-                                if ( ie.getStateChange() == ItemEvent.SELECTED ) {
-                                    final ColorButton b =
-                                        (ColorButton)ie.getItem();
-                                    selectPreset( b.m_preset );
-                                }
-                            }
+                    button.addItemListener(ie -> {
+                        if ( ie.getStateChange() == ItemEvent.SELECTED ) {
+                            final ColorButton b =
+                                    (ColorButton)ie.getItem();
+                            selectPreset( b.m_preset );
                         }
-                    );
+                    });
                 }
             }
 
@@ -240,13 +243,7 @@ final class ColorSelectionControls extends Box {
         );
 
         final ResetColorSelectionButton resetButton =
-            new ResetColorSelectionButton(
-                new ActionListener() {
-                    public void actionPerformed( ActionEvent ae ) {
-                        resetColorSelection();
-                    }
-                }
-            );
+            new ResetColorSelectionButton(ae -> resetColorSelection());
 
         setBackground( LightZoneSkin.Colors.ToolPanesBackground );
 
@@ -668,17 +665,13 @@ final class ColorSelectionControls extends Box {
         m_dropperButton.setToolTips(
             ColorSelectStartToolTip, ColorSelectEndToolTip
         );
-        m_dropperButton.addItemListener(
-            new ItemListener() {
-                public void itemStateChanged( ItemEvent ie ) {
-                    if ( ie.getStateChange() == ItemEvent.SELECTED ) {
-                        getComboFrame().getEditor().setMode( EditorMode.ARROW );
-                        control.notifyListenersEnterMode( m_dropperMode );
-                    } else if ( !m_isDropperModeCancelling )
-                        control.notifyListenersExitMode( m_dropperMode );
-                }
-            }
-        );
+        m_dropperButton.addItemListener(ie -> {
+            if ( ie.getStateChange() == ItemEvent.SELECTED ) {
+                getComboFrame().getEditor().setMode( EditorMode.ARROW );
+                control.notifyListenersEnterMode( m_dropperMode );
+            } else if ( !m_isDropperModeCancelling )
+                control.notifyListenersExitMode( m_dropperMode );
+        });
 
         m_dropperMode = new DropperMode( control );
         m_dropperMode.addListener(

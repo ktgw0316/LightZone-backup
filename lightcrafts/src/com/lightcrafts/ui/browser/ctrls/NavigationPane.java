@@ -8,6 +8,7 @@ import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
 import com.lightcrafts.ui.toolkit.MenuButton;
 import com.lightcrafts.ui.toolkit.PaneTitle;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -58,7 +59,7 @@ public class NavigationPane extends PaneTitle {
         btnForward.setEnabled(false);
 
         btnPath.setIcon(imgPath);
-        // btnPath.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
+         btnPath.putClientProperty(SubstanceLookAndFeel.FLAT_PROPERTY, Boolean.FALSE);
         btnPath.setToolTipText(LOCALE.get("PathToolTip"));
 
         btnBack.addActionListener(

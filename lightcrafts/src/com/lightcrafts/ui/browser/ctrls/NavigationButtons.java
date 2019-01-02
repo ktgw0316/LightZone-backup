@@ -2,25 +2,24 @@
 
 package com.lightcrafts.ui.browser.ctrls;
 
-import com.lightcrafts.ui.LightZoneSkin;
+import static com.lightcrafts.ui.browser.ctrls.Locale.LOCALE;
 import com.lightcrafts.ui.browser.folders.FolderBrowserPane;
 import com.lightcrafts.ui.browser.folders.FolderTreeListener;
 import com.lightcrafts.ui.toolkit.CoolButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
 import com.lightcrafts.ui.toolkit.MenuButton;
-import org.jvnet.substance.SubstanceLookAndFeel;
+import com.lightcrafts.ui.LightZoneSkin;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.*;
+import javax.imageio.ImageIO;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import static com.lightcrafts.ui.browser.ctrls.Locale.LOCALE;
 
 public class NavigationButtons extends JPanel {
 

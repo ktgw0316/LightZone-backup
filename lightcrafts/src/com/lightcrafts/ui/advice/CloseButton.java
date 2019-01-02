@@ -3,12 +3,11 @@
 package com.lightcrafts.ui.advice;
 
 import com.lightcrafts.ui.toolkit.ImageOnlyButton;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 class CloseButton extends ImageOnlyButton {
 
@@ -39,6 +38,6 @@ class CloseButton extends ImageOnlyButton {
         super(NormalIcon, PressedIcon);
         setRolloverIcon(HighlightIcon);
         setRolloverEnabled(true);
-        putClientProperty(SubstanceLookAndFeel.BUTTON_NO_MIN_SIZE_PROPERTY, Boolean.TRUE);
+//        putClientProperty(SubstanceLookAndFeel.BUTTON_NO_MIN_SIZE_PROPERTY, Boolean.TRUE);
     }
 }

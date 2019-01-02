@@ -2,13 +2,13 @@
 
 package com.lightcrafts.ui.operation;
 
-import static com.lightcrafts.ui.operation.Locale.LOCALE;
-import com.lightcrafts.ui.toolkit.ImageOnlyButton;
-import com.lightcrafts.ui.toolkit.IconFactory;
 import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.ui.editor.CurveTypeButtons;
+import com.lightcrafts.ui.toolkit.IconFactory;
+import com.lightcrafts.ui.toolkit.ImageOnlyButton;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +19,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import org.jvnet.substance.SubstanceLookAndFeel;
+import static com.lightcrafts.ui.operation.Locale.LOCALE;
 
 class SelectableTitle extends JPanel implements MouseListener {
 
@@ -189,8 +189,10 @@ class SelectableTitle extends JPanel implements MouseListener {
         button.setSize(size.width, size.height);
         
         if (selected) {
-            button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
-            button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+//            button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//            button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+            button.putClientProperty(SubstanceLookAndFeel.COLORIZATION_FACTOR, 1.0);
+            button.setBackground(LightZoneSkin.Colors.LZOrange);
         }
         button.paint(g);
 

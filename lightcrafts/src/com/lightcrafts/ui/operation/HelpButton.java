@@ -6,6 +6,7 @@ import com.lightcrafts.platform.Platform;
 import static com.lightcrafts.ui.operation.Locale.LOCALE;
 import com.lightcrafts.ui.toolkit.ImageOnlyButton;
 import com.lightcrafts.ui.toolkit.IconFactory;
+import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,8 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 class HelpButton extends ImageOnlyButton {
 
@@ -41,7 +40,7 @@ class HelpButton extends ImageOnlyButton {
 
     HelpButton(final SelectableControl control) {
         super(InfoNormalIcon, InfoPressedIcon);
-        putClientProperty(SubstanceLookAndFeel.BUTTON_NO_MIN_SIZE_PROPERTY, Boolean.TRUE);
+//        putClientProperty(SubstanceLookAndFeel.BUTTON_NO_MIN_SIZE_PROPERTY, Boolean.TRUE);
         setToolTipText(ToolTip);
         addActionListener(
             new ActionListener() {

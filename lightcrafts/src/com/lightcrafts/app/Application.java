@@ -2201,13 +2201,13 @@ public class Application {
                         if (Platform.isMac()) {
                             // Get a Mac menu bar before setting LaF, then restore.
                             Object menuBarUI = UIManager.get("MenuBarUI");
-                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
+                            LightZoneSkin.setLightZoneLookAndFeel();
                             UIManager.put("MenuBarUI", menuBarUI);
 
                             openMacPlaceholderFrame();
                         }
                         else {
-                            setLookAndFeel(LightZoneSkin.getLightZoneLookAndFeel());
+                            LightZoneSkin.setLightZoneLookAndFeel();
                         }
 
                         for (final String arg : args) {

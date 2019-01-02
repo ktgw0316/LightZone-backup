@@ -2,14 +2,12 @@
 
 package com.lightcrafts.platform;
 
-import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.utils.ProgressIndicator;
 import com.lightcrafts.utils.ProgressListener;
 import com.lightcrafts.utils.Version;
 import com.lightcrafts.utils.thread.CancelableThread;
 import com.lightcrafts.utils.thread.CancelableThreadMonitor;
 import com.lightcrafts.utils.thread.ProgressThread;
-import org.jvnet.substance.SubstanceLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +27,7 @@ public final class DefaultProgressDialog implements ProgressDialog {
 
     public DefaultProgressDialog() {
         m_progressBar = new JProgressBar();
-        m_progressBar.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
+//        m_progressBar.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, LightZoneSkin.orangeTheme);
         m_progressBar.setBorder(null);
     }
 
@@ -192,7 +190,7 @@ public final class DefaultProgressDialog implements ProgressDialog {
             final JButton cancelButton = new JButton( "Cancel ");
 
             final JOptionPane panel = new JOptionPane(
-                layoutPanel, JOptionPane.PLAIN_MESSAGE,
+                layoutPanel, JOptionPane.INFORMATION_MESSAGE,
                 JOptionPane.DEFAULT_OPTION, null, new Object[]{ cancelButton }
             );
 
