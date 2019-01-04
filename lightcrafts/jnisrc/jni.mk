@@ -65,12 +65,13 @@ endif
 
 DEFINES:=		-DJNILIB $(JNI_EXTRA_DEFINES)
 INCLUDES:=		$(PLATFORM_INCLUDES) $(JAVA_INCLUDES) \
+			-I$(COMMON_DIR) \
 			-I$(COMMON_DIR)/jnisrc/jniutils $(JNI_EXTRA_INCLUDES)
 LDFLAGS:=		$(PLATFORM_LDFLAGS) $(JAVA_LDFLAGS) \
 			-L$(COMMON_DIR)/products $(JNI_EXTRA_LDFLAGS)
 LINK:=			$(JNI_EXTRA_LINK)
 
-ifneq ($(JNI_EXTRA_PKGCFG),)
+ifdef JNI_EXTRA_PKGCFG
   LINK+=		$(shell $(PKGCFG) --libs-only-l $(JNI_EXTRA_PKGCFG))
   INCLUDES+=		$(shell $(PKGCFG) --cflags-only-I $(JNI_EXTRA_PKGCFG))
   LDFLAGS+=		$(shell $(PKGCFG) --libs-only-L $(JNI_EXTRA_PKGCFG))
@@ -156,8 +157,6 @@ endif
 
 include			$(COMMON_DIR)/mk/sources.mk
 
-JAVAH_HEADERS:=	$(foreach class,$(subst .,_,$(JAVAH_CLASSES)),javah/$(class).h)
-
 LOCAL_LIBS:=	$(filter-out %-ranlib.a,$(wildcard *.a))
 LOCAL_RANLIBS:=	$(foreach lib,$(LOCAL_LIBS),$(lib:.a=-ranlib.a))
 
@@ -192,12 +191,7 @@ ifndef mk_target
 # mk_target that recursively calls make with mk_target=true that will build the
 # real target.
 ##
-all: $(JAVAH_HEADERS) mk_target
-
-$(JAVAH_HEADERS):
-	-$(MKDIR) javah
-	javah -classpath "$(COMMON_DIR)/build$(CLASSPATH_SEP)$(COMMON_DIR)/lib/*$(CLASSPATH_SEP)$(PLATFORM_DIR)/build" \
-	      -d javah $(basename $(subst _,.,$(@F)))
+all: mk_target
 
 .PHONY: mk_target
 mk_target:

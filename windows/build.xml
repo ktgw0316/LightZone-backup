@@ -49,18 +49,19 @@
   <target name="common">
     <ant dir="${common-dir}" target="jar"/>
     <exec executable="make" dir="products" failonerror="true"
-          vmlauncher="false"/>
+          vmlauncher="false">
+      <arg value="-j"/>
+    </exec>
   </target>
 
   <target name="javac" depends="common">
     <mkdir dir="build"/>
-    <javac destdir="build" source="1.8" target="1.8" debug="true">
+    <mkdir dir="javah"/>
+    <javac destdir="build" debug="true"
+           source="1.8" target="1.8" nativeheaderdir="javah">
       <src path="src"/>
       <classpath>
         <fileset dir="${common-dir}/products">
-          <include name="*.jar"/>
-        </fileset>
-        <fileset dir="lib">
           <include name="*.jar"/>
         </fileset>
       </classpath>
@@ -211,8 +212,12 @@
 
   <target name="clean-up">
     <ant dir="${common-dir}" target="${clean-method}"/>
-    <delete dir="build"/>
-    <delete file="${installer-name}"/>
+    <parallel>
+      <delete dir="build"/>
+      <delete dir="javah"/>
+      <delete file="${installer-name}"/>
+      <delete file="products/lightzone.jvmargs"/>
+    </parallel>
     <exec executable="make" dir="helpers">
       <arg value="${clean-method}"/>
     </exec>
@@ -220,9 +225,9 @@
       <arg value="${clean-method}"/>
     </exec>
     <exec executable="make" dir="products">
+      <arg value="-j"/>
       <arg value="${clean-method}"/>
     </exec>
-    <delete file="products/lightzone.jvmargs"/>
     <antcall target="cc-clean"/>
   </target>
 
