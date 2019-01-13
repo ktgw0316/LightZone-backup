@@ -15,7 +15,6 @@ import com.lightcrafts.image.export.ImageExportOptions;
 import com.lightcrafts.image.export.ImageFileExportOptions;
 import com.lightcrafts.image.metadata.ImageMetadata;
 import com.lightcrafts.image.types.*;
-import javax.media.jai.PlanarImage;
 import com.lightcrafts.model.Engine;
 import com.lightcrafts.model.OperationType;
 import com.lightcrafts.model.PrintSettings;
@@ -46,10 +45,12 @@ import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlDocument;
 import com.lightcrafts.utils.xml.XmlNode;
 
+import lombok.val;
+import org.jetbrains.annotations.NotNull;
+
+import javax.media.jai.PlanarImage;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -57,9 +58,9 @@ import java.awt.image.RenderedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterAbortException;
 import java.awt.print.PrinterException;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Handler;
@@ -80,7 +81,7 @@ public class Application {
     public static final String LznNamespace =
         "http://www.lightcrafts.com/lightzone/LightZoneTransform";
 
-    public static final String LznPrefix = "lzn";
+    private static final String LznPrefix = "lzn";
 
     private static Rectangle InitialFrameBounds; // First window bounds
 
@@ -90,12 +91,11 @@ public class Application {
 
     private static int RecentCount = 5;     // Max recent file count
 
-    private static LinkedList<ComboFrame> Current =
-        new LinkedList<ComboFrame>();
+    private static LinkedList<ComboFrame> Current = new LinkedList<>();
 
-    private static LinkedList<File> RecentFiles = new LinkedList<File>();
+    private static LinkedList<File> RecentFiles = new LinkedList<>();
 
-    private static LinkedList<File> RecentFolders = new LinkedList<File>();
+    private static LinkedList<File> RecentFolders = new LinkedList<>();
 
     private static File LastOpenPath;       // Most recent "Open" selection
 
@@ -151,25 +151,6 @@ public class Application {
             }
         }
         open(file, frame, null);
-    }
-
-    /**
-     * Open an image file at the request of some other application.
-     */
-    public static void openFrom(File file, OtherApplication otherApp) {
-        ComboFrame priorFrame = getFrameForFile(file);
-        if (priorFrame != null) {
-            priorFrame.requestFocus();
-            return;
-        }
-        // The desktop event handlers don't know anything about frames.
-        // See if there's an active frame:
-        ComboFrame frame = getActiveFrame();
-        if (frame == null) {
-            // Otherwise, open into a new window.
-            frame = openEmpty();
-        }
-        open(file, frame, otherApp);
     }
 
     public static void reOpen(ComboFrame frame) {
@@ -295,17 +276,16 @@ public class Application {
         ComboFrame frame,
         ProgressThread cancel
     ) throws UserCanceledException,
-             XMLException,
              UnknownImageTypeException,
              IOException,
              BadImageFileException,
              ColorProfileException,
              Document.MissingImageFileException
     {
-        Document doc;
+        final Document doc;
 
         // First try as a saved-document:
-        DocumentReader.Interpretation interp = DocumentReader.read(file);
+        final DocumentReader.Interpretation interp = DocumentReader.read(file);
 
         // If it's somehow a saved document:
         if (interp != null) {
@@ -400,62 +380,47 @@ public class Application {
             DocumentDatabase.addDocumentFile(file);
         }
         else {
-            // Maybe it's an image:
-            ImageInfo info = ImageInfo.getInstanceFor(file);
-            ImageMetadata meta = info.getMetadata();
-            ImageType type = info.getImageType();
-
-            // Maybe set up a template with default tools:
-            XmlDocument xml = null;
-
-            // First look for default settings in the user-defined templates:
-            try {
-                TemplateKey template = TemplateDatabase.getDefaultTemplate(meta);
-                if (template != null) {
-                    xml = TemplateDatabase.getTemplateDocument(template);
-                }
-            }
-            catch (TemplateDatabase.TemplateException e) {
-                // Let xml remain null, try the factory defaults.
-            }
-            // Then look for factory default settings:
-            if (xml == null) {
-                xml = DocumentDatabase.getDefaultDocument(meta);
-            }
-            // Only apply default settings if the image is in a RAW format:
-            boolean isRaw = (type instanceof RawImageType);
-
-            if (isRaw && (xml != null)) {
-                doc = new Document(xml, meta, null, cancel);
-            }
-            else {
-                doc = new Document(meta, cancel);
-            }
+            doc = getDocumentForFile(file, cancel);
         }
         maybeAddRawAdjustments(doc);
 
         SaveOptions save = doc.getSaveOptions();
+        prepareSaveOptions(doc, file, save);
 
-        // Make sure the save options point to the place the file was opened
-        // from, in case it was moved since it was written:
-        if (save != null) {
-            save.setFile(file);
-        }
-        // Check for the legacy LZN saved document format, and mutate into the
-        // current default format if the legacy format was used.
-        ImageType type = ImageType.determineTypeByExtensionOf(file);
-        boolean recentLzn = ((save != null) && save.isLzn());
-        boolean oldLzn = (save == null) && type.equals(LZNImageType.INSTANCE);
-        // (Basically, if save == null and it's not an original image.)
-        if (recentLzn || oldLzn) {
-            // A legacy file: clobber the save options with defaults.
-            doc.setSaveOptions(null);
-            save = getSaveOptions(doc);
-            doc.setSaveOptions(save);
-        }
         addToRecentFiles(file);
 
         return doc;
+    }
+
+    @NotNull
+    private static Document getDocumentForFile(File file, ProgressThread cancel) throws BadImageFileException, IOException, UnknownImageTypeException, ColorProfileException, UserCanceledException, Document.MissingImageFileException {
+        // Maybe the file is an image:
+        ImageInfo info = ImageInfo.getInstanceFor(file);
+        ImageMetadata meta = info.getMetadata();
+        ImageType type = info.getImageType();
+
+        // Maybe set up a template with default tools:
+        XmlDocument xml = null;
+
+        // First look for default settings in the user-defined templates:
+        try {
+            TemplateKey template = TemplateDatabase.getDefaultTemplate(meta);
+            if (template != null) {
+                xml = TemplateDatabase.getTemplateDocument(template);
+            }
+        } catch (TemplateDatabase.TemplateException e) {
+            // Let xml remain null, try the factory defaults.
+        }
+        // Then look for factory default settings:
+        if (xml == null) {
+            xml = DocumentDatabase.getDefaultDocument(meta);
+        }
+        // Only apply default settings if the image is in a RAW format:
+        boolean isRaw = (type instanceof RawImageType);
+
+        return (isRaw && (xml != null))
+                ? new Document(xml, meta, null, cancel)
+                : new Document(meta, cancel);
     }
 
     // This headless Document initialization differs from the behavior in
@@ -466,23 +431,21 @@ public class Application {
 
     public static Document createDocumentHeadless(File file)
         throws UserCanceledException,
-               XMLException,
                UnknownImageTypeException,
                IOException,
                BadImageFileException,
                ColorProfileException,
                Document.MissingImageFileException
     {
-        Document doc;
+        final Document doc;
 
         // First try as a saved-document:
-        DocumentReader.Interpretation interp = DocumentReader.read(file);
+        final DocumentReader.Interpretation interp = DocumentReader.read(file);
 
         // If it's somehow a saved document:
         if (interp != null) {
             if (interp.imageFile != null) {
-                ImageInfo imageFileInfo =
-                    ImageInfo.getInstanceFor(interp.imageFile);
+                ImageInfo imageFileInfo = ImageInfo.getInstanceFor(interp.imageFile);
                 ImageMetadata meta = imageFileInfo.getMetadata();
                 doc = new Document(interp.xml, meta, interp.info, null);
             }
@@ -493,50 +456,29 @@ public class Application {
             DocumentDatabase.addDocumentFile(file);
         }
         else {
-            // Maybe it's an image:
-            ImageInfo info = ImageInfo.getInstanceFor(file);
-            ImageMetadata meta = info.getMetadata();
-            ImageType type = info.getImageType();
-
-            // Maybe set up a template with default tools:
-            XmlDocument xml = null;
-
-            // First look for default settings in the user-defined templates:
-            try {
-                TemplateKey template = TemplateDatabase.getDefaultTemplate(meta);
-                if (template != null) {
-                    xml = TemplateDatabase.getTemplateDocument(template);
-                }
-            }
-            catch (TemplateDatabase.TemplateException e) {
-                // Let xml remain null, try the factory defaults.
-            }
-            // Then look for factory default settings:
-            if (xml == null) {
-                xml = DocumentDatabase.getDefaultDocument(meta);
-            }
-            // Only apply default settings if the image is in a RAW format:
-            boolean isRaw = (type instanceof RawImageType);
-
-            if (isRaw && (xml != null)) {
-                doc = new Document(xml, meta);
-            }
-            else {
-                doc = new Document(meta);
-            }
+            doc = getDocumentForFile(file, null);
         }
         maybeAddRawAdjustments(doc);
 
         SaveOptions save = doc.getSaveOptions();
+        prepareSaveOptions(doc, file, save);
 
+        return doc;
+    }
+
+    private static void prepareSaveOptions(Document doc, File file, SaveOptions save) {
         // Make sure the save options point to the place the file was opened
         // from, in case it was moved since it was written:
         if (save != null) {
             save.setFile(file);
         }
+
         // Check for the legacy LZN saved document format, and mutate into the
         // current default format if the legacy format was used.
         ImageType type = ImageType.determineTypeByExtensionOf(file);
+        if (type == null) {
+            return;
+        }
         boolean recentLzn = ((save != null) && save.isLzn());
         boolean oldLzn = (save == null) && type.equals(LZNImageType.INSTANCE);
         // (Basically, if save == null and it's not an original image.)
@@ -546,7 +488,6 @@ public class Application {
             save = getSaveOptions(doc);
             doc.setSaveOptions(save);
         }
-        return doc;
     }
 
     // New Documents created from RAW files get a "RAW Adjustments" singleton
@@ -620,6 +561,9 @@ public class Application {
             }
             else {
                 options = getSaveOptions(doc);
+                if (options == null) {
+                    return false;
+                }
 
                 final FileChooser chooser =
                     Platform.getPlatform().getFileChooser();
@@ -642,8 +586,9 @@ public class Application {
                 LastSaveOptions = options;
                 doc.setSaveOptions(options);
             }
-        } else
+        } else {
             saveDirectly = options.shouldSaveDirectly();
+        }
 
         frame.showWait(LOCALE.get("SaveMessage"));
 
@@ -709,6 +654,9 @@ public class Application {
             return SaveResult.DontSave;
         }
         SaveOptions options = getSaveOptions(doc);
+        if (options == null) {
+            return SaveResult.DontSave;
+        }
 
         FileChooser chooser = Platform.getPlatform().getFileChooser();
         File file = options.getFile();
@@ -738,7 +686,7 @@ public class Application {
         return SaveResult.Saved;
     }
 
-    public static void saveAll() {
+    static void saveAll() {
         for (ComboFrame frame : Current) {
             Document doc = frame.getDocument();
             if ((doc != null) && (doc.isDirty())) {
@@ -763,7 +711,7 @@ public class Application {
     // This handles ask-to-save and clearing the document on the given frame,
     // but it should only be called from ComboFrame so the auto-save logic
     // can be applied.
-    public static boolean closeDocument(ComboFrame frame) {
+    static boolean closeDocument(ComboFrame frame) {
         Document doc = frame.getDocument();
         if ((doc != null) && doc.isDirty()) {
             final int result = askToSaveChanges(frame);
@@ -788,7 +736,7 @@ public class Application {
         return true;
     }
 
-    public static void closeDocumentForce(ComboFrame frame) {
+    static void closeDocumentForce(ComboFrame frame) {
         Document doc = frame.getDocument();
         frame.setDocument(null);
         if (doc != null) {
@@ -798,7 +746,7 @@ public class Application {
 
     public static void quit() {
         // Persist open documents in preferences.
-        ArrayList<ComboFrame> frames = new ArrayList<ComboFrame>(Current);
+        ArrayList<ComboFrame> frames = new ArrayList<>(Current);
         IsQuitting = true;
         for (ComboFrame frame : frames) {
             boolean closed = close(frame);
@@ -888,51 +836,35 @@ public class Application {
             (BufferedImage) image, layout, frame, LOCALE.get("PrintDialogTitle")
         );
         // Hook up behaviors for the dialog buttons:
-        dialog.addCancelAction(
-            new ActionListener() {
-                public void actionPerformed(ActionEvent event) {
-                    dialog.dispose();
-                    if (callback != null)
-                        callback.done();
-                }
-            }
-        );
-        dialog.addDoneAction(
-            new ActionListener() {
-                public void actionPerformed(ActionEvent event) {
-                    PrintLayoutModel layout = dialog.getPrintLayout();
-                    doc.setPrintLayout(layout);
-                    dialog.dispose();
-                    if (callback != null)
-                        callback.done();
-                    LastPrintLayout = layout;
-                    savePrefs();
-                }
-            }
-        );
-        dialog.addPrintAction(
-            new ActionListener() {
-                public void actionPerformed(ActionEvent event) {
-                    PrintLayoutModel layout = dialog.getPrintLayout();
-                    doc.setPrintLayout(layout);
-                    printHeadless(frame, doc);
-                    LastPrintLayout = layout;
-                    savePrefs();
-                }
-            }
-        );
-        dialog.addPageSetupAction(
-            new ActionListener() {
-                public void actionPerformed(ActionEvent event) {
-                    PrintLayoutModel layout = dialog.getPrintLayout();
-                    doc.setPrintLayout(layout);
-                    pageSetup(doc);
-                    layout = doc.getPrintLayout();
-                    PageFormat format = layout.getPageFormat();
-                    dialog.setPageFormat(format);
-                }
-            }
-        );
+        dialog.addCancelAction(event -> {
+            dialog.dispose();
+            if (callback != null)
+                callback.done();
+        });
+        dialog.addDoneAction(event -> {
+            PrintLayoutModel layout1 = dialog.getPrintLayout();
+            doc.setPrintLayout(layout1);
+            dialog.dispose();
+            if (callback != null)
+                callback.done();
+            LastPrintLayout = layout1;
+            savePrefs();
+        });
+        dialog.addPrintAction(event -> {
+            PrintLayoutModel layout12 = dialog.getPrintLayout();
+            doc.setPrintLayout(layout12);
+            printHeadless(frame, doc);
+            LastPrintLayout = layout12;
+            savePrefs();
+        });
+        dialog.addPageSetupAction(event -> {
+            PrintLayoutModel layout13 = dialog.getPrintLayout();
+            doc.setPrintLayout(layout13);
+            pageSetup(doc);
+            layout13 = doc.getPrintLayout();
+            PageFormat format = layout13.getPageFormat();
+            dialog.setPageFormat(format);
+        });
         PrinterLayer printer = Env.getPrinterLayer();
         printer.initialize();
 
@@ -955,6 +887,9 @@ public class Application {
     public static boolean export(ComboFrame frame, File file) {
         try {
             Document doc = createDocument(file, frame, null);
+            if (doc == null) {
+                return false;
+            }
             boolean result = export(frame, doc);
             doc.dispose();
             return result;
@@ -1032,9 +967,11 @@ public class Application {
         }
         if (! success) {
             // User canceled.
-            File file = options.getExportFile();
-            if (file != null) {
-                file.delete();
+            val path = options.getExportFile().toPath();
+            try {
+                Files.deleteIfExists(path);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             return false;
         }
@@ -1047,7 +984,7 @@ public class Application {
         return true;
     }
 
-    public static TemplateKey saveTemplate(ComboFrame frame, String namespace) {
+    static TemplateKey saveTemplate(ComboFrame frame, String namespace) {
         Document doc = frame.getDocument();
         if (doc == null) {
             return null;
@@ -1116,15 +1053,8 @@ public class Application {
         }
         try {
             XmlDocument template = TemplateDatabase.getTemplateDocument(key);
-            if (template != null) {
-                XmlNode root = template.getRoot();
-                doc.applyTemplate(root);
-            }
-            else {
-                showError(
-                    LOCALE.get("TemplateNameError", key.toString()), null, frame
-                );
-            }
+            XmlNode root = template.getRoot();
+            doc.applyTemplate(root);
         }
         catch (TemplateDatabase.TemplateException e) {
             showError(
@@ -1156,12 +1086,6 @@ public class Application {
         catch (TemplateDatabase.TemplateException e) {
             showError(
                 LOCALE.get("TemplateReadError", key.toString()), e, frame
-            );
-            return;
-        }
-        if (template == null) {
-            showError(
-                LOCALE.get("TemplateNameError", key.toString()), null, frame
             );
             return;
         }
@@ -1240,7 +1164,7 @@ public class Application {
     }
 
     public static List<File> getRecentFiles() {
-        return new ArrayList<File>(RecentFiles);
+        return new ArrayList<>(RecentFiles);
     }
 
     public static void clearRecentFiles() {
@@ -1249,7 +1173,7 @@ public class Application {
     }
 
     public static List<File> getRecentFolders() {
-        return new ArrayList<File>(RecentFolders);
+        return new ArrayList<>(RecentFolders);
     }
 
     public static void clearRecentFolders() {
@@ -1258,22 +1182,7 @@ public class Application {
     }
 
     public static List<ComboFrame> getCurrentFrames() {
-        List<ComboFrame> frames = new ArrayList<ComboFrame>(Current);
-        return frames;
-    }
-
-    public static void setLookAndFeel(LookAndFeel laf) {
-        // We presume it's always OK to do nothing if this fails:
-        try {
-            UIManager.setLookAndFeel(laf);
-            for (ComboFrame frame : Current) {
-                SwingUtilities.updateComponentTreeUI(frame);
-                frame.pack();
-            }
-        }
-        catch (UnsupportedLookAndFeelException e) {
-            showError("Error setting look and feel", e, null);
-        }
+        return new ArrayList<>(Current);
     }
 
     public static void setLookAndFeel(String className) {
@@ -1285,16 +1194,8 @@ public class Application {
                 frame.pack();
             }
         }
-        catch (ClassNotFoundException e) {
-            showError("Error setting look and feel", e, null);
-        }
-        catch (InstantiationException e) {
-            showError("Error setting look and feel", e, null);
-        }
-        catch (IllegalAccessException e) {
-            showError("Error setting look and feel", e, null);
-        }
-        catch (UnsupportedLookAndFeelException e) {
+        catch (ClassNotFoundException | InstantiationException
+                | IllegalAccessException | UnsupportedLookAndFeelException e) {
             showError("Error setting look and feel", e, null);
         }
     }
@@ -1500,6 +1401,7 @@ public class Application {
         ComboFrame frame = new ComboFrame();
         frame.addWindowListener(
             new WindowAdapter() {
+                @Override
                 public void windowClosing(WindowEvent event) {
                     ComboFrame frame = (ComboFrame) event.getWindow();
                     // On the Mac, we can close the last frame without quitting.
@@ -1549,40 +1451,38 @@ public class Application {
 
     static SaveOptions getSaveOptions(Document doc) {
         SaveOptions options = doc.getSaveOptions();
-        if (options == null) {
-            ImageMetadata meta = doc.getMetadata();
-
-            Preferences prefs = getPreferences();
-            boolean byOriginal = prefs.getBoolean("SaveByOriginal", true);
-            File dir;
-            if (byOriginal || LastSaveOptions == null) {
-                dir = meta.getFile().getParentFile();
-            }
-            else {
-                dir = LastSaveOptions.getFile().getParentFile();
-            }
-            options = SaveOptions.getDefaultSaveOptions();
-
-            ImageFileExportOptions export =
-                (ImageFileExportOptions) SaveOptions.getExportOptions(options);
-            ImageType type = export.getImageType();
-
-            File file = new File(dir, meta.getFile().getName());
-            String name = ExportNameUtility.getBaseName(file);
-            name = name + "_lzn." + type.getExtensions()[0];
-            file = new File(name);
-            file = ExportNameUtility.ensureNotExists(file);
-
-            // Code for the "actual size" save preference:
-            if (export.resizeWidth.getValue() == 0 &&
-                export.resizeHeight.getValue() == 0
-            ) {
-                Engine engine = doc.getEngine();
-                Dimension size = engine.getNaturalSize();
-                options.updateSize(size);
-            }
-            options.setFile(file);
+        if (options != null) {
+            return options;
         }
+
+        ImageMetadata meta = doc.getMetadata();
+
+        Preferences prefs = getPreferences();
+        boolean byOriginal = prefs.getBoolean("SaveByOriginal", true);
+        final File dir = (byOriginal || LastSaveOptions == null)
+                ? meta.getFile().getParentFile()
+                : LastSaveOptions.getFile().getParentFile();
+        options = SaveOptions.getDefaultSaveOptions();
+
+        val export = (ImageFileExportOptions) SaveOptions.getExportOptions(options);
+        if (export == null) {
+            return null;
+        }
+
+        val type = export.getImageType();
+
+        File file = new File(dir, meta.getFile().getName());
+        String name = ExportNameUtility.getBaseName(file)
+                + "_" + LznPrefix + "." + type.getExtensions()[0];
+        file = ExportNameUtility.ensureNotExists(new File(name));
+
+        // Code for the "actual size" save preference:
+        if (export.resizeWidth.getValue() == 0 && export.resizeHeight.getValue() == 0) {
+            Engine engine = doc.getEngine();
+            Dimension size = engine.getNaturalSize();
+            options.updateSize(size);
+        }
+        options.setFile(file);
         return options;
     }
 
@@ -1779,7 +1679,7 @@ public class Application {
                     Collection<String> jpegs = Arrays.asList(
                         JPEGImageType.INSTANCE.getExtensions()
                     );
-                    Collection<String> all = new LinkedList<String>();
+                    Collection<String> all = new LinkedList<>();
                     all.addAll(tiffs);
                     all.addAll(jpegs);
                     return all;
@@ -1830,21 +1730,14 @@ public class Application {
             // Third choice: inset from the screen bounds
             GraphicsConfiguration gc = frame.getGraphicsConfiguration();
             Rectangle bounds = gc.getBounds();
-            int x = inset;
-            int y = inset;
             int width = bounds.width - 2 * inset;
             int height = bounds.height - 2 * inset;
-            frame.setBounds(x, y, width, height);
+            frame.setBounds(inset, inset, width, height);
             // InitialFrameBounds is initialized from preferences, used once,
             // and then discarded
             InitialFrameBounds = null;
         }
         frame.validate();
-    }
-
-    private static void setLookAndFeel() {
-        LookAndFeel plafName = Env.getLookAndFeel();
-        setLookAndFeel(plafName);
     }
 
     private final static String FirstLaunchTag = "FirstLaunch";
@@ -2011,7 +1904,7 @@ public class Application {
             }
             // Restore the RecentFile list:
             String[] keys = prefs.keys();
-            Map<Integer, File> recentMap = new HashMap<Integer, File>();
+            Map<Integer, File> recentMap = new HashMap<>();
             for (String key : keys) {
                 if (key.startsWith(RecentFileTag)) {
                     String indexString = key.substring(RecentFileTag.length());
@@ -2034,7 +1927,7 @@ public class Application {
             }
             // Restore the RecentFolder list:
             keys = prefs.keys();
-            recentMap = new HashMap<Integer, File>();
+            recentMap = new HashMap<>();
             for (String key : keys) {
                 if (key.startsWith(RecentFolderTag)) {
                     String indexString =
@@ -2115,10 +2008,9 @@ public class Application {
         if (text != null) {
             try {
                 InputStream in = new ByteArrayInputStream(
-                    text.getBytes("UTF-8")
+                    text.getBytes(StandardCharsets.UTF_8)
                 );
-                XmlDocument doc = new XmlDocument(in);
-                return doc;
+                return new XmlDocument(in);
             }
             catch (Exception e) {   // IOException, XMLException
                 System.err.print("Error reading preferences: ");
@@ -2132,24 +2024,15 @@ public class Application {
 
     // Set up verbose focus event logging, for development purposes.
     private static void initFocusDebug() {
-        KeyboardFocusManager focus =
-            KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        focus.addPropertyChangeListener(
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent evt) {
-                    String propName = evt.getPropertyName();
-                    Object oldValue = evt.getOldValue();
-                    String oldName = (oldValue != null) ?
-                        oldValue.getClass().getName() : "null";
-                    Object newValue = evt.getNewValue();
-                    String newName = (newValue != null) ?
-                        newValue.getClass().getName() : "null";
-                    System.out.println(
-                        propName + ": " + oldName + " -> " + newName
-                    );
-                }
-            }
-        );
+        val focus = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        focus.addPropertyChangeListener(evt -> {
+            String propName = evt.getPropertyName();
+            Object oldValue = evt.getOldValue();
+            String oldName = (oldValue != null) ? oldValue.getClass().getName() : "null";
+            Object newValue = evt.getNewValue();
+            String newName = (newValue != null) ? newValue.getClass().getName() : "null";
+            System.out.println(propName + ": " + oldName + " -> " + newName);
+        });
     }
 
     private static void addShutdownHook() {
