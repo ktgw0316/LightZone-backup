@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2019-     Masahiro Kitagawa */
 
 package com.lightcrafts.utils.swing;
 
@@ -21,14 +22,14 @@ public final class NoIcon implements Icon {
      * {@inheritDoc
      */
     public int getIconHeight() {
-        return 0;
+        return 1;
     }
 
     /**
      * {@inheritDoc
      */
     public int getIconWidth() {
-        return 0;
+        return 1;
     }
 
     /**
