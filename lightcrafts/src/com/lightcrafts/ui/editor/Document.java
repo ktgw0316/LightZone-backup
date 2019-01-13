@@ -11,7 +11,6 @@ import com.lightcrafts.image.UnknownImageTypeException;
 import com.lightcrafts.image.export.ImageExportOptions;
 import com.lightcrafts.image.metadata.ImageMetadata;
 import com.lightcrafts.image.metadata.ImageOrientation;
-import javax.media.jai.util.ImagingException;
 import com.lightcrafts.model.Engine;
 import com.lightcrafts.model.EngineFactory;
 import com.lightcrafts.model.Scale;
@@ -24,10 +23,10 @@ import com.lightcrafts.utils.xml.XmlDocument;
 import com.lightcrafts.utils.xml.XmlNode;
 
 import javax.imageio.ImageIO;
+import javax.media.jai.util.ImagingException;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
 import java.awt.Dimension;
-import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -139,7 +138,6 @@ public class Document {
         throws ColorProfileException,
                UserCanceledException,
                IOException,
-               XMLException,
                MissingImageFileException,
                BadImageFileException,
                UnknownImageTypeException
@@ -154,7 +152,6 @@ public class Document {
         throws UserCanceledException,
                ColorProfileException,
                IOException,
-               XMLException,
                MissingImageFileException,
                BadImageFileException,
                UnknownImageTypeException
@@ -178,8 +175,7 @@ public class Document {
         ImageInfo versionInfo,
         ProgressThread thread
     )
-        throws XMLException,
-               IOException,
+        throws IOException,
                BadImageFileException,
                ColorProfileException,
                UnknownImageTypeException,
@@ -349,23 +345,9 @@ public class Document {
         undoManager = new DocUndoManager(this);
         editor.addUndoableEditListener(undoManager);
         print = null;
-        scaleModel.addScaleListener(
-            new ScaleListener() {
-                @Override
-                public void scaleChanged(Scale scale) {
-                    xform.update();
-                }
-            }
-        );
-        xform.addXFormListener(
-            new XFormListener() {
-                @Override
-                public void xFormChanged(AffineTransform xform) {
-                    regionManager.setXForm(xform);
-                }
-            }
-        );
-        listeners = new LinkedList<DocumentListener>();
+        scaleModel.addScaleListener(scale -> xform.update());
+        xform.addXFormListener(xform -> regionManager.setXForm(xform));
+        listeners = new LinkedList<>();
     }
 
     /**
