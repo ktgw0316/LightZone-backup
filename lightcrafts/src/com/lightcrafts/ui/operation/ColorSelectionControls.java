@@ -21,6 +21,7 @@ import com.lightcrafts.utils.LCMS;
 import com.lightcrafts.utils.xml.XMLException;
 import com.lightcrafts.utils.xml.XmlNode;
 
+import org.pushingpixels.substance.api.SubstanceCortex;
 import org.pushingpixels.substance.api.SubstanceLookAndFeel;
 import org.pushingpixels.substance.api.colorscheme.SubstanceColorScheme;
 
@@ -105,11 +106,9 @@ final class ColorSelectionControls extends Box {
                                                 0xff & systemColor[1],
                                                 0xff & systemColor[2]);
 
-                        final SubstanceColorScheme colorScheme = new LightZoneSkin.CustomColorScheme(color);
-//                        final SubstanceTheme theme = LightZoneSkin.makeTheme(colorScheme, p.name());
-
-//                        button.putClientProperty(SubstanceLookAndFeel.THEME_PROPERTY, theme);
-//                        button.putClientProperty(SubstanceLookAndFeel.PAINT_ACTIVE_PROPERTY, Boolean.TRUE);
+                        SubstanceCortex.ComponentOrParentChainScope.setColorizationFactor(
+                                button, 1.0);
+                        button.setBackground(color);
 
                         button.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 3));
                     }
