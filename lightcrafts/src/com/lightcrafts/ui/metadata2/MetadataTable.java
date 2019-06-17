@@ -137,7 +137,7 @@ class MetadataTable extends JTable {
 
         TableCellRenderer ratingRenderer = new RatingTableCellRenderer();
         setDefaultRenderer(
-            RatingMetadataEntry.RatingObject.class, ratingRenderer
+                RatingMetadataEntry.RatingObject.class, ratingRenderer
         );
         // setRowHeight(15);
         // setRowMargin(10);
@@ -147,6 +147,12 @@ class MetadataTable extends JTable {
     // Make the cell renderer be determined by the class of each cell.
     public TableCellRenderer getCellRenderer(int row, int col) {
         Object o = getValueAt(row, col);
+        if (o instanceof Icon) {
+            int height = ((Icon) o).getIconHeight();
+            if (height > this.getRowHeight(row)) {
+                setRowHeight(row, height);
+            }
+        }
         return getDefaultRenderer(o.getClass());
     }
 

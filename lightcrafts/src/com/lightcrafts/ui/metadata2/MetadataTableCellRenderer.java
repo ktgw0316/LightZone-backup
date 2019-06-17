@@ -11,6 +11,7 @@ import java.awt.*;
 
 class MetadataTableCellRenderer extends DefaultTableCellRenderer {
 
+    @Override
     public Component getTableCellRendererComponent(
         JTable table,
         Object value,
@@ -44,5 +45,13 @@ class MetadataTableCellRenderer extends DefaultTableCellRenderer {
             label.setBackground(LightZoneSkin.Colors.ToolPanesBackground);
         }
         return label;
+    }
+
+    @Override
+    public void setValue(Object value) {
+        super.setValue(value);
+        if (value instanceof Icon) {
+            setIcon((Icon) value);
+        }
     }
 }
