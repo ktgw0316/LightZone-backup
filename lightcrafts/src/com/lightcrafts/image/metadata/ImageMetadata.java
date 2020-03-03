@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2020-     Masahiro Kitagawa */
 
 package com.lightcrafts.image.metadata;
 
@@ -12,11 +13,18 @@ import com.lightcrafts.image.types.TIFFImageType;
 import com.lightcrafts.utils.LightCraftsException;
 import com.lightcrafts.utils.Version;
 import com.lightcrafts.utils.xml.XMLUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.lightcrafts.image.metadata.CoreTags.*;
 import static com.lightcrafts.image.metadata.EXIFConstants.EXIF_SUBEXIF_TAG_ID_START;
@@ -35,7 +43,7 @@ import static com.lightcrafts.image.metadata.XMPConstants.XMP_DC_PREFIX;
  * @author Paul J. Lucas [paul@lightcrafts.com]
  */
 public class ImageMetadata implements
-    ApertureProvider, BitsPerChannelProvider, CaptionProvider,
+    ArtistProvider, ApertureProvider, BitsPerChannelProvider, CaptionProvider,
     CaptureDateTimeProvider, Cloneable, ColorTemperatureProvider,
     CopyrightProvider, Externalizable, FileDateTimeProvider, FlashProvider,
     FocalLengthProvider, GPSProvider, ISOProvider, LensProvider, MakeModelProvider,
@@ -102,15 +110,10 @@ public class ImageMetadata implements
      *
      * @return Returns said clone.
      */
-    @SuppressWarnings({"CloneDoesntDeclareCloneNotSupportedException"})
+    @Override
     public Object clone() {
-        final ImageMetadata copy = new ImageMetadata( getImageType() );
-        for ( Map.Entry<Class,ImageMetadataDirectory> me
-              : m_classToDirMap.entrySet() ) {
-            final Class dirClass = me.getKey();
-            final ImageMetadataDirectory dir = me.getValue();
-            copy.m_classToDirMap.put( dirClass, dir.clone() );
-        }
+        final ImageMetadata copy = new ImageMetadata(getImageType());
+        m_classToDirMap.forEach((key, dir) -> copy.m_classToDirMap.put(key, dir.clone()));
         return copy;
     }
 
@@ -127,6 +130,7 @@ public class ImageMetadata implements
      * <code>ImageMetadata</code> and the two objects are equal.
      * @see #hashCode()
      */
+    @Override
     public boolean equals( Object object ) {
         if ( object == this )
             return true;
@@ -134,8 +138,7 @@ public class ImageMetadata implements
             final ImageMetadata thatMD = (ImageMetadata)object;
             final String thisPath = getPath();
             final String thatPath = thatMD.getPath();
-            return  thisPath == null ? thatPath == null :
-                    thisPath.equals( thatPath );
+            return Objects.equals(thisPath, thatPath);
         }
         return false;
     }
@@ -149,11 +152,12 @@ public class ImageMetadata implements
      * given provider interface or <code>null</code> if none is found.
      * @see #findProvidersOf(Class)
      */
-    public ImageMetadataDirectory findProviderOf( Class provider ) {
-        for ( ImageMetadataDirectory dir : getDirectories() )
-            if ( provider.isInstance( dir ) )
-                return dir;
-        return null;
+    public ImageMetadataDirectory
+    findProviderOf(@NotNull Class<PreviewImageProvider> provider) {
+        return getDirectories().stream()
+                .filter(provider::isInstance)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -161,62 +165,61 @@ public class ImageMetadata implements
      * given provider interface.
      *
      * @param provider The provider interface to find.
-     * @return Returns an ordered {@link Collection} of all instances of
+     * @return Returns an ordered {@link Stream} of all instances of
      * {@link ImageMetadataDirectory} that implement the given provider
      * interface.
      * @see #findProviderOf(Class)
      */
-    public Collection<ImageMetadataDirectory>
-    findProvidersOf( Class<? extends ImageMetadataProvider> provider ) {
-        final ArrayList<ImageMetadataDirectory> providers =
-            new ArrayList<ImageMetadataDirectory>();
-        for ( ImageMetadataDirectory dir : getDirectories() )
-            if ( provider.isInstance( dir ) )
-                providers.add( dir );
-        Collections.sort( providers, new ProviderComparator( provider ) );
-        return providers;
+
+    private <T extends ImageMetadataProvider>
+    Stream<T> findProvidersOf(@NotNull Class<T> provider) {
+        return getDirectories().stream()
+                .filter(provider::isInstance)
+                .sorted(new ProviderComparator(provider))
+                .map(provider::cast);
+    }
+
+    @NotNull
+    private <T extends ImageMetadataProvider, V> V findMetadataValue(
+            Class<T> clazz, Function<T, V> getter, Predicate<V> predicate, V fallback) {
+        return findProvidersOf(clazz)
+                .map(getter)
+                .filter(predicate)
+                .findFirst()
+                .orElse(fallback);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public float getAperture() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( ApertureProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final float value = ((ApertureProvider)dir).getAperture();
-            if ( value > 0 )
-                return value;
-        }
-        return 0;
+        return findMetadataValue(
+                ApertureProvider.class,
+                ApertureProvider::getAperture,
+                v -> v > 0f, 0f);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getArtist() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( ArtistProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String value = ((ArtistProvider)dir).getArtist();
-            if ( value != null )
-                return value;
-        }
-        return null;
+        return findMetadataValue(
+                ArtistProvider.class,
+                ArtistProvider::getArtist,
+                Objects::nonNull, null);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getBitsPerChannel() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( BitsPerChannelProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int value = ((BitsPerChannelProvider)dir).getBitsPerChannel();
-            if ( value > 0 )
-                return value;
-        }
-        return 0;
+        return findMetadataValue(
+                BitsPerChannelProvider.class,
+                BitsPerChannelProvider::getBitsPerChannel,
+                v -> v > 0, 0);
     }
 
     /**
@@ -226,74 +229,56 @@ public class ImageMetadata implements
      * @return Returns the make (and possibly model) converted to uppercase and
      * seperated by a space or <code>null</code> if not available.
      */
-    public final String getCameraMake( boolean includeModel ) {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( MakeModelProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String make =
-                ((MakeModelProvider)dir).getCameraMake( includeModel );
-            if ( make != null )
-                return make;
-        }
-        return null;
+    @Override
+    public final String getCameraMake(boolean includeModel) {
+        return findMetadataValue(
+                MakeModelProvider.class,
+                dir -> dir.getCameraMake(includeModel),
+                Objects::nonNull, null);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getCaption() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( CaptionProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String value = ((CaptionProvider)dir).getCaption();
-            if ( value != null )
-                return value;
-        }
-        return null;
+        return findMetadataValue(
+                CaptionProvider.class,
+                CaptionProvider::getCaption,
+                Objects::nonNull, null);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Date getCaptureDateTime() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( CaptureDateTimeProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final Date date =
-                ((CaptureDateTimeProvider)dir).getCaptureDateTime();
-            if ( date != null )
-                return date;
-        }
-        return null;
+        return findMetadataValue(
+                CaptureDateTimeProvider.class,
+                CaptureDateTimeProvider::getCaptureDateTime,
+                Objects::nonNull, null);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getColorTemperature() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( ColorTemperatureProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int temp =
-                ((ColorTemperatureProvider)dir).getColorTemperature();
-            if ( temp > 0 )
-                return temp;
-        }
-        return 0;
+        return findMetadataValue(
+                ColorTemperatureProvider.class,
+                ColorTemperatureProvider::getColorTemperature,
+                v -> v > 0, 0);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getCopyright() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( CopyrightProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String value = ((CopyrightProvider)dir).getCopyright();
-            if ( value != null )
-                return value;
-        }
-        return null;
+        return findMetadataValue(
+                CopyrightProvider.class,
+                CopyrightProvider::getCopyright,
+                Objects::nonNull, null);
     }
 
     /**
@@ -315,7 +300,7 @@ public class ImageMetadata implements
      * {@link Class} if found; <code>null</code> otherwise.
      */
     public ImageMetadataDirectory getDirectoryFor(
-        Class<? extends ImageMetadataDirectory> dirClass )
+        Class<? extends ImageMetadataDirectory> dirClass)
     {
         return getDirectoryFor( dirClass, false );
     }
@@ -332,13 +317,13 @@ public class ImageMetadata implements
      * {@link Class} if found or created; <code>null</code> otherwise.
      */
     public ImageMetadataDirectory getDirectoryFor(
-        Class<? extends ImageMetadataDirectory> dirClass, boolean create )
+        Class<? extends ImageMetadataDirectory> dirClass, boolean create)
     {
         synchronized ( m_classToDirMap ) {
             ImageMetadataDirectory dir = m_classToDirMap.get( dirClass );
             if ( dir == null && create ) {
                 try {
-                    dir = dirClass.newInstance();
+                    dir = dirClass.getDeclaredConstructor().newInstance();
                     dir.setOwningMetadata( this );
                 }
                 catch ( Exception e ) {
@@ -364,38 +349,34 @@ public class ImageMetadata implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public Date getFileDateTime() {
-        final CoreDirectory dir =
-            (CoreDirectory)getDirectoryFor( CoreDirectory.class );
-        return dir != null ? dir.getFileDateTime() : null;
+        return findMetadataValue(
+                FileDateTimeProvider.class,
+                FileDateTimeProvider::getFileDateTime,
+                Objects::nonNull, null);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getFlash() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( FlashProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int flash = ((FlashProvider)dir).getFlash();
-            if ( flash != -1 )
-                return flash;
-        }
-        return -1;
+        return findMetadataValue(
+                FlashProvider.class,
+                FlashProvider::getFlash,
+                v -> v != -1, -1);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public float getFocalLength() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( FocalLengthProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final float value = ((FocalLengthProvider)dir).getFocalLength();
-            if ( value > 0 )
-                return value;
-        }
-        return 0;
+        return findMetadataValue(
+                FocalLengthProvider.class,
+                FocalLengthProvider::getFocalLength,
+                v -> v > 0f, 0f);
     }
 
     /**
@@ -403,14 +384,10 @@ public class ImageMetadata implements
      */
     @Override
     public Double getGPSLatitude() {
-        final Collection<ImageMetadataDirectory> dirs =
-                findProvidersOf( GPSProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final Double latitude = ((GPSProvider)dir).getGPSLatitude();
-            if ( latitude != null )
-                return latitude;
-        }
-        return null;
+        return findMetadataValue(
+                GPSProvider.class,
+                GPSProvider::getGPSLatitude,
+                Objects::nonNull, null);
     }
 
     /**
@@ -418,14 +395,10 @@ public class ImageMetadata implements
      */
     @Override
     public Double getGPSLongitude() {
-        final Collection<ImageMetadataDirectory> dirs =
-                findProvidersOf( GPSProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final Double longitude = ((GPSProvider)dir).getGPSLongitude();
-            if ( longitude != null )
-                return longitude;
-        }
-        return null;
+        return findMetadataValue(
+                GPSProvider.class,
+                GPSProvider::getGPSLongitude,
+                Objects::nonNull, null);
     }
 
     /**
@@ -433,14 +406,10 @@ public class ImageMetadata implements
      */
     @Override
     public String getGPSLatitudeDMS() {
-        final Collection<ImageMetadataDirectory> dirs =
-                findProvidersOf( GPSProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String value = ((GPSProvider)dir).getGPSLatitudeDMS();
-            if (! value.isEmpty())
-                return value;
-        }
-        return "";
+        return findMetadataValue(
+                GPSProvider.class,
+                GPSProvider::getGPSLatitudeDMS,
+                String::isEmpty, "");
     }
 
     /**
@@ -448,28 +417,21 @@ public class ImageMetadata implements
      */
     @Override
     public String getGPSLongitudeDMS() {
-        final Collection<ImageMetadataDirectory> dirs =
-                findProvidersOf( GPSProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String value = ((GPSProvider)dir).getGPSLongitudeDMS();
-            if (! value.isEmpty())
-                return value;
-        }
-        return "";
+        return findMetadataValue(
+                GPSProvider.class,
+                GPSProvider::getGPSLongitudeDMS,
+                String::isEmpty, "");
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getImageHeight() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( WidthHeightProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int height = ((WidthHeightProvider)dir).getImageHeight();
-            if ( height > 0 )
-                return height;
-        }
-        return 0;
+        return findMetadataValue(
+                WidthHeightProvider.class,
+                WidthHeightProvider::getImageHeight,
+                v -> v > 0, 0);
     }
 
     /**
@@ -486,10 +448,7 @@ public class ImageMetadata implements
                 try {
                     m_imageType = info.getImageType();
                 }
-                catch ( IOException e ) {
-                    // ignore
-                }
-                catch ( LightCraftsException e ) {
+                catch ( IOException | LightCraftsException e ) {
                     // ignore
                 }
             }
@@ -500,88 +459,67 @@ public class ImageMetadata implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getImageWidth() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( WidthHeightProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int width = ((WidthHeightProvider)dir).getImageWidth();
-            if ( width > 0 )
-                return width;
-        }
-        return 0;
+        return findMetadataValue(
+                WidthHeightProvider.class,
+                WidthHeightProvider::getImageWidth,
+                v -> v > 0, 0);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getOriginalImageHeight() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( OriginalWidthHeightProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int height =
-                ((OriginalWidthHeightProvider)dir).getOriginalImageHeight();
-            if ( height > 0 )
-                return height;
-        }
-        return 0;
+        return findMetadataValue(
+                OriginalWidthHeightProvider.class,
+                OriginalWidthHeightProvider::getOriginalImageHeight,
+                v -> v > 0, 0);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getOriginalImageWidth() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( OriginalWidthHeightProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int width =
-                ((OriginalWidthHeightProvider)dir).getOriginalImageWidth();
-            if ( width > 0 )
-                return width;
-        }
-        return 0;
+        return findMetadataValue(
+                OriginalWidthHeightProvider.class,
+                OriginalWidthHeightProvider::getOriginalImageWidth,
+                v -> v > 0, 0);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getISO() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( ISOProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int iso = ((ISOProvider)dir).getISO();
-            if ( iso > 0 )
-                return iso;
-        }
-        return 0;
+        return findMetadataValue(
+                ISOProvider.class,
+                ISOProvider::getISO,
+                v -> v > 0, 0);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLens() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( LensProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String lens = ((LensProvider)dir).getLens();
-            if ( lens != null )
-                return lens;
-        }
-        return null;
+        return findMetadataValue(
+                LensProvider.class,
+                LensProvider::getLens,
+                Objects::nonNull, null);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public ImageOrientation getOrientation() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( OrientationProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final ImageOrientation orientation =
-                ((OrientationProvider)dir).getOrientation();
-            if ( orientation != ORIENTATION_UNKNOWN )
-                return orientation;
-        }
-        return ORIENTATION_UNKNOWN;
+        return findMetadataValue(
+                OrientationProvider.class,
+                OrientationProvider::getOrientation,
+                v -> v != ORIENTATION_UNKNOWN, ORIENTATION_UNKNOWN);
     }
 
     /**
@@ -618,6 +556,7 @@ public class ImageMetadata implements
      * @see #clearRating()
      * @see #setRating(int)
      */
+    @Override
     public int getRating() {
         final Collection<ImageMetadataDirectory> dirs =
                 findProvidersOf( RatingProvider.class );
@@ -652,57 +591,45 @@ public class ImageMetadata implements
     /**
      * {@inheritDoc}
      */
+    @Override
     public double getResolution() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( ResolutionProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final double value = ((ResolutionProvider)dir).getResolution();
-            if ( value > 0 )
-                return value;
-        }
-        return 0;
+        return findMetadataValue(
+                ResolutionProvider.class,
+                ResolutionProvider::getResolution,
+                v -> v > 0, 0.);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getResolutionUnit() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( ResolutionProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final int value = ((ResolutionProvider)dir).getResolutionUnit();
-            if ( value != RESOLUTION_UNIT_NONE )
-                return value;
-        }
-        return RESOLUTION_UNIT_NONE;
+        return findMetadataValue(
+                ResolutionProvider.class,
+                ResolutionProvider::getResolutionUnit,
+                v -> v != RESOLUTION_UNIT_NONE, RESOLUTION_UNIT_NONE);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public float getShutterSpeed() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( ShutterSpeedProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final float speed = ((ShutterSpeedProvider)dir).getShutterSpeed();
-            if ( speed > 0 )
-                return speed;
-        }
-        return 0;
+        return findMetadataValue(
+                ShutterSpeedProvider.class,
+                ShutterSpeedProvider::getShutterSpeed,
+                v -> v > 0, 0f);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTitle() {
-        final Collection<ImageMetadataDirectory> dirs =
-            findProvidersOf( TitleProvider.class );
-        for ( ImageMetadataDirectory dir : dirs ) {
-            final String value = ((TitleProvider)dir).getTitle();
-            if ( value != null )
-                return value;
-        }
-        return null;
+        return findMetadataValue(
+                TitleProvider.class,
+                TitleProvider::getTitle,
+                Objects::nonNull, null);
     }
 
     /**
@@ -736,6 +663,7 @@ public class ImageMetadata implements
      * @return Returns said hash code.
      * @see #equals(Object)
      */
+    @Override
     public int hashCode() {
         final String path = getPath();
         return path != null ? path.hashCode() : super.hashCode();
@@ -756,7 +684,7 @@ public class ImageMetadata implements
      *
      * @param fromMetadata The other {@link ImageMetadata} to merge from.
      */
-    public void mergeFrom( ImageMetadata fromMetadata ) {
+    public void mergeFrom(@NotNull ImageMetadata fromMetadata ) {
         for ( ImageMetadataDirectory fromDir : fromMetadata.getDirectories() ) {
             final ImageMetadataDirectory toDir =
                 getDirectoryFor( fromDir.getClass(), true );
@@ -902,10 +830,8 @@ public class ImageMetadata implements
             final ImageMetadataDirectory subEXIFDir =
                 metadata.getDirectoryFor( SubEXIFDirectory.class );
             if ( subEXIFDir != null ) {
-                for ( Iterator<Map.Entry<Integer,ImageMetaValue>>
-                      i = subEXIFDir.iterator(); i.hasNext(); ) {
-                    final Map.Entry<Integer,ImageMetaValue> me = i.next();
-                    exifDir.putValue( me.getKey(), me.getValue() );
+                for (final Map.Entry<Integer, ImageMetaValue> me : subEXIFDir) {
+                    exifDir.putValue(me.getKey(), me.getValue());
                 }
                 metadata.removeDirectory( SubEXIFDirectory.class );
             }
@@ -1017,13 +943,8 @@ public class ImageMetadata implements
 
             ////////// Always use UTF-8 to write IPTC metadata.
 
-            String value = "";
-            try {
-                byte[] utf8Marker = {0x1B, 0x25, 0x47}; // ESC, "%", "G"
-                value = new String( utf8Marker, "ASCII" );
-            } catch (UnsupportedEncodingException e) {
-                // This should never occur
-            }
+            byte[] utf8Marker = {0x1B, 0x25, 0x47}; // ESC, "%", "G"
+            String value = new String( utf8Marker, StandardCharsets.US_ASCII);
             iptcDir.putValue(
                 IPTC_CODED_CHARACTER_SET, new StringMetaValue( value )
             );
@@ -1091,12 +1012,7 @@ public class ImageMetadata implements
         //
         // Remove all maker notes since we currently don't export them.
         //
-        for ( Iterator<ImageMetadataDirectory> i =
-              metadata.getDirectories().iterator(); i.hasNext(); ) {
-            final ImageMetadataDirectory dir = i.next();
-            if ( dir instanceof MakerNotesDirectory )
-                i.remove();
-        }
+        metadata.getDirectories().removeIf(dir -> dir instanceof MakerNotesDirectory);
 
         CoreDirectory.syncEditableMetadata( metadata );
         CoreDirectory.syncImageDimensions( metadata );
@@ -1169,8 +1085,8 @@ public class ImageMetadata implements
      * @return Returns the previous {@link ImageMetadataDirectory} or
      * <code>null</code> if there was no previos directory.
      */
-    public ImageMetadataDirectory putDirectory( ImageMetadataDirectory dir ) {
-        final Class dirClass = dir.getClass();
+    public ImageMetadataDirectory putDirectory(@NotNull ImageMetadataDirectory dir ) {
+        final Class<? extends ImageMetadataDirectory> dirClass = dir.getClass();
         return m_classToDirMap.put( dirClass, dir );
     }
 
@@ -1219,17 +1135,17 @@ public class ImageMetadata implements
      * @return Returns the removed {@link ImageMetadataDirectory} or
      * <code>null</code> if there was no such directory to remove.
      */
-    public ImageMetadataDirectory removeDirectory( Class dirClass ) {
-        return m_classToDirMap.remove( dirClass );
+    public ImageMetadataDirectory removeDirectory(Class<? extends ImageMetadataDirectory> dirClass) {
+        return m_classToDirMap.remove(dirClass);
     }
 
     /**
      * Remove all directories that have no metadata.
      */
     public void removeAllEmptyDirectories() {
-        for ( Iterator<Map.Entry<Class,ImageMetadataDirectory>>
-              i = m_classToDirMap.entrySet().iterator(); i.hasNext(); ) {
-            final Map.Entry<Class,ImageMetadataDirectory> me = i.next();
+        for (Iterator<Map.Entry<Class<? extends ImageMetadataDirectory>, ImageMetadataDirectory>>
+             i = m_classToDirMap.entrySet().iterator(); i.hasNext(); ) {
+            final Map.Entry<Class<? extends ImageMetadataDirectory>, ImageMetadataDirectory> me = i.next();
             final ImageMetadataDirectory dir = me.getValue();
             if ( dir.isEmpty() )
                 i.remove();
@@ -1240,8 +1156,8 @@ public class ImageMetadata implements
      * Remove all string values that are empty in all directories.
      */
     public void removeAllEmptyStringValues() {
-        for ( ImageMetadataDirectory dir : m_classToDirMap.values() )
-            dir.removeAllEmptyStringValues();
+        m_classToDirMap.values()
+                .forEach(ImageMetadataDirectory::removeAllEmptyStringValues);
         CoreDirectory.syncEditableMetadata( this );
     }
 
@@ -1278,7 +1194,7 @@ public class ImageMetadata implements
      *
      * @param orientation The new {@link ImageOrientation}.
      */
-    public void setOrientation( ImageOrientation orientation ) {
+    public void setOrientation(@NotNull ImageOrientation orientation ) {
         final ImageMetadataDirectory dir =
             getDirectoryFor( CoreDirectory.class, true );
         dir.setValue( CORE_IMAGE_ORIENTATION, orientation.getTIFFConstant() );
@@ -1320,13 +1236,11 @@ public class ImageMetadata implements
      *
      * @return Returns said {@link String}.
      */
+    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        for ( ImageMetadataDirectory dir : getDirectories() ) {
-            sb.append( dir.toString() );
-            sb.append( '\n' );
-        }
-        return sb.toString();
+        return getDirectories().stream()
+                .map(dir -> dir.toString() + '\n')
+                .collect(Collectors.joining());
     }
 
     /**
@@ -1373,14 +1287,12 @@ public class ImageMetadata implements
     private void toXMP( Document xmpDoc,
                        Class<? extends ImageMetadataDirectory> dirClass ) {
         final Element rdfElement = XMPUtil.getRDFElementOf( xmpDoc );
-        for ( ImageMetadataDirectory dir : getDirectories() ) {
-            if (dirClass == null || dirClass == dir.getClass()) {
-                final Collection<Element> rdfDescElements = dir.toXMP(xmpDoc);
-                if (rdfDescElements != null)
-                    for (Element element : rdfDescElements)
-                        rdfElement.appendChild(element);
-            }
-        }
+        getDirectories().stream()
+                .filter(dir -> dirClass == null || dirClass == dir.getClass())
+                .map(dir -> dir.toXMP(xmpDoc))
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .forEachOrdered(rdfElement::appendChild);
         final Element dcRDFDescElement = toDublinCoreXMP( xmpDoc );
         if ( dcRDFDescElement != null )
             rdfElement.appendChild( dcRDFDescElement );
@@ -1389,7 +1301,8 @@ public class ImageMetadata implements
     /**
      * {@inheritDoc}
      */
-    public void readExternal( ObjectInput in ) throws IOException {
+    @Override
+    public void readExternal(@NotNull ObjectInput in ) throws IOException {
         for ( int count = in.readShort(); count > 0; --count ) {
             try {
                 final Class dirClass = Class.forName( in.readUTF() );
@@ -1407,14 +1320,14 @@ public class ImageMetadata implements
      * (<code>short</code>) followed by pairs of each directory's class's name
      * (<code>String</code>) and {@link ImageMetadataDirectory}.
      */
-    public void writeExternal( ObjectOutput out ) throws IOException {
-        out.writeShort( m_classToDirMap.size() );
-        for ( Map.Entry<Class,ImageMetadataDirectory>
-              me : m_classToDirMap.entrySet() ) {
-            final Class dirClass = me.getKey();
+    @Override
+    public void writeExternal(@NotNull ObjectOutput out ) throws IOException {
+        out.writeShort(m_classToDirMap.size());
+        for (var me : m_classToDirMap.entrySet()) {
+            final var dirClass = me.getKey();
             final ImageMetadataDirectory dir = me.getValue();
-            out.writeUTF( dirClass.getName() );
-            dir.writeExternal( out );
+            out.writeUTF(dirClass.getName());
+            dir.writeExternal(out);
         }
     }
 
@@ -1507,8 +1420,9 @@ public class ImageMetadata implements
          * the first directory's provider priority is greater than, equal to,
          * or less than the second.
          */
-        public int compare( ImageMetadataDirectory dir1,
-                            ImageMetadataDirectory dir2 ) {
+        @Override
+        public int compare(@NotNull ImageMetadataDirectory dir1,
+                           @NotNull ImageMetadataDirectory dir2 ) {
             return  dir2.getProviderPriorityFor( m_provider ) -
                     dir1.getProviderPriorityFor( m_provider );
         }
@@ -1535,7 +1449,7 @@ public class ImageMetadata implements
      * @param xmpDoc The XMP XML document to use.
      * @return Returns said {@link Element} or <code>null</code>
      */
-    private Element toDublinCoreXMP( Document xmpDoc ) {
+    private @Nullable Element toDublinCoreXMP(Document xmpDoc) {
         final String artist = getArtist();
         final String description = getCaption();
         final String rights = getCopyright();
@@ -1585,8 +1499,8 @@ public class ImageMetadata implements
     /**
      * The map from directory classes to instances thereof.
      */
-    private final Map<Class,ImageMetadataDirectory> m_classToDirMap =
-        new HashMap<Class,ImageMetadataDirectory>();
+    private final Map<Class<? extends ImageMetadataDirectory>, ImageMetadataDirectory> m_classToDirMap =
+            new HashMap<>();
 
     /**
      * The type of the image file this metadata is for.
