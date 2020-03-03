@@ -1451,46 +1451,26 @@ public class ImageMetadata implements
         final String description = getCaption();
         final String rights = getCopyright();
         final String title = getTitle();
-        if ( artist == null && description == null && rights == null &&
-             title == null )
+        if (artist == null && description == null && rights == null && title == null)
             return null;
 
         final Element dcRDFDescElement =
-            XMPUtil.createRDFDescription( xmpDoc, XMP_DC_NS, XMP_DC_PREFIX );
+            XMPUtil.createRDFDescription(xmpDoc, XMP_DC_NS, XMP_DC_PREFIX);
 
-        if ( artist != null ) {
-            final Element creatorElement = xmpDoc.createElementNS(
-                XMP_DC_NS, XMP_DC_PREFIX + ":creator"
-            );
-            XMLUtil.setTextContentOf( creatorElement, artist );
-            dcRDFDescElement.appendChild( creatorElement );
-        }
-
-        if ( description != null ) {
-            final Element descriptionElement = xmpDoc.createElementNS(
-                XMP_DC_NS, XMP_DC_PREFIX + ":description"
-            );
-            XMLUtil.setTextContentOf( descriptionElement, description );
-            dcRDFDescElement.appendChild( descriptionElement );
-        }
-
-        if ( rights != null ) {
-            final Element rightsElement = xmpDoc.createElementNS(
-                XMP_DC_NS, XMP_DC_PREFIX + ":rights"
-            );
-            XMLUtil.setTextContentOf( rightsElement, rights );
-            dcRDFDescElement.appendChild( rightsElement );
-        }
-
-        if ( title != null ) {
-            final Element titleElement = xmpDoc.createElementNS(
-                XMP_DC_NS, XMP_DC_PREFIX + ":title"
-            );
-            XMLUtil.setTextContentOf( titleElement, title );
-            dcRDFDescElement.appendChild( titleElement );
-        }
+        appendXMPElement(xmpDoc, dcRDFDescElement, ":creator", artist);
+        appendXMPElement(xmpDoc, dcRDFDescElement, ":description", description);
+        appendXMPElement(xmpDoc, dcRDFDescElement, ":rights", rights);
+        appendXMPElement(xmpDoc, dcRDFDescElement, ":title", title);
 
         return dcRDFDescElement;
+    }
+
+    private void appendXMPElement(Document xmpDoc, Element elem, String name, String value) {
+        if (value == null) return;
+        final Element titleElement = xmpDoc.createElementNS(
+                XMP_DC_NS, XMP_DC_PREFIX + name);
+        XMLUtil.setTextContentOf(titleElement, value);
+        elem.appendChild(titleElement);
     }
 
     /**
