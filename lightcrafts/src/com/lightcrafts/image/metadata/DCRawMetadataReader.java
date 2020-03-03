@@ -2,14 +2,14 @@
 
 package com.lightcrafts.image.metadata;
 
-import java.io.IOException;
-import java.util.Date;
-
 import com.lightcrafts.image.ImageInfo;
 import com.lightcrafts.image.metadata.values.*;
 import com.lightcrafts.image.types.RawImageInfo;
 import com.lightcrafts.utils.DCRaw;
 import com.lightcrafts.utils.LightCraftsException;
+
+import java.io.IOException;
+import java.util.Date;
 
 import static com.lightcrafts.image.metadata.EXIFTags.*;
 
@@ -48,10 +48,7 @@ public final class DCRawMetadataReader extends ImageMetadataReader {
         final DCRaw dcraw = info.getDCRaw();
 
         final ImageMetadata metadata = m_imageInfo.getCurrentMetadata();
-        final EXIFDirectory exifDir =
-            (EXIFDirectory)metadata.getDirectoryFor(
-                EXIFDirectory.class, true
-            );
+        final EXIFDirectory exifDir = metadata.getDirectoryFor(EXIFDirectory.class, true);
 
         final float aperture = dcraw.getAperture();
         if ( aperture > 0 )

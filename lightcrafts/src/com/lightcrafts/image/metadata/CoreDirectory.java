@@ -51,10 +51,7 @@ public final class CoreDirectory extends ImageMetadataDirectory implements
      */
     public static void addMetadata( ImageInfo imageInfo ) {
         final ImageMetadata metadata = imageInfo.getCurrentMetadata();
-        final CoreDirectory dir =
-            (CoreDirectory)metadata.getDirectoryFor(
-                CoreDirectory.class, true
-            );
+        final CoreDirectory dir = metadata.getDirectoryFor(CoreDirectory.class, true);
         dir.addAperture( metadata );
         dir.addCamera( imageInfo );
         dir.addCaptureDateTime( imageInfo );
@@ -81,8 +78,7 @@ public final class CoreDirectory extends ImageMetadataDirectory implements
      * @param metadata The {@link ImageMetadata} to synchronize.
      */
     public static void syncEditableMetadata( ImageMetadata metadata ) {
-        final CoreDirectory dir = (CoreDirectory)
-            metadata.getDirectoryFor( CoreDirectory.class, true );
+        final CoreDirectory dir = metadata.getDirectoryFor(CoreDirectory.class, true);
         dir.addArtist( metadata );
         dir.addCaption( metadata );
         dir.addCopyright( metadata );
@@ -96,8 +92,7 @@ public final class CoreDirectory extends ImageMetadataDirectory implements
      * @param metadata The {@link ImageMetadata} to synchronize.
      */
     public static void syncImageDimensions( ImageMetadata metadata ) {
-        final CoreDirectory dir = (CoreDirectory)
-            metadata.getDirectoryFor( CoreDirectory.class, true );
+        final CoreDirectory dir = metadata.getDirectoryFor(CoreDirectory.class, true);
         dir.removeValue( CORE_IMAGE_WIDTH );
         dir.removeValue( CORE_IMAGE_HEIGHT );
         final int width = metadata.getImageWidth();
@@ -121,10 +116,7 @@ public final class CoreDirectory extends ImageMetadataDirectory implements
      */
     public static void addOriginalOrientation( ImageInfo imageInfo ) {
         final ImageMetadata metadata = imageInfo.getCurrentMetadata();
-        final CoreDirectory dir =
-            (CoreDirectory)metadata.getDirectoryFor(
-                CoreDirectory.class, true
-            );
+        final CoreDirectory dir = metadata.getDirectoryFor(CoreDirectory.class, true);
         final ImageOrientation orientation = getOrientationFrom( metadata );
         dir.putValue(
             CORE_ORIGINAL_ORIENTATION,

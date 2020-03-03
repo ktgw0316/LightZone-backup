@@ -299,8 +299,8 @@ public class ImageMetadata implements
      * @return Returns the {@link ImageMetadataDirectory} for the given
      * {@link Class} if found; <code>null</code> otherwise.
      */
-    public ImageMetadataDirectory getDirectoryFor(
-        Class<? extends ImageMetadataDirectory> dirClass)
+    public <T extends ImageMetadataDirectory>
+    T getDirectoryFor(Class<T> dirClass)
     {
         return getDirectoryFor( dirClass, false );
     }
@@ -316,22 +316,22 @@ public class ImageMetadata implements
      * @return Returns the {@link ImageMetadataDirectory} for the given
      * {@link Class} if found or created; <code>null</code> otherwise.
      */
-    public ImageMetadataDirectory getDirectoryFor(
-        Class<? extends ImageMetadataDirectory> dirClass, boolean create)
+    public <T extends ImageMetadataDirectory>
+    T getDirectoryFor(Class<T> dirClass, boolean create)
     {
-        synchronized ( m_classToDirMap ) {
-            ImageMetadataDirectory dir = m_classToDirMap.get( dirClass );
-            if ( dir == null && create ) {
+        synchronized (m_classToDirMap) {
+            ImageMetadataDirectory dir = m_classToDirMap.get(dirClass);
+            if (dir == null && create) {
                 try {
                     dir = dirClass.getDeclaredConstructor().newInstance();
-                    dir.setOwningMetadata( this );
+                    dir.setOwningMetadata(this);
                 }
-                catch ( Exception e ) {
-                    throw new IllegalStateException( e );
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
                 }
-                m_classToDirMap.put( dirClass, dir );
+                m_classToDirMap.put(dirClass, dir);
             }
-            return dir;
+            return dirClass.cast(dir);
         }
     }
 
@@ -543,8 +543,7 @@ public class ImageMetadata implements
      * @see #getFile()
      */
     public synchronized String getPath() {
-        final CoreDirectory coreDir =
-            (CoreDirectory)getDirectoryFor( CoreDirectory.class );
+        final CoreDirectory coreDir = getDirectoryFor( CoreDirectory.class );
         return coreDir != null ? coreDir.getPath() : null;
     }
 
@@ -774,15 +773,13 @@ public class ImageMetadata implements
         ImageMetadataDirectory tiffDir =
             metadata.getDirectoryFor( TIFFDirectory.class );
 
-        final ImageMetadataDirectory ciffDir =
-            metadata.getDirectoryFor( CIFFDirectory.class );
+        final CIFFDirectory ciffDir = metadata.getDirectoryFor( CIFFDirectory.class );
         if ( ciffDir != null ) {
             //
             // If there's CIFF metadata, convert it to TIFF/EXIF, then merge it
             // into the existing metadata.
             //
-            final ImageMetadata ciffMetadata =
-                ((CIFFDirectory)ciffDir).convertMetadata( toJPEG );
+            final ImageMetadata ciffMetadata = ciffDir.convertMetadata( toJPEG );
             metadata.mergeFrom( ciffMetadata );
             metadata.removeDirectory( CIFFDirectory.class );
         } else {

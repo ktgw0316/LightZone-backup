@@ -21,8 +21,7 @@ public class GPSMetadataEntry extends MetadataEntry {
 
     @Override
     public String getValue(ImageMetadata meta) {
-        final GPSDirectory dir =
-                (GPSDirectory) meta.getDirectoryFor(GPSDirectory.class);
+        final GPSDirectory dir = meta.getDirectoryFor(GPSDirectory.class);
         if (dir == null) {
             return "";
         }
@@ -54,8 +53,7 @@ public class GPSMetadataEntry extends MetadataEntry {
 
     @Override
     URI getURI(ImageMetadata meta) {
-        final GPSDirectory dir =
-                (GPSDirectory) meta.getDirectoryFor(GPSDirectory.class);
+        final GPSDirectory dir = meta.getDirectoryFor(GPSDirectory.class);
         if (dir == null) {
             return null;
         }

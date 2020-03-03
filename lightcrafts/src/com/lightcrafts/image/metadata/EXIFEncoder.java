@@ -2,16 +2,16 @@
 
 package com.lightcrafts.image.metadata;
 
+import com.lightcrafts.image.metadata.values.*;
+import com.lightcrafts.utils.Rational;
+import com.lightcrafts.utils.bytebuffer.ByteBufferUtil;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.lightcrafts.image.metadata.values.*;
-import com.lightcrafts.utils.bytebuffer.ByteBufferUtil;
-import com.lightcrafts.utils.Rational;
 
 import static com.lightcrafts.image.metadata.EXIFConstants.*;
 import static com.lightcrafts.image.metadata.EXIFTags.*;
@@ -184,9 +184,9 @@ public final class EXIFEncoder {
      * @return Returns Returns said {@link ByteBuffer}.
      */
     private ByteBuffer encode() {
-        final ImageMetadataDirectory exifDir =
+        final EXIFDirectory exifDir =
             m_metadata.getDirectoryFor( EXIFDirectory.class );
-        return exifDir != null ? encodeEXIFDir( (EXIFDirectory)exifDir ) : null;
+        return exifDir != null ? encodeEXIFDir(exifDir) : null;
     }
 
     /**
