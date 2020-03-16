@@ -61,7 +61,6 @@ public class LensCorrectionsOperation extends BlendedOperation {
     private float focal = 0f;
     private float aperture = 0f;
 
-    @NotNull
     private Lensfun lf;
 
     static final OperationType type = new OperationTypeImpl("Lens Corrections");
@@ -78,7 +77,7 @@ public class LensCorrectionsOperation extends BlendedOperation {
         addChoiceKey(CAMERA_NAME);
         addChoiceKey(LENS_NAME);
         addChoiceValue(CAMERA_NAME, "(Automatic)" + SEPARATOR);
-        addChoiceValues(CAMERA_NAME, Lensfun.getAllCameraNames());
+        addChoiceValues(CAMERA_NAME, lf.getAllCameraNames());
         addChoiceValue(LENS_NAME, "(Automatic)" + SEPARATOR);
         addChoiceValues(LENS_NAME, lf.getLensNamesFor(cameraMaker, cameraModel));
 
@@ -86,11 +85,18 @@ public class LensCorrectionsOperation extends BlendedOperation {
         setCheckboxValue(MANUAL_MODE, false);
 
         val format = new DecimalFormat("0.0");
-        distortion_k1_config = new SliderConfig(-200, 200, distortion_k1, 1, false, format);
-        distortion_k2_config = new SliderConfig(-200, 200, distortion_k2, 1, false, format);
-        tca_r_offset_config  = new SliderConfig(-2, 2, tca_r_offset, 0.1, false, format);
-        tca_b_offset_config  = new SliderConfig(-2, 2, tca_b_offset, 0.1, false, format);
+        distortion_k1_config = new SliderConfig(-50, 50, distortion_k1, 1, false, format);
+        distortion_k2_config = new SliderConfig(-50, 50, distortion_k2, 1, false, format);
+        tca_r_offset_config  = new SliderConfig(-5, 5, tca_r_offset, 0.1, false, format);
+        tca_b_offset_config  = new SliderConfig(-5, 5, tca_b_offset, 0.1, false, format);
         addSliderKeys();
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        lf.dispose();
+        lf = null;
     }
 
     private void addSliderKeys() {
@@ -199,7 +205,7 @@ public class LensCorrectionsOperation extends BlendedOperation {
     private void updateLenses() {
         clearChoiceValues(LENS_NAME);
         final List<String> values = (cameraModel.isEmpty())
-                ? Lensfun.getAllLensNames()
+                ? lf.getAllLensNames()
                 : lf.getLensNamesFor(cameraMaker, cameraModel);
         addChoiceValue(LENS_NAME, "(Automatic)" + SEPARATOR);
         addChoiceValues(LENS_NAME, values);
