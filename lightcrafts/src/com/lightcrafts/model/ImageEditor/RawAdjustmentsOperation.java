@@ -2,6 +2,7 @@
 
 package com.lightcrafts.model.ImageEditor;
 
+import Jama.Matrix;
 import com.lightcrafts.image.color.ColorScience;
 import com.lightcrafts.image.types.AuxiliaryImageInfo;
 import com.lightcrafts.image.types.RawImageInfo;
@@ -15,8 +16,6 @@ import com.lightcrafts.model.RawAdjustmentOperation;
 import com.lightcrafts.model.SliderConfig;
 import com.lightcrafts.utils.DCRaw;
 import com.lightcrafts.utils.LCMatrix;
-import lombok.val;
-import org.ejml.simple.SimpleMatrix;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.PlanarImage;
@@ -75,8 +74,8 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
     static final OperationType typeV1 = new OperationTypeImpl("RAW Adjustments");
     static final OperationType typeV2 = new OperationTypeImpl("RAW Adjustments V2");
 
-    private static final SimpleMatrix RGBtoZYX = new LCMatrix(ColorScience.RGBtoZYX()).transpose();
-    private static final SimpleMatrix XYZtoRGB = RGBtoZYX.invert();
+    private static final Matrix RGBtoZYX = new LCMatrix(ColorScience.RGBtoZYX()).transpose();
+    private static final Matrix XYZtoRGB = RGBtoZYX.inverse();
 
     public RawAdjustmentsOperation(Rendering rendering, OperationType type) {
         super(rendering, type);
@@ -142,11 +141,11 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
                     for (int j = 0; j < 3; j++)
                         cameraRGBWB[j][i] *= wb[i];
 
-                val B = new LCMatrix(ColorScience.chromaticAdaptation(daylightTemperature, originalTemperature, caMethod));
-                val combo = XYZtoRGB.mult(B.mult(RGBtoZYX));
+                Matrix B = new LCMatrix(ColorScience.chromaticAdaptation(daylightTemperature, originalTemperature, caMethod));
+                Matrix combo = XYZtoRGB.times(B.times(RGBtoZYX));
 
                 cameraRGBWB = LCMatrix.getArrayFloat(
-                        combo.invert().mult(new LCMatrix(cameraRGBWB))
+                        combo.inverse().times(new LCMatrix(cameraRGBWB))
                 );
             }
 
@@ -182,15 +181,18 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
         float sat = Float.MAX_VALUE;
         float minT = 0;
         for (int t = 1000; t < 40000; t+= (0.01 * t)) {
-            val B = new LCMatrix(ColorScience.chromaticAdaptation(t, refT, caMethod));
-            val combo = XYZtoRGB.mult(B.mult(RGBtoZYX));
-            val color = combo.mult(new LCMatrix(3, 1, rgb));
+            Matrix B = new LCMatrix(ColorScience.chromaticAdaptation(t, refT, caMethod));
+            Matrix combo = XYZtoRGB.times(B.times(RGBtoZYX));
 
-            val r = color.get(0, 0);
-            val g = color.get(1, 0);
-            val b = color.get(2, 0);
+            Matrix color = new Matrix(new double[][]{{rgb[0]}, {rgb[1]}, {rgb[2]}});
 
-            val tSat = (float) ColorScience.saturation(r, g, b);
+            color = combo.times(color);
+
+            double r = color.get(0, 0);
+            double g = color.get(1, 0);
+            double b = color.get(2, 0);
+
+            float tSat = (float) ColorScience.saturation(r, g, b);
 
             if (tSat < sat) {
                 sat = tSat;
@@ -368,18 +370,18 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
             }
 
             // Chromatic adaptation matrix
-            val B = new LCMatrix(ColorScience.chromaticAdaptation(daylightTemperature, temperature, caMethod));
-            SimpleMatrix CA = XYZtoRGB.mult(B.mult(RGBtoZYX));
+            Matrix B = new LCMatrix(ColorScience.chromaticAdaptation(daylightTemperature, temperature, caMethod));
+            Matrix CA = XYZtoRGB.times(B.times(RGBtoZYX));
 
             // Normalize the CA matrix to keep exposure constant
-            val m = CA.mult(new LCMatrix(new float[][]{{1},{1},{1}}));
-            val max = (float) m.get(1, 0);
+            Matrix m = CA.times(new Matrix(new double[][]{{1},{1},{1}}));
+            double max = m.get(1, 0);
             if (max != 1)
-                CA = CA.mult(new LCMatrix(new float[][]{{1/max, 0, 0},{0, 1/max, 0},{0, 0, 1/max}}));
+                CA = CA.times(new Matrix(new double[][]{{1/max, 0, 0},{0, 1/max, 0},{0, 0, 1/max}}));
 
             // The matrix taking into account the camera color space and its basic white balance and exposure
-            val camMatrix = LCMatrix.getArrayFloat(
-                    CA.mult(new LCMatrix(cameraRGB(temperature)).scale(Math.pow(2, exposure)))
+            float camMatrix[][] = LCMatrix.getArrayFloat(
+                    CA.times(new LCMatrix(cameraRGB(temperature)).times(Math.pow(2, exposure)))
             );
 
             front = new HighlightRecoveryOpImage(front, preMul, camMatrix, JAIContext.fileCacheHint);
@@ -390,7 +392,8 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
 
             front.setProperty(JAIContext.PERSISTENT_CACHE_TAG, Boolean.TRUE);
 
-            // NOISE REDUCTION
+            /*** NOISE REDUCTION ***/
+
             if (color_noise != 0 || grain_noise != 0) {
                 BorderExtender borderExtender = BorderExtender.createInstance(BorderExtender.BORDER_COPY);
                 front = new BilateralFilterRGBOpImage(front, borderExtender, JAIContext.fileCacheHint, null, grain_noise * scale, 0.02f, color_noise * scale, 0.04f);

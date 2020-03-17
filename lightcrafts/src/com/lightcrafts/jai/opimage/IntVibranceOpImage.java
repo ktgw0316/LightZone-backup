@@ -2,9 +2,9 @@
 
 package com.lightcrafts.jai.opimage;
 
+import Jama.Matrix;
 import com.lightcrafts.jai.JAIContext;
 import com.lightcrafts.utils.LCMatrix;
-import lombok.val;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PointOpImage;
@@ -67,9 +67,9 @@ public class IntVibranceOpImage extends PointOpImage {
         saturationIncrease = transform[0][0] > 1;
 
         ICC_ProfileRGB linRGB = (ICC_ProfileRGB) ICC_Profile.getInstance(ColorSpace.CS_LINEAR_RGB);
-        val XYZtoLinsRGB = new LCMatrix(linRGB.getMatrix()).invert();
-        val CIERGBtoXYZ = new LCMatrix(((ICC_ProfileRGB) JAIContext.linearProfile).getMatrix());
-        double[][] CIERGBtoLinsRGB = LCMatrix.getArrayDouble(XYZtoLinsRGB.mult(CIERGBtoXYZ));
+        Matrix XYZtoLinsRGB = new LCMatrix(linRGB.getMatrix()).inverse();
+        Matrix CIERGBtoXYZ = new LCMatrix(((ICC_ProfileRGB) JAIContext.linearProfile).getMatrix());
+        double[][] CIERGBtoLinsRGB = XYZtoLinsRGB.times(CIERGBtoXYZ).getArray();
 
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
