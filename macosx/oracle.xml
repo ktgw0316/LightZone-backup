@@ -49,7 +49,7 @@
       version="${git-revision}"
       signature="LCLZ"
       copyright="${app-name} ${app-version} (${git-revision}), Copyright 2005-2011 Light Crafts, Inc. All Rights Reserved. Copyright 2013- The LightZone Project. All Rights Reserved."
-      icon="resources/Resources/${app-name}.icns"
+      icon="src/main/resources/Resources/${app-name}.icns"
       applicationCategory="public.app-category.photography"
       mainclassname="com.lightcrafts.platform.macosx.MacOSXLauncher">
 
@@ -112,7 +112,7 @@
     </bundleapp>
 
     <copy todir="${bundle-contents}">
-      <fileset dir="resources" excludes=".git"/>
+      <fileset dir="src/main/resources" excludes=".git"/>
     </copy>
     <copy todir="${bundle-contents}/Resources">
       <fileset dir="helpers/JavaAppLauncher/Resources" excludes=".git"/>

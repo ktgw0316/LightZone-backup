@@ -4,7 +4,7 @@
 
   <!--===== Properties =====================================================-->
 
-  <property file="resources/com/lightcrafts/utils/resources/Version.properties"/>
+  <property file="src/main/resources/com/lightcrafts/utils/resources/Version.properties"/>
 
   <property name="common-jar" value="products/lightcrafts.jar"/>
 
@@ -86,7 +86,7 @@
     <mkdir dir="javah"/>
     <javac destdir="build" includeantruntime="false" debug="true"
            release="11" nativeheaderdir="javah">
-      <src path="src"/>
+      <src path="src/main/java"/>
       <classpath>
         <fileset dir="lib">
           <include name="*.jar"/>
@@ -121,8 +121,8 @@
 
   <target name="resources" depends="revision">
     <copy todir="build">
-      <fileset dir="resources" excludes=".git"/>
-      <fileset dir="locale" excludes=".git"/>
+      <fileset dir="src/main/resources" excludes=".git"/>
+      <fileset dir="src/main/locale" excludes=".git"/>
     </copy>
   </target>
 
@@ -165,8 +165,8 @@
 	<!--===== Make test ======================================================-->
 
   <target name="test" depends="build">
-    <ant dir="test" target="build"/>
-    <ant dir="test" target="docs-test"/>
+    <ant dir="src/test" target="build"/>
+    <ant dir="src/test" target="docs-test"/>
   </target>
 
 	<!--===== Run the application ============================================-->
@@ -192,7 +192,7 @@
         <fileset dir="products">
           <include name="*.jar"/>
         </fileset>
-        <pathelement path="test/build"/>
+        <pathelement path="src/test/build"/>
       </classpath>
       <assertions>
         <enable/>
@@ -233,7 +233,7 @@
       <arg value="-j"/>
       <arg value="${clean-method}"/>
     </exec>
-    <ant dir="test" target="${clean-method}"/>
+    <ant dir="src/test" target="${clean-method}"/>
   </target>
 
   <target name="distclean">
