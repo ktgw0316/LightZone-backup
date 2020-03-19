@@ -1,6 +1,8 @@
 !**/GNUMakefile
 !**/lightzone*
+**/.gradle
 **/build
+**/gradle
 **/javah
 **/out
 **/products
@@ -48,7 +50,6 @@ lightcrafts/extbuild
 lightcrafts/jnisrc/**/*config\.h
 lightcrafts/jnisrc/**/arch-*
 lightcrafts/jnisrc/**/configure
-out
 windows/helpers/JavaAppLauncher/LightZone.ico
 windows/helpers/JavaAppLauncher/jar_md5_include
 windows/md5sums
