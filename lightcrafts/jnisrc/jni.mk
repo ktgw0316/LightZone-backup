@@ -65,7 +65,6 @@ endif
 
 DEFINES:=		-DJNILIB $(JNI_EXTRA_DEFINES)
 INCLUDES:=		$(PLATFORM_INCLUDES) $(JAVA_INCLUDES) \
-			-I$(COMMON_DIR) \
 			-I$(COMMON_DIR)/jnisrc/jniutils $(JNI_EXTRA_INCLUDES)
 LDFLAGS:=		$(PLATFORM_LDFLAGS) $(JAVA_LDFLAGS) \
 			-L$(COMMON_DIR)/products $(JNI_EXTRA_LDFLAGS)
@@ -157,6 +156,8 @@ endif
 
 include			$(COMMON_DIR)/mk/sources.mk
 
+JAVAH_HEADERS:=	$(foreach class,$(subst .,_,$(JAVAH_CLASSES)),javah/$(class).h)
+
 LOCAL_LIBS:=	$(filter-out %-ranlib.a,$(wildcard *.a))
 LOCAL_RANLIBS:=	$(foreach lib,$(LOCAL_LIBS),$(lib:.a=-ranlib.a))
 
@@ -191,7 +192,12 @@ ifndef mk_target
 # mk_target that recursively calls make with mk_target=true that will build the
 # real target.
 ##
-all: mk_target
+all: $(JAVAH_HEADERS) mk_target
+
+$(JAVAH_HEADERS):
+	$(COMMON_DIR)/tools/bin/javah.sh \
+	      $(basename $(subst _,.,$(@F))) \
+	      "$(COMMON_DIR)/build/classes/java/main/$(CLASSPATH_SEP)$(COMMON_DIR)/lib/*$(CLASSPATH_SEP)$(PLATFORM_DIR)/build"
 
 .PHONY: mk_target
 mk_target:
@@ -271,7 +277,7 @@ endif	# UNIVERSAL
 .PHONY: clean distclean mostlyclean
 
 clean:
-	$(RM) *.o .*.d javah *-ranlib.a *.dSYM *.res $(TARGET).dSYM $(JNI_EXTRA_CLEAN)
+	$(RM) *.o .*.d javah java_jni *-ranlib.a *.dSYM *.res $(TARGET).dSYM $(JNI_EXTRA_CLEAN)
 
 distclean mostlyclean: clean
 	$(RM) $(TARGET) $(TARGET_IMPLIB) $(TARGET_PPC) $(TARGET_X86) $(POST_TARGET) $(JNI_EXTRA_DISTCLEAN)

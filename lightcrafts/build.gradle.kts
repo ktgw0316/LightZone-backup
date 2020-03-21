@@ -16,7 +16,6 @@ repositories {
 dependencies {
     annotationProcessor("org.jetbrains", "annotations", "17.0.0")
     annotationProcessor("org.projectlombok", "lombok", "1.18.4")
-    compileOnly("com.github.krnl0x0", "gjavah", "0.2.0.1")
     compileOnly("org.jetbrains", "annotations", "17.0.0")
     compileOnly("org.projectlombok", "lombok", "1.18.4")
     implementation(files("lib/substance-lite.jar", "lib/laf-widget-.jar"))
@@ -42,30 +41,18 @@ configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val NATIVE_SRC_JNI_INCLUDE_DIR = "javah"
-
-/**
- * Generates header files for native methods.
- */
-tasks.withType<JavaCompile> {
-    doLast {
-        val cp = (sourceSets["main"].runtimeClasspath + sourceSets["main"].output).asPath
-        val cs = sourceSets["main"].output.asFileTree.matching { include("**/*.class") }.asPath
-	    project.exec {
-		    commandLine = listOf(
-                "sh", "tools/bin/gjavah.sh",
-                "-d", NATIVE_SRC_JNI_INCLUDE_DIR,
-                "-classpath", cp, cs
-            )
-        }
-    }
-}
-
-//tasks {
+tasks {
 //    compileKotlin {
 //        kotlinOptions.jvmTarget = "1.8"
 //    }
 //    compileTestKotlin {
 //        kotlinOptions.jvmTarget = "1.8"
 //    }
-//}
+    register<Exec> ("jni") {
+        dependsOn("classes")
+        commandLine("make", "-C", "jnisrc")
+    }
+    register<Exec> ("cleanJni") {
+        commandLine("make", "-C", "jnisrc", "clean")
+    }
+}

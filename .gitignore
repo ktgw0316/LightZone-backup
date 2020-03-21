@@ -3,6 +3,7 @@
 **/.gradle
 **/build
 **/gradle
+**/java_jni
 **/javah
 **/out
 **/products
