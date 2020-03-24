@@ -1,3 +1,6 @@
+// import org.gradle.nativeplatform.platform.NativePlatform
+// import org.gradle.nativeplatform.platform.OperatingSystem
+
 plugins {
     java
     id("org.openjfx.javafxplugin") version "0.0.8"
@@ -41,6 +44,13 @@ configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
+// val os = NativePlatform.getOperatingSystem
+// val MAKE = when(os) {
+//     isFreeBSD, isSolaris -> "gmake"
+//     else -> "make"
+// }
+val MAKE = "make"
+
 tasks {
 //    compileKotlin {
 //        kotlinOptions.jvmTarget = "1.8"
@@ -48,11 +58,18 @@ tasks {
 //    compileTestKotlin {
 //        kotlinOptions.jvmTarget = "1.8"
 //    }
+
     register<Exec> ("jni") {
         dependsOn("classes")
-        commandLine("make", "-C", "jnisrc")
+        commandLine(MAKE, "-C", "jnisrc", "-s")
     }
     register<Exec> ("cleanJni") {
-        commandLine("make", "-C", "jnisrc", "clean")
+        commandLine(MAKE, "-C", "jnisrc", "-j", "-s", "clean")
+    }
+    getByName("build") {
+        dependsOn("jni")
+    }
+    getByName("clean") {
+        dependsOn("cleanJni")
     }
 }
