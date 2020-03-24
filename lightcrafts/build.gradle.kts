@@ -58,7 +58,12 @@ tasks {
 //    compileTestKotlin {
 //        kotlinOptions.jvmTarget = "1.8"
 //    }
-
+    register<Exec> ("coprocesses") {
+        commandLine(MAKE, "-C", "coprocesses", "-j", "-s")
+    }
+    register<Exec> ("cleanCoprocesses") {
+        commandLine(MAKE, "-C", "coprocesses", "-j", "-s", "clean")
+    }
     register<Exec> ("jni") {
         dependsOn("classes")
         commandLine(MAKE, "-C", "jnisrc", "-s")
@@ -67,9 +72,9 @@ tasks {
         commandLine(MAKE, "-C", "jnisrc", "-j", "-s", "clean")
     }
     getByName("build") {
-        dependsOn("jni")
+        dependsOn("coprocesses", "jni")
     }
     getByName("clean") {
-        dependsOn("cleanJni")
+        dependsOn("cleanCoprocesses", "cleanJni")
     }
 }
