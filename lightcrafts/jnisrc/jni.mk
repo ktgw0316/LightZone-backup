@@ -197,7 +197,7 @@ all: $(JAVAH_HEADERS) mk_target
 $(JAVAH_HEADERS):
 	$(COMMON_DIR)/tools/bin/javah.sh \
 	      $(basename $(subst _,.,$(@F))) \
-	      "$(COMMON_DIR)/build/classes/java/main/$(CLASSPATH_SEP)$(COMMON_DIR)/lib/*$(CLASSPATH_SEP)$(PLATFORM_DIR)/build"
+	      "$(COMMON_DIR)/build/classes/java/main/$(CLASSPATH_SEP)$(COMMON_DIR)/lib/*$(CLASSPATH_SEP)$(PLATFORM_DIR)/build/classes/java/main/"
 
 .PHONY: mk_target
 mk_target:
