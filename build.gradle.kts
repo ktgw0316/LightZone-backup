@@ -22,6 +22,8 @@ subprojects {
         "annotationProcessor"("org.projectlombok:lombok:1.18.4")
         "compileOnly"("org.jetbrains:annotations:17.0.0")
         "compileOnly"("org.projectlombok:lombok:1.18.4")
+        "implementation"(files("${project.rootDir}/lightcrafts/lib/substance-lite.jar"))
+        "implementation"(files("${project.rootDir}/lightcrafts/lib/laf-widget-.jar"))
         "implementation"("javax.media:jai_core:1.1.3")
         "implementation"("javax.media:jai_codec:1.1.3")
         "implementation"("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
@@ -67,8 +69,3 @@ subprojects {
     }
 }
 
-project(":windows") {
-    dependencies {
-        "implementation"(project(":lightcrafts"))
-    }
-}

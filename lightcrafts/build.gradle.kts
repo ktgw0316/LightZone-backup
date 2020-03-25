@@ -2,10 +2,6 @@ import java.io.FileOutputStream
 
 val MAKE = "make"
 
-dependencies {
-    "implementation"(files("${projectDir}/lib/substance-lite.jar"))
-    "implementation"(files("${projectDir}/lib/laf-widget-.jar"))
-}
 javafx {
     modules = listOf("javafx.controls", "javafx.swing")
 }

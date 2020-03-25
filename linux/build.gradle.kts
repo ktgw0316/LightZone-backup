@@ -3,4 +3,5 @@ javafx {
 }
 dependencies {
     "implementation"(project(":lightcrafts"))
+    "implementation"("javax.help:javahelp:2.0.05")
 }
