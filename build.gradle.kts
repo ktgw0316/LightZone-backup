@@ -11,7 +11,7 @@ subprojects {
 //    apply(plugin = "kotlin")
     apply(plugin = "org.openjfx.javafxplugin")
     group = "com.lightcrafts"
-    version = "4.2.0"
+    version = rootProject.file("lightcrafts/version.txt").readText().trim()
     repositories {
         maven(url = "https://download.osgeo.org/webdav/geotools/")
         maven(url = "https://jitpack.io/")

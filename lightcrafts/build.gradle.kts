@@ -31,14 +31,10 @@ tasks {
             }
             it.toString().trim()
         }
-    }
-    register<Copy> ("version") {
-        from("version.txt")
-        into("${project.buildDir}/resources/main/com/lightcrafts/utils/resources/Version")
+        File("$dir/Version/version.txt").writeText(version.toString())
     }
     register<Copy> ("resources") {
         dependsOn("revision")
-        dependsOn("version")
         from("${projectDir}/src/main/resources")
         from("${projectDir}/src/main/locale")
         exclude("**/.git")
