@@ -53,6 +53,12 @@ subprojects {
 //        compileTestKotlin {
 //            kotlinOptions.jvmTarget = "1.8"
 //        }
+        register<Exec> ("products") {
+            commandLine(MAKE, "-C", "products", "-j")
+        }
+        register<Exec> ("cleanProducts") {
+            commandLine(MAKE, "-C", "products", "-j", "-s", "clean")
+        }
         register<Exec> ("jni") {
             dependsOn("classes")
             commandLine(MAKE, "-C", "jnisrc")
@@ -61,10 +67,10 @@ subprojects {
             commandLine(MAKE, "-C", "jnisrc", "-j", "-s", "clean")
         }
         getByName("build") {
-            dependsOn("jni")
+            dependsOn("jni", "products")
         }
         getByName("clean") {
-            dependsOn("cleanJni")
+            dependsOn("cleanProducts", "cleanJni")
         }
     }
 }
