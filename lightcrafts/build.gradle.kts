@@ -31,7 +31,7 @@ tasks {
             }
             it.toString().trim()
         }
-        File("$dir/Version/version.txt").writeText(version.toString())
+        File("$dir/Version").writeText(version.toString())
     }
     register<Copy> ("resources") {
         dependsOn("revision")
