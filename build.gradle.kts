@@ -8,6 +8,7 @@ plugins {
 
 subprojects {
     apply(plugin = "java")
+    apply(plugin = "application")
 //    apply(plugin = "kotlin")
     apply(plugin = "org.openjfx.javafxplugin")
     group = "com.lightcrafts"

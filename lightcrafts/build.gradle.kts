@@ -5,6 +5,9 @@ val MAKE = "make"
 javafx {
     modules = listOf("javafx.controls", "javafx.swing")
 }
+application {
+    mainClassName = "com.lightcrafts.app.Application"
+}
 tasks {
     register<Exec> ("coprocesses") {
         commandLine(MAKE, "-C", "coprocesses", "-j", "-s")
@@ -45,5 +48,8 @@ tasks {
     }
     getByName("clean") {
         dependsOn("cleanCoprocesses")
+    }
+    withType<JavaExec> {
+        systemProperty("java.library.path", "${projectDir}/products")
     }
 }
