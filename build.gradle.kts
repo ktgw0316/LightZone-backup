@@ -36,7 +36,7 @@ subprojects {
         "implementation"("org.slf4j:slf4j-simple:1.7.25")
         "implementation"("org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438")
 //        "implementation"(kotlin("stdlib-jdk8", "1.3.70"))
-//        "testImplementation"("junit:junit:4.12")
+        "testImplementation"("junit:junit:4.12")
     }
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_11
