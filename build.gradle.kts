@@ -14,7 +14,7 @@ subprojects {
     group = "com.lightcrafts"
     version = rootProject.file("lightcrafts/version.txt").readText().trim()
     repositories {
-        maven(url = "https://download.osgeo.org/webdav/geotools/")
+        maven(url = "https://maven.geotoolkit.org/")
         maven(url = "https://jitpack.io/")
         mavenCentral()
     }
