@@ -69,12 +69,12 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
         return matrix;
     }
 
-    private static final ColorScience.CAMethod caMethod = ColorScience.INSTANCE.CAMethod.Mixed;
+    private static final ColorScience.CAMethod caMethod = ColorScience.CAMethod.Mixed;
 
     static final OperationType typeV1 = new OperationTypeImpl("RAW Adjustments");
     static final OperationType typeV2 = new OperationTypeImpl("RAW Adjustments V2");
 
-    private static final Matrix RGBtoZYX = new LCMatrix(ColorScience.RGBtoZYX()).transpose();
+    private static final Matrix RGBtoZYX = new LCMatrix(ColorScience.INSTANCE.RGBtoZYX()).transpose();
     private static final Matrix XYZtoRGB = RGBtoZYX.inverse();
 
     public RawAdjustmentsOperation(Rendering rendering, OperationType type) {
@@ -141,7 +141,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
                     for (int j = 0; j < 3; j++)
                         cameraRGBWB[j][i] *= wb[i];
 
-                Matrix B = new LCMatrix(ColorScience.chromaticAdaptation(daylightTemperature, originalTemperature, caMethod));
+                Matrix B = new LCMatrix(ColorScience.INSTANCE.chromaticAdaptation(daylightTemperature, originalTemperature, caMethod));
                 Matrix combo = XYZtoRGB.times(B.times(RGBtoZYX));
 
                 cameraRGBWB = LCMatrix.getArrayFloat(
@@ -181,7 +181,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
         float sat = Float.MAX_VALUE;
         float minT = 0;
         for (int t = 1000; t < 40000; t+= (0.01 * t)) {
-            Matrix B = new LCMatrix(ColorScience.chromaticAdaptation(t, refT, caMethod));
+            Matrix B = new LCMatrix(ColorScience.INSTANCE.chromaticAdaptation(t, refT, caMethod));
             Matrix combo = XYZtoRGB.times(B.times(RGBtoZYX));
 
             Matrix color = new Matrix(new double[][]{{rgb[0]}, {rgb[1]}, {rgb[2]}});
@@ -192,7 +192,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
             double g = color.get(1, 0);
             double b = color.get(2, 0);
 
-            float tSat = (float) ColorScience.saturation(r, g, b);
+            float tSat = (float) ColorScience.INSTANCE.saturation(r, g, b);
 
             if (tSat < sat) {
                 sat = tSat;
@@ -370,7 +370,7 @@ public class RawAdjustmentsOperation extends BlendedOperation implements ColorDr
             }
 
             // Chromatic adaptation matrix
-            Matrix B = new LCMatrix(ColorScience.chromaticAdaptation(daylightTemperature, temperature, caMethod));
+            Matrix B = new LCMatrix(ColorScience.INSTANCE.chromaticAdaptation(daylightTemperature, temperature, caMethod));
             Matrix CA = XYZtoRGB.times(B.times(RGBtoZYX));
 
             // Normalize the CA matrix to keep exposure constant

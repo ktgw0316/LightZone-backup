@@ -1,12 +1,17 @@
 !**/GNUMakefile
 !**/lightzone*
+**/.gradle
+**/.vscode
 **/build
+**/java_jni
 **/javah
+**/out
 **/products
 **/release
 *.0
 *.a
 *.cache
+*.bak
 *.d
 *.db
 *.dll
@@ -25,6 +30,7 @@
 *.rej
 *.res
 *.so
+*.srctrl*
 *.status
 *.swp
 *.tlog

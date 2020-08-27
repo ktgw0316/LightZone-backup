@@ -8,8 +8,18 @@ import com.lightcrafts.model.ImageEditor.ImageProcessor;
 import com.lightcrafts.model.ImageEditor.Rendering;
 import com.lightcrafts.model.Operation;
 import com.sun.media.jai.util.ImageUtil;
+import org.jetbrains.annotations.NotNull;
 
-import javax.media.jai.*;
+import javax.media.jai.BorderExtender;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.KernelJAI;
+import javax.media.jai.LookupTableJAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.RasterAccessor;
+import javax.media.jai.RasterFormatTag;
+import javax.media.jai.RenderedOp;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_Profile;
@@ -18,6 +28,7 @@ import java.awt.image.*;
 import java.awt.image.renderable.ParameterBlock;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -681,6 +692,7 @@ public class Functions {
             return toColorSpace(image, linearCS, hints);
     }
 
+    @NotNull
     public static WritableRaster copyData(WritableRaster raster, Raster source) {
         Rectangle region;               // the region to be copied
         if (raster == null) {           // copy the entire image
@@ -731,51 +743,50 @@ public class Functions {
         return raster;
     }
 
-    private static void fastCopyRaster(RasterAccessor src,
-                                        RasterAccessor dst) {
-        int srcLineStride = src.getScanlineStride();
-        int[] srcBandOffsets = src.getBandOffsets();
-
-        int dstPixelStride = dst.getPixelStride();
-        int dstLineStride = dst.getScanlineStride();
-        int[] dstBandOffsets = dst.getBandOffsets();
-
-        int width = dst.getWidth() * dstPixelStride;
-        int height = dst.getHeight() * dstLineStride;
-
-        int dataType = src.getDataType();
-
+    private static void fastCopyRaster(@NotNull RasterAccessor src,
+                                       @NotNull RasterAccessor dst) {
         final Object s, d;
 
-        if (dataType == DataBuffer.TYPE_BYTE) {
-            s = src.getByteDataArray(0);
-            d = dst.getByteDataArray(0);
-        } else if (dataType == DataBuffer.TYPE_SHORT ||
-                   dataType == DataBuffer.TYPE_USHORT) {
-            s = src.getShortDataArray(0);
-            d = dst.getShortDataArray(0);
-        } else if (dataType == DataBuffer.TYPE_INT) {
-            s = src.getIntDataArray(0);
-            d = dst.getIntDataArray(0);
-        } else if (dataType == DataBuffer.TYPE_FLOAT) {
-            s = src.getFloatDataArray(0);
-            d = dst.getFloatDataArray(0);
-        } else if (dataType == DataBuffer.TYPE_DOUBLE) {
-            s = src.getDoubleDataArray(0);
-            d = dst.getDoubleDataArray(0);
-        } else
-            throw new IllegalArgumentException();
+        switch (src.getDataType()) {
+            case DataBuffer.TYPE_BYTE:
+                s = src.getByteDataArray(0);
+                d = dst.getByteDataArray(0);
+                break;
+            case DataBuffer.TYPE_SHORT:
+            case DataBuffer.TYPE_USHORT:
+                s = src.getShortDataArray(0);
+                d = dst.getShortDataArray(0);
+                break;
+            case DataBuffer.TYPE_INT:
+                s = src.getIntDataArray(0);
+                d = dst.getIntDataArray(0);
+                break;
+            case DataBuffer.TYPE_FLOAT:
+                s = src.getFloatDataArray(0);
+                d = dst.getFloatDataArray(0);
+                break;
+            case DataBuffer.TYPE_DOUBLE:
+                s = src.getDoubleDataArray(0);
+                d = dst.getDoubleDataArray(0);
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
 
-        int srcOffset = Integer.MAX_VALUE;
-        for (int offset : srcBandOffsets)
-            if (offset < srcOffset)
-                srcOffset = offset;
-        int dstOffset = Integer.MAX_VALUE;
-        for (int offset : dstBandOffsets)
-            if (offset < dstOffset)
-                dstOffset = offset;
+        final int srcLineStride = src.getScanlineStride();
+        final int[] srcBandOffsets = src.getBandOffsets();
 
-        int heightEnd = dstOffset + height;
+        final int dstPixelStride = dst.getPixelStride();
+        final int dstLineStride = dst.getScanlineStride();
+        final int[] dstBandOffsets = dst.getBandOffsets();
+
+        final int width = dst.getWidth() * dstPixelStride;
+        final int height = dst.getHeight() * dstLineStride;
+
+        final int srcOffset = Arrays.stream(srcBandOffsets).min().orElse(Integer.MAX_VALUE);
+        final int dstOffset = Arrays.stream(dstBandOffsets).min().orElse(Integer.MAX_VALUE);
+
+        final int heightEnd = dstOffset + height;
 
         for (int dstLineOffset = dstOffset,
              srcLineOffset = srcOffset;

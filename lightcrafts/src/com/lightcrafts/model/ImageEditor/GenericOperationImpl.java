@@ -3,21 +3,18 @@
 
 package com.lightcrafts.model.ImageEditor;
 
+import com.lightcrafts.jai.utils.Transform;
 import com.lightcrafts.model.GenericOperation;
 import com.lightcrafts.model.OperationType;
 import com.lightcrafts.model.SliderConfig;
-import com.lightcrafts.jai.utils.Transform;
+import lombok.AccessLevel;
+import lombok.Setter;
 
 import javax.media.jai.PlanarImage;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 
 /** A ImageEditor implementation of GenericOperation that does nothing when its
   * settings are updated.
@@ -33,8 +30,13 @@ abstract class GenericOperationImpl extends OperationImpl implements GenericOper
     private Map<String, List<String>> choiceValues;
     private Map<String, SliderConfig> sliderConfigs;
 
-    @Getter @Setter (AccessLevel.PROTECTED)
+    @Setter (AccessLevel.PROTECTED)
     private String helpTopic = null; // null leads to the help home page.
+
+    @Override
+    public String getHelpTopic() {
+        return this.helpTopic;
+    }
 
     GenericOperationImpl(Rendering rendering, OperationType type) {
         super(rendering, type.getName());

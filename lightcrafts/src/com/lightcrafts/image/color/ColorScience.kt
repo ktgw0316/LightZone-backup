@@ -1,3 +1,6 @@
+/* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2017-     Masahiro Kitagawa */
+
 package com.lightcrafts.image.color
 
 import Jama.Matrix

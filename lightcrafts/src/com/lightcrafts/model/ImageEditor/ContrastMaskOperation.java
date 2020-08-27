@@ -10,7 +10,13 @@ import com.lightcrafts.model.LayerConfig;
 import com.lightcrafts.model.OperationType;
 import com.lightcrafts.model.SliderConfig;
 
-import javax.media.jai.*;
+import javax.media.jai.BorderExtender;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.LookupTableJAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.RenderedOp;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.renderable.ParameterBlock;
@@ -109,7 +115,7 @@ public class ContrastMaskOperation extends BlendedOperation {
                 ParameterBlock pb = new ParameterBlock();
                 pb.addSource(scaleDown);
                 double[][] transform = {
-                        {ColorScience.Wr, ColorScience.Wg, ColorScience.Wb, 0}
+                        {ColorScience.INSTANCE.getWr(), ColorScience.INSTANCE.getWg(), ColorScience.INSTANCE.getWb(), 0}
                 };
                 pb.add(transform);
                 scaleDown = JAI.create("BandCombine", pb, JAIContext.noCacheHint);  // Desaturate, single banded

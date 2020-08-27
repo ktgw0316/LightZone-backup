@@ -7,13 +7,12 @@ import Jama.Matrix
 import com.lightcrafts.extensions.matrix.Matrix
 import com.lightcrafts.extensions.matrix.getArrayFloat
 import com.lightcrafts.extensions.primitive.clamp
+import com.lightcrafts.image.color.ColorScience
 
-import com.lightcrafts.image.types.RawImageInfo
 import com.lightcrafts.jai.utils.Transform
 import com.lightcrafts.model.OperationType
 import com.lightcrafts.model.SliderConfig
 import com.lightcrafts.model.ColorDropperOperation
-import com.lightcrafts.utils.ColorScience
 import com.lightcrafts.utils.splines
 
 import javax.media.jai.JAI
@@ -25,14 +24,9 @@ import java.awt.image.renderable.ParameterBlock
 import java.awt.image.RenderedImage
 import java.text.DecimalFormat
 import java.util.TreeMap
+import kotlin.math.max
+import kotlin.math.min
 
-/**
- * Created by IntelliJ IDEA.
- * User: fabio
- * Date: May 31, 2005
- * Time: 7:08:49 PM
- * To change this template use File | Settings | File Templates.
- */
 internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : BlendedOperation(rendering, type), ColorDropperOperation {
     private val TINT = "Tint"
     private var tint = 0f
@@ -70,7 +64,7 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
         super.setSliderValue(key, value)
     }
 
-    override fun setColor(p: Point2D): Map<String, Float> {
+    override fun setColor(p: Point2D?): Map<String, Float> {
         this.p = p
         settingsChanged()
         this.p = null
@@ -81,7 +75,7 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
         return result
     }
 
-    private inner class WhiteBalanceTransform internal constructor(source: PlanarImage) :
+    private inner class WhiteBalanceTransform(source: PlanarImage) :
             BlendedOperation.BlendedTransform(source)
     {
         override fun setFront(): PlanarImage {
@@ -94,7 +88,7 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
                     val n = neutralize(pixel, caMethod, source, REF_T)
                     lightness = pixel[1] / 255.0f
                     source = n[0]
-                    tint = Math.min(Math.max(n[1], -20f), 20f)
+                    tint = min(max(n[1], -20f), 20f)
                 }
             }
 
@@ -112,19 +106,13 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
     companion object {
         private val SOURCE = "Temperature"
 
-        internal val typeV2: OperationType = OperationTypeImpl("White Point V2")
-        internal val typeV3: OperationType = OperationTypeImpl("White Point V3")
-
-        private fun W(original: Float, target: Float): FloatArray {
-            val originalW = ColorScience.W(original)
-            val targetW = ColorScience.W(target)
-            return floatArrayOf(originalW[0] / targetW[0], originalW[1] / targetW[1], originalW[2] / targetW[2])
-        }
+        val typeV2: OperationType = OperationTypeImpl("White Point V2")
+        val typeV3: OperationType = OperationTypeImpl("White Point V3")
 
         private val RGBtoZYX = Matrix(ColorScience.RGBtoZYX()).transpose()
         private val XYZtoRGB = RGBtoZYX.inverse()
 
-        internal fun neutralize(pixel: IntArray, caMethod: ColorScience.CAMethod, source: Float, REF_T: Float):
+        fun neutralize(pixel: IntArray, caMethod: ColorScience.CAMethod, source: Float, REF_T: Float):
                 FloatArray {
             var r = pixel[0].toDouble()
             var g = pixel[1].toDouble()

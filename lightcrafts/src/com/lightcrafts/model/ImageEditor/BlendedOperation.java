@@ -14,7 +14,11 @@ import com.lightcrafts.model.*;
 import com.lightcrafts.utils.LCMS;
 import com.lightcrafts.utils.LCMS_ColorSpace;
 
-import javax.media.jai.*;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.TileCache;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -441,7 +445,9 @@ public abstract class BlendedOperation extends GenericOperationImpl implements C
             return source;
         }
 
-        final double[][] yChannel = new double[][]{{ColorScience.Wr, ColorScience.Wg, ColorScience.Wb, 0}};
+        final double[][] yChannel = new double[][]{
+                {ColorScience.INSTANCE.getWr(), ColorScience.INSTANCE.getWg(), ColorScience.INSTANCE.getWb(), 0}
+        };
         ParameterBlock pb = new ParameterBlock()
                 .addSource(source)
                 .add(yChannel);
