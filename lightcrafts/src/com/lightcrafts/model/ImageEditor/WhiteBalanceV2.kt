@@ -24,8 +24,6 @@ import java.awt.image.renderable.ParameterBlock
 import java.awt.image.RenderedImage
 import java.text.DecimalFormat
 import java.util.TreeMap
-import kotlin.math.max
-import kotlin.math.min
 
 internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : BlendedOperation(rendering, type), ColorDropperOperation {
     private val TINT = "Tint"
@@ -70,8 +68,8 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
         this.p = null
 
         val result = TreeMap<String, Float>()
-        result.put(SOURCE, source)
-        result.put(TINT, tint)
+        result[SOURCE] = source
+        result[TINT] = tint
         return result
     }
 
@@ -88,7 +86,7 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
                     val n = neutralize(pixel, caMethod, source, REF_T)
                     lightness = pixel[1] / 255.0f
                     source = n[0]
-                    tint = min(max(n[1], -20f), 20f)
+                    tint = n[1].clamp(-20f, 20f)
                 }
             }
 
@@ -104,7 +102,7 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
             WhiteBalanceTransform(source)
 
     companion object {
-        private val SOURCE = "Temperature"
+        private const val SOURCE = "Temperature"
 
         val typeV2: OperationType = OperationTypeImpl("White Point V2")
         val typeV3: OperationType = OperationTypeImpl("White Point V3")
