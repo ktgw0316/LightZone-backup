@@ -104,12 +104,16 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
     companion object {
         private const val SOURCE = "Temperature"
 
+        @JvmStatic
         val typeV2: OperationType = OperationTypeImpl("White Point V2")
+
+        @JvmStatic
         val typeV3: OperationType = OperationTypeImpl("White Point V3")
 
         private val RGBtoZYX = Matrix(ColorScience.RGBtoZYX()).transpose()
         private val XYZtoRGB = RGBtoZYX.inverse()
 
+        @JvmStatic
         fun neutralize(pixel: IntArray, caMethod: ColorScience.CAMethod, source: Float, REF_T: Float):
                 FloatArray {
             var r = pixel[0].toDouble()
@@ -188,6 +192,7 @@ internal class WhiteBalanceV2(rendering: Rendering, type: OperationType) : Blend
             return combo.getArrayFloat()
         }
 
+        @JvmStatic
         fun tintCast(image: PlanarImage, tint: Float, lightness: Float): PlanarImage {
             if (tint != 0f) {
                 val tred = (-tint / 4).toDouble()

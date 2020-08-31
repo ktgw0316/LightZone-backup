@@ -14,9 +14,16 @@ object ColorScience {
     internal val wtptXYZ: FloatArray
     internal val whitePointTemperature: Float
 
+    @JvmStatic
     val Wr: Float
+
+    @JvmStatic
     val Wg: Float
+
+    @JvmStatic
     val Wb: Float
+
+    @JvmStatic
     val W: FloatArray
 
     internal val Cxy: Array<FloatArray>
@@ -142,7 +149,8 @@ object ColorScience {
         return r
     }
 
-    fun W(T: Float, Cxy: Array<FloatArray>): FloatArray {
+    @JvmOverloads @JvmStatic
+    fun W(T: Float, Cxy: Array<FloatArray> = this.Cxy): FloatArray {
         val DT = D(T)
 
         // Compute z-coordinates
