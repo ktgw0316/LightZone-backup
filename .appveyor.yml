@@ -1,7 +1,7 @@
 version: 4.2.1.{build}-{branch}
 
 image:
-- macos-mojave
+- macos
 - Visual Studio 2017
 - Ubuntu2004
 
@@ -48,7 +48,7 @@ for:
 -
   matrix:
     only:
-      - image: macos-mojave
+      - image: macos
 
   install:
     - sh: export JAVA_HOME=/usr/local/opt/openjdk
