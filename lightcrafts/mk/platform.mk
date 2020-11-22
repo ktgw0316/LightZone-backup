@@ -89,15 +89,9 @@ ifeq ($(PLATFORM),MacOSX)
   ##
   # Don't use := here so other makefiles can override SDKROOT.
   ##
-  ifeq ($(UNIVERSAL),1)
-    SDKROOT:=		$(shell xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path:/p' | sed 's/^Path: //')
-    MACOSX_ISYSROOT=	-isysroot $(SDKROOT)
-    MACOSX_SYSLIBROOT=	-Wl,-syslibroot,$(SDKROOT)
-  else
-    SDKROOT:=
-    MACOSX_ISYSROOT=
-    MACOSX_SYSLIBROOT=
-  endif
+  SDKROOT:=		$(shell xcrun --sdk macosx --show-sdk-path)
+  MACOSX_ISYSROOT=	-isysroot $(SDKROOT)
+  MACOSX_SYSLIBROOT=	-Wl,-syslibroot,$(SDKROOT)
   PLATFORM_LDFLAGS+=	$(MACOSX_SYSLIBROOT)
 
   ##
