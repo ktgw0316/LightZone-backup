@@ -4,14 +4,12 @@ bin/lightzone
 %%LIBDIR%%/libDCRaw.so
 %%LIBDIR%%/libFASTJAI.so
 %%LIBDIR%%/libJAI.so
-%%LIBDIR%%/libLCArrays.so
 %%LIBDIR%%/libLCCache.so
 %%LIBDIR%%/libLCFileUtil.so
 %%LIBDIR%%/libLCJNI.so
 %%LIBDIR%%/libLCJPEG.so
 %%LIBDIR%%/libLCLCMS.so
 %%LIBDIR%%/libLCTIFF.so
-%%LIBDIR%%/libLinux.so
 %%LIBDIR%%/libSegment.so
 %%LIBDIR%%/libfbf.so
 %%JAVASHAREDIR%%/lightzone/asm-all-2.2.2.jar

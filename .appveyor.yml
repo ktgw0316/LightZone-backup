@@ -1,33 +1,83 @@
-version: 4.2.1.{build}-{branch}
+version: 4.2.3.{build}-{branch}
 
 image:
-- Visual Studio 2017
-- Ubuntu
+- macos
+- Visual Studio 2019
+- Ubuntu2004
 
 clone_depth: 1
 
 matrix:
   fast_finish: true
 
-install:
-  - cmd: SET MINGW_PATH=mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64
-  - cmd: SET MINGW_DIR=/c/%MINGW_PATH%/
-  - cmd: SET MINGW_ARCH=mingw-w64-x86_64
-  - cmd: SET PATH=C:/%MINGW_PATH%/bin/;C:/msys64/mingw64/bin/;C:/msys64/usr/bin/;%PATH%
-  - cmd: SET MSSDK_HOME=/c/Program Files (x86)/Windows Kits/10
-  - cmd: SET JAVA_HOME=/c/Program Files/Java/jdk11
-  - cmd: cinst ant html-help-workshop
-  - cmd: bash -lc 'cp "/c/Program Files (x86)/Windows Kits/10/Lib/10.0.14393.0/um/x64/Htmlhelp.Lib" /c/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/lib/libhtmlhelp.a'
-  - cmd: bash -lc "pacman --needed --noconfirm -Syu"
-  - cmd: bash -lc "pacman --needed --noconfirm -Sy"
-  - cmd: bash -lc "pacman --noconfirm -S autoconf git make tar"
-  - cmd: bash -lc "pacman --noconfirm -S ${MINGW_ARCH}-lcms2 ${MINGW_ARCH}-lensfun ${MINGW_ARCH}-ntldd-git ${MINGW_ARCH}-pkg-config"
-  - sh: export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2019
 
-init:
-  - sh: sudo apt-get update
-  - sh: sudo apt-get install -y ant autoconf javahelp2 tidy libglib2.0-dev liblensfun-dev liblcms2-dev libtiff5-dev openjfx
+  init:
+    - cmd: SET MINGW64_PATH=msys64/mingw64
+    - cmd: SET MINGW32_PATH=msys64/mingw32
+    - cmd: SET PATH=C:/%MINGW64_PATH%/bin/;C:/%MINGW32_PATH%/bin/;C:/msys64/usr/bin/;%PATH%
+    - cmd: SET MSSDK_HOME=/c/Program Files (x86)/Windows Kits/10
+    - cmd: SET JAVA_HOME=/c/Program Files/Java/jdk11
+    - cmd: SET ANT_SCRIPT=/c/projects/lightzone/windows/build.xml
 
-build_script:
-  - cmd: bash -lc "ant -f /c/projects/lightzone/windows/build.xml"
-  - sh: ant -f linux/build.xml
+  install:
+    - cmd: cinst ant
+    - cmd: bash -lc 'cp "$MSSDK_HOME/../8.1/Lib/winv6.3/um/x64/Htmlhelp.Lib" /c/$MINGW64_PATH/lib/libhtmlhelp.a'
+    - cmd: bash -lc 'cp "$MSSDK_HOME/../8.1/Lib/winv6.3/um/x86/Htmlhelp.Lib" /c/$MINGW32_PATH/lib/libhtmlhelp.a'
+    - ps: (new-object net.webclient).DownloadFile('https://download-gcdn.ej-technologies.com/install4j/install4j_windows-x64_8_0_8.exe', 'install4j-installer.exe')
+    - ps: install4j-installer.exe -q
+    - cmd: bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+    - cmd: bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+    - cmd: bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+    - cmd: bash -lc "pacman --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+    - cmd: bash -lc "pacman --needed --noconfirm -Sy pacman"
+    - cmd: bash -lc "pacman --needed --noconfirm -Su"
+    - cmd: bash -lc "pacboy --noconfirm --disable-download-timeout -S lcms2:m lensfun:m ntldd-git:m"
+
+  build_script:
+    - cmd: bash -lc "MINGW_DIR=/c/$MINGW64_PATH ant -f $ANT_SCRIPT build-installer"
+    - cmd: bash -lc "ant -f $ANT_SCRIPT clean-native"
+    - cmd: bash -lc "TARGET_ARCH=i686 MINGW_DIR=/c/$MINGW32_PATH ant -f $ANT_SCRIPT -Doffline=true build-installer"
+
+  artifacts:
+    - path: 'windows/LightZone_Installer_*.exe'
+      name: windows installer
+
+-
+  matrix:
+    only:
+      - image: macos
+
+  init:
+    - sh: export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
+    - sh: export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+
+  install:
+    - sh: HOMEBREW_NO_AUTO_UPDATE=1 brew install ant autoconf lensfun libjpeg-turbo libomp libtiff libxml2 little-cms2 rsync
+
+  build_script:
+    - sh: ant -f macosx/build.xml dmg
+
+  artifacts:
+    - path: 'macosx/dmg/LightZone.dmg'
+      name: macos installer
+
+-
+  matrix:
+    only:
+      - image: Ubuntu2004
+
+  init:
+    - sh: export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+  install:
+    - sh: sudo add-apt-repository --yes ppa:lightzone-team/lightzone
+    - sh: sudo apt-get update
+    - sh: sudo apt-get install -y ant autoconf javahelp2 libejml-java libglib2.0-dev libjaxb-java libjetbrains-annotations-java libjiconfont-font-awesome-java libjiconfont-google-material-design-icons-java libjiconfont-swing-java liblensfun-dev liblcms2-dev liblombok-java librefuel-java libslf4j-java libtiff5-dev tidy
+
+  build_script:
+    - sh: ant -f linux/build.xml -Doffline=true

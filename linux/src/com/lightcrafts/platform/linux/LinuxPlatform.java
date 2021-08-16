@@ -4,6 +4,7 @@
 package com.lightcrafts.platform.linux;
 
 import com.lightcrafts.platform.AlertDialog;
+import com.lightcrafts.platform.FileChooser;
 import com.lightcrafts.platform.Platform;
 import com.lightcrafts.ui.LightZoneSkin;
 import com.lightcrafts.image.color.ColorProfileInfo;
@@ -13,9 +14,14 @@ import javax.help.HelpSet;
 import javax.help.HelpSetException;
 import javax.help.JHelp;
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.color.ICC_Profile;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
@@ -76,6 +82,11 @@ public class LinuxPlatform extends Platform {
     }
 
     @Override
+    public FileChooser getFileChooser() {
+        return new LinuxFileChooser();
+    }
+
+    @Override
     public ICC_Profile getDisplayProfile() {
         Preferences prefs = Preferences.userRoot().node(
             "/com/lightcrafts/platform/linux"
@@ -103,11 +114,6 @@ public class LinuxPlatform extends Platform {
         return getColorProfiles();
     }
 
-    @Override
-    public boolean isKeyPressed(int keyCode) {
-        return LinuxKeyUtil.isKeyPressed(keyCode);
-    }
-
     private static synchronized Collection<ColorProfileInfo> getColorProfiles() {
         if (Profiles == null) {
             Profiles = new HashSet<>();
@@ -115,11 +121,6 @@ public class LinuxPlatform extends Platform {
             Profiles.addAll(getColorProfiles(UserProfileDir));
         }
         return Profiles;
-    }
-
-    @Override
-    public void loadLibraries() throws UnsatisfiedLinkError {
-        System.loadLibrary("Linux");
     }
 
     @Override

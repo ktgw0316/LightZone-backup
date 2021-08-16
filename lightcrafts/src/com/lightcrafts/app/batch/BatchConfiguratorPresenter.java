@@ -8,7 +8,8 @@ import com.lightcrafts.image.export.ImageExportOptions;
 import com.lightcrafts.image.export.ImageFileExportOptions;
 import com.lightcrafts.ui.base.BasePresenter;
 import lombok.Getter;
-import lombok.val;
+
+import java.io.File;
 
 import static com.lightcrafts.app.batch.Locale.LOCALE;
 
@@ -48,8 +49,15 @@ class BatchConfiguratorPresenter extends BasePresenter<BatchConfiguratorContract
 
     @Override
     public void onDirButtonPressed() {
-        val directory = mView.chooseDirectory(config.directory);
+        final File configDirectory = config.directory != null && config.directory.isDirectory()
+                ? config.directory
+                : new File(System.getProperty("java.io.tmpdir"));
+        var directory = mView.chooseDirectory(configDirectory);
+        if (directory == null) return;
 
+        if (!directory.isDirectory()) {
+            directory = directory.getParentFile();
+        }
         if (directory != null) {
             config.directory = directory;
             dirLabelText = directory.getName();

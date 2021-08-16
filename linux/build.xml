@@ -51,6 +51,11 @@
         <fileset dir="${common-dir}/products">
           <include name="*.jar"/>
         </fileset>
+        <fileset dir="${common-dir}/lib">
+          <include name="lombok*.jar"/>
+          <include name="annotations*.jar"/>
+          <include name="jsr305*.jar"/>
+        </fileset>
         <fileset dir="/usr">
           <include name="share/java*/**/*.jar"/>
           <include name="local/share/java/classes/*.jar"/>
@@ -58,10 +63,6 @@
         </fileset>
       </classpath>
     </javac>
-  </target>
-
-  <target name="jni">
-    <exec executable="${MAKE}" dir="jnisrc" failonerror="true" vmlauncher="true"/>
   </target>
 
   <target name="locales">
@@ -74,7 +75,7 @@
     <ant dir="help" target="build"/>
   </target>
 
-  <target name="build" depends="javac, jni, locales, help"/>
+  <target name="build" depends="javac, locales, help"/>
 
   <!--===== Make the jar files =============================================-->
 
@@ -103,8 +104,8 @@
           <include name="*.jar"/>
         </fileset>
         <fileset dir="/usr">
-          <include name="share/java*/**/jh.jar"/>
-          <include name="local/share/java/classes/jh.jar"/>
+          <include name="share/java*/**/*.jar"/>
+          <include name="local/share/java/classes/*.jar"/>
           <include name="jdk/packages/lib/ext/*.jar"/>
         </fileset>
       </classpath>
@@ -187,10 +188,6 @@
       <delete file="LightZone.tar.gz"/>
     </parallel>
     <exec executable="${MAKE}" dir="products">
-      <arg value="distclean"/>
-    </exec>
-    <exec executable="${MAKE}" dir="jnisrc">
-      <arg value="-j"/>
       <arg value="distclean"/>
     </exec>
   </target>

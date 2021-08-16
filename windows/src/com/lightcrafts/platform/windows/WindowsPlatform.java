@@ -54,12 +54,6 @@ public final class WindowsPlatform extends Platform {
     }
 
     @Override
-    public FileChooser getFileChooser() {
-        return super.getFileChooser();
-        // return new WindowsFileChooser();
-    }
-
-    @Override
     public String getDisplayNameOf( File file ) {
         String displayName = getFileSystemView().getSystemDisplayName( file );
 
@@ -119,11 +113,6 @@ public final class WindowsPlatform extends Platform {
     }
 
     @Override
-    public boolean isKeyPressed( int keyCode ) {
-        return WindowsKeyUtil.isKeyPressed( keyCode );
-    }
-
-    @Override
     public File isSpecialFile( File file ) {
         file = FileUtil.resolveAliasFile( file );
         if ( !(file instanceof WindowsSavedSearch) &&
@@ -153,12 +142,6 @@ public final class WindowsPlatform extends Platform {
     @Override
     public boolean moveFilesToTrash( String[] pathNames ) {
         return WindowsFileUtil.moveToRecycleBin( pathNames );
-    }
-
-    @Override
-    public void readyToOpenFiles() {
-        if ( System.getProperty( "IDE" ) == null )
-            WindowsLauncher.readyToOpenFiles();
     }
 
     @Override

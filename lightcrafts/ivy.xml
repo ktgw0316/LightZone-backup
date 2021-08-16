@@ -2,32 +2,18 @@
 <ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
   <info organisation="lightcrafts" module="lightcrafts"/>
   <dependencies>
-    <dependency org="gov.nist.math.jama" name="gov.nist.math.jama" rev="1.1.1"/>
-    <dependency org="org.projectlombok" name="lombok" rev="1.18.4"/>
-    <dependency org="org.jetbrains.kotlin" name="kotlin-compiler" rev="${kotlin.version}" conf="*->*,!sources,!javadoc"/>
-    <dependency org="de.dimaki" name="refuel" rev="0.1.1"/>
-    <dependency org="org.slf4j" name="slf4j-simple" rev="1.7.25"/>
-    <dependency org="javax.xml.bind" name="jaxb-api" rev="2.4.0-b180830.0359" conf="*->*,!sources,!javadoc"/>
-    <dependency org="org.glassfish.jaxb" name="jaxb-runtime" rev="2.4.0-b180830.0438" conf="*->*,!sources,!javadoc"/>
-    <dependency org="org.openjfx" name="javafx-base" rev="11.0.2">
-	    <artifact name="javafx-base" ext="jar"/>
-	    <artifact name="javafx-base" ext="jar" type="${javafx.platform}" m:classifier="${javafx.platform}"/>
-    </dependency>
-    <dependency org="org.openjfx" name="javafx-controls" rev="11.0.2">
-	    <artifact name="javafx-controls" ext="jar"/>
-	    <artifact name="javafx-controls" ext="jar" type="${javafx.platform}" m:classifier="${javafx.platform}"/>
-    </dependency>
-    <dependency org="org.openjfx" name="javafx-graphics" rev="11.0.2">
-	    <artifact name="javafx-graphics" ext="jar"/>
-	    <artifact name="javafx-graphics" ext="jar" type="${javafx.platform}" m:classifier="${javafx.platform}"/>
-    </dependency>
-    <dependency org="org.openjfx" name="javafx-swing" rev="11.0.2">
-	    <artifact name="javafx-swing" ext="jar"/>
-	    <artifact name="javafx-swing" ext="jar" type="${javafx.platform}" m:classifier="${javafx.platform}"/>
-    </dependency>
-    <dependency org="com.github.jiconfont" name="jiconfont-swing" rev="1.0.0" conf="*->*,!sources,!javadoc"/>
-    <dependency org="com.github.jiconfont" name="jiconfont-font_awesome" rev="4.5.0.3" conf="*->*,!sources,!javadoc"/>
-    <dependency org="com.github.jiconfont" name="jiconfont-google_material_design_icons" rev="2.2.0.1" conf="*->*,!sources,!javadoc"/>
+    <dependency name="gov.nist.math.jama" rev="1.1.1" org="gov.nist.math.jama"/>
+    <dependency name="jaxb-api" rev="2.4.0-b180830.0359" org="javax.xml.bind"/>
+    <dependency name="jaxb-runtime" rev="3.0.0" org="org.glassfish.jaxb"/>
+    <dependency name="jiconfont-font_awesome" rev="4.7.0.0" org="com.github.jiconfont"/>
+    <dependency name="jiconfont-google_material_design_icons" rev="2.2.0.2" org="com.github.jiconfont"/>
+    <dependency name="jiconfont-swing" rev="1.0.1" org="com.github.jiconfont"/>
+      <dependency name="kotlin-compiler" rev="${kotlin.version}" org="org.jetbrains.kotlin"/>
+    <dependency name="lombok" rev="1.18.20" org="org.projectlombok"/>
+    <dependency name="refuel" rev="0.1.1" org="de.dimaki"/>
+    <dependency name="slf4j-simple" rev="1.7.30" org="org.slf4j"/>
+    <!-- Don't download source or javadocs to save bandwidth -->
+    <exclude org="*" ext="*" type="source"/>
+    <exclude org="*" ext="*" type="javadoc"/>
   </dependencies>
 </ivy-module>
-

@@ -37,27 +37,12 @@
     </or>
   </condition>
 
-  <condition property="javafx.platform" value="linux">
-    <not>
-      <or>
-        <os family="mac"/>
-        <os family="windows"/>
-      </or>
-    </not>
-  </condition>
-  <condition property="javafx.platform" value="mac">
-    <os family="mac"/>
-  </condition>
-  <condition property="javafx.platform" value="win">
-    <os family="windows"/>
-  </condition>
-
-  <target name="resolve" depends="init-ivy">
+  <target name="resolve" depends="init-ivy" unless="offline">
     <ivy:resolve file="${basedir}/ivy.xml"/>
     <ivy:retrieve/>
   </target>
 
-  <property name="ivy.version" value="2.4.0"/>
+  <property name="ivy.version" value="2.5.0"/>
   <property name="ivy.jar.dir" value="${basedir}/lib"/>
   <property name="ivy.jar.file"
             value="${ivy.jar.dir}/ivy.jar"/>
@@ -93,21 +78,36 @@
     </move>
   </target>
 
-  <target name="javac" depends="init-kotlin">
+  <available file="/usr" type="dir" property="have.usr"/>
+
+  <path id="compile.classpath">
+    <fileset dir="lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="init_classpath" if="have.usr">
+    <path id="compile.classpath">
+      <fileset dir="lib">
+        <include name="*.jar"/>
+      </fileset>
+      <fileset dir="/usr">
+        <include name="share/java*/**/*.jar"/>
+        <include name="local/share/java/classes/*.jar"/>
+        <include name="jdk/packages/lib/ext/*.jar"/>
+      </fileset>
+    </path>
+  </target>
+
+  <target name="javac" depends="resolve, init-kotlin, init_classpath">
     <exec executable="${MAKE}" dir="products" failonerror="true"
           vmlauncher="true">
       <arg value="-j"/>
     </exec>
     <mkdir dir="build"/>
     <mkdir dir="javah"/>
-    <javac destdir="build" includeantruntime="false" debug="true"
-           release="11" nativeheaderdir="javah">
-      <src path="src"/>
-      <classpath>
-        <fileset dir="lib">
-          <include name="*.jar"/>
-        </fileset>
-      </classpath>
+    <javac srcdir="src" destdir="build" includeantruntime="false" debug="true"
+           release="11" nativeheaderdir="javah" classpathref="compile.classpath">
       <withKotlin>
         <compilerarg line="-jvm-target 1.8"/>
       </withKotlin>

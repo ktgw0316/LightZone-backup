@@ -25,7 +25,7 @@
       <variable name="LC_VERSION" />
     </variables>
     <codeSigning windowsEnabled="true" windowsPkcs12File="./resources/sign/lightcrafts.pfx" />
-    <jreBundles jdkProviderId="Liberica" release="OpenJDK 11.0.5+11">
+    <jreBundles jdkProviderId="JBR" release="11.0.9-b1145.10">
       <modules>
         <defaultModules set="minimum" />
         <module name="java.base" />
@@ -34,7 +34,6 @@
         <module name="java.management" />
         <module name="java.prefs" />
         <module name="java.rmi" />
-        <module name="javafx.swing" />
         <module name="jdk.management" />
       </modules>
     </jreBundles>
@@ -47,6 +46,7 @@
       <dirEntry mountPoint="1" file="products" overwriteMode="1" uninstallMode="2" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" overrideDirMode="true">
         <exclude>
           <entry location="GNUmakefile" />
+          <entry location="copydeps.sh" />
           <entry location="jre" />
         </exclude>
       </dirEntry>
@@ -70,9 +70,9 @@
       </java>
       <macStaticAssociationActions mode="selected" />
       <vmOptionsFile mode="content" overwriteMode="1">
-        <content>-Xrs -XX:+UseG1GC
--XX:MinHeapFreeRatio=30
+        <content>-XX:MinHeapFreeRatio=30
 -XX:MaxHeapFreeRatio=30
+-Xmx16384m
 -Dfile.encoding=UTF8
 -Dlensfun.dir=${launcher:sys.launcherDirectory}/share/lensfun</content>
       </vmOptionsFile>

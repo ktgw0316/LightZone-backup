@@ -856,8 +856,7 @@ public class JPEGImageType extends ImageType implements TrueImageTypeProvider {
             final short newRating = rating.getShortValue();
             boolean removeRating = false;
             if ( newRating == 0 ) {
-                metadata.removeValues( CoreDirectory.class, CORE_RATING );
-                metadata.removeValues( SubEXIFDirectory.class, EXIF_MS_RATING );
+                metadata.clearRating();
                 removeRating = true;
             }
             modifyMetadata(
@@ -865,8 +864,6 @@ public class JPEGImageType extends ImageType implements TrueImageTypeProvider {
             );
             rating.clearEdited();
         }
-
-        // TODO: must do something about unrating a photo
 
         ////////// IPTC directory
 
