@@ -25,7 +25,7 @@ import javax.media.jai.RasterAccessor
  * Date: Mar 20, 2007
  * Time: 4:32:46 PM
  */
-class IntVibranceOpImage(source: RenderedImage, transform: Array<FloatArray>, config: Map<*, *>) :
+class IntVibranceOpImage(source: RenderedImage, transform: Array<FloatArray>, config: Map<*, *>?) :
         PointOpImage(source, ImageLayout(source), config, true)
 {
     private val transform = Array(3) { IntArray(3) }

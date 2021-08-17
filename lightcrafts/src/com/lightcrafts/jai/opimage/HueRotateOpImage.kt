@@ -25,7 +25,7 @@ import javax.media.jai.RasterAccessor
  * Date: Mar 20, 2007
  * Time: 4:32:46 PM
  */
-class HueRotateOpImage(source: RenderedImage, private val angle: Float, config: Map<*, *>) :
+class HueRotateOpImage(source: RenderedImage, private val angle: Float, config: Map<*, *>?) :
         PointOpImage(source, ImageLayout(source), config, true)
 {
     private val toSRGB: Array<FloatArray>
