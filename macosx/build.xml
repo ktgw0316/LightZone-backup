@@ -22,6 +22,8 @@
     <isset property="UNIVERSAL"/>
   </condition>
 
+  <property name="JVMARG" value="--add-exports=java.desktop/sun.awt.image=ALL-UNNAMED"/>
+
   <!--===== Application build ==============================================-->
 
   <target name="common">
@@ -101,6 +103,7 @@
     <java classname="com.lightcrafts.platform.macosx.MacOSXLauncher"
           dir="products" failonerror="true" fork="true"
           maxmemory="${maxmemory}">
+      <jvmarg line="${JVMARG}"/>
       <classpath>
         <pathelement location="/System/Library/Java/"/>
         <fileset dir="products">
