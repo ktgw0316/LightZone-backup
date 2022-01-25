@@ -64,21 +64,9 @@
     <property name="ivy.initialized" value="true"/>
   </target>
 
-  <property name="kotlin.version" value="1.4.0"/>
-
-  <target name="init-kotlin" depends="resolve">
-    <move todir="${ivy.jar.dir}">
-      <fileset dir="${ivy.jar.dir}"/>
-      <mapper type="glob" from="kotlin-*-${kotlin.version}.jar" to="kotlin-*.jar"/>
-    </move>
-    <typedef resource="org/jetbrains/kotlin/ant/antlib.xml"
-             classpath="lib/kotlin-ant.jar"/>
-    <!-- The kotlin-ant.jar requres trove4j.jar -->
-    <move todir="${ivy.jar.dir}">
-      <fileset dir="${ivy.jar.dir}"/>
-      <mapper type="glob" from="trove4j-*.jar" to="trove4j.jar"/>
-    </move>
-  </target>
+  <property environment="env"/>
+  <typedef resource="org/jetbrains/kotlin/ant/antlib.xml"
+           classpath="${env.KOTLIN_HOME}/lib/kotlin-ant.jar"/>
 
   <available file="/usr" type="dir" property="have.usr"/>
 
@@ -101,7 +89,7 @@
     </path>
   </target>
 
-  <target name="javac" depends="resolve, init-kotlin, init_classpath">
+  <target name="javac" depends="resolve, init_classpath">
     <exec executable="${MAKE}" dir="products" failonerror="true"
           vmlauncher="true">
       <arg value="-j"/>
@@ -111,7 +99,7 @@
     <javac srcdir="src" destdir="build" includeantruntime="false" debug="true"
            release="11" nativeheaderdir="javah" classpathref="compile.classpath">
       <withKotlin>
-        <compilerarg line="-jvm-target 1.8"/>
+        <compilerarg line="-jvm-target 15"/>
       </withKotlin>
     </javac>
   </target>
