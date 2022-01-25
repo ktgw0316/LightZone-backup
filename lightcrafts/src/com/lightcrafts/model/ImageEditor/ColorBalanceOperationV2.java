@@ -126,7 +126,7 @@ public class ColorBalanceOperationV2 extends BlendedOperation implements com.lig
                                 hsb[0] -= 1;
                             color = Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
                         }
-                        midpoint = (ColorScience.INSTANCE.getWr() * pixel[0] + ColorScience.INSTANCE.getWg() * pixel[1] + ColorScience.INSTANCE.getWb() * pixel[2]) / (double) 0xffff;
+                        midpoint = (ColorScience.getWr() * pixel[0] + ColorScience.getWg() * pixel[1] + ColorScience.getWb() * pixel[2]) / (double) 0xffff;
                         p = null;
                     } else {
                         System.out.println("Something funny here...");

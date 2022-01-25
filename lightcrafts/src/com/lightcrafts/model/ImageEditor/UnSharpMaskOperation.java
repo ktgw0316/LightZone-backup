@@ -93,8 +93,8 @@ public class UnSharpMaskOperation extends BlendedOperation {
         return x * (1 - 1 / Math.exp(x * x / 5.0)) / 10.0;
     }
 
-    private static short[] tableData = new short[0x10000];
-    private static short[] invTableData = new short[0x10000];
+    private static final short[] tableData = new short[0x10000];
+    private static final short[] invTableData = new short[0x10000];
     private static LookupTableJAI table, invTable;
 
     private static synchronized LookupTableJAI getTable() {
@@ -150,7 +150,7 @@ public class UnSharpMaskOperation extends BlendedOperation {
     static class LuminanceUSMProcessor implements ImageProcessor {
         @Override
         public RenderedOp process(RenderedImage source) {
-            double[][] yChannel = new double[][]{{ColorScience.INSTANCE.getWr(), ColorScience.INSTANCE.getWg(), ColorScience.INSTANCE.getWb(), 0}};
+            double[][] yChannel = new double[][]{{ColorScience.getWr(), ColorScience.getWg(), ColorScience.getWb(), 0}};
 
             ParameterBlock pb = new ParameterBlock();
             pb.addSource( source );
@@ -164,8 +164,8 @@ public class UnSharpMaskOperation extends BlendedOperation {
         }
     }
 
-    private static GammaUSMProcessor GammaUSMProcessorInstance = new GammaUSMProcessor();
-    private static LuminanceUSMProcessor LuminanceUSMProcessorInstance = new LuminanceUSMProcessor();
+    private static final GammaUSMProcessor GammaUSMProcessorInstance = new GammaUSMProcessor();
+    private static final LuminanceUSMProcessor LuminanceUSMProcessorInstance = new LuminanceUSMProcessor();
 
     private class UnSharpMask extends BlendedTransform {
         Operation op;

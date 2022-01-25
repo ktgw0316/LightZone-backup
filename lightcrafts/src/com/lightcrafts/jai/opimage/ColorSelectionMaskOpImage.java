@@ -69,9 +69,9 @@ public class ColorSelectionMaskOpImage extends PointOpImage {
                 colorSelection.isLuminosityEnabled ? colorSelection.luminosityUpperFeather : 0
         };
 
-        float wr = ColorScience.INSTANCE.getWr();
-        float wg = ColorScience.INSTANCE.getWg();
-        float wb = ColorScience.INSTANCE.getWb();
+        float wr = ColorScience.getWr();
+        float wg = ColorScience.getWg();
+        float wb = ColorScience.getWb();
 
         nativeUshortLoop(srcData, dstData, width, height,
                          srcBandOffsets, dstOffset,

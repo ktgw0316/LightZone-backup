@@ -115,7 +115,7 @@ public class ContrastMaskOperation extends BlendedOperation {
                 ParameterBlock pb = new ParameterBlock();
                 pb.addSource(scaleDown);
                 double[][] transform = {
-                        {ColorScience.INSTANCE.getWr(), ColorScience.INSTANCE.getWg(), ColorScience.INSTANCE.getWb(), 0}
+                        {ColorScience.getWr(), ColorScience.getWg(), ColorScience.getWb(), 0}
                 };
                 pb.add(transform);
                 scaleDown = JAI.create("BandCombine", pb, JAIContext.noCacheHint);  // Desaturate, single banded

@@ -9,9 +9,9 @@ package com.lightcrafts.image.color;
  * Time: 10:45:38 PM
  */
 public class ColorMatrix2 {
-    public static final float RLUM = ColorScience.INSTANCE.getWr();
-    public static final float GLUM = ColorScience.INSTANCE.getWg();
-    public static final float BLUM = ColorScience.INSTANCE.getWb();
+    public static final float RLUM = ColorScience.getWr();
+    public static final float GLUM = ColorScience.getWg();
+    public static final float BLUM = ColorScience.getWb();
 
     /*
     *	matrixmult -

@@ -45,9 +45,9 @@ public class ChannelMixer extends BlendedOperation {
 
     static final OperationType type = new OperationTypeImpl("Channel Mixer");
 
-    private double red = ColorScience.INSTANCE.getWr();
-    private double green = ColorScience.INSTANCE.getWg();
-    private double blue = ColorScience.INSTANCE.getWb();
+    private double red = ColorScience.getWr();
+    private double green = ColorScience.getWg();
+    private double blue = ColorScience.getWb();
 
     @Override
     public void setSliderValue(String key, double value) {
