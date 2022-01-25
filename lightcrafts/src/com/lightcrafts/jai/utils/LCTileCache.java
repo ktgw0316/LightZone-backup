@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2011 Fabio Riccardi */
+/* Copyright (C) 2013-     Masahiro Kitagawa */
 
 /*
  * $RCSfile: SunTileCache.java,v $
@@ -18,13 +19,12 @@ import com.lightcrafts.utils.LCArrays;
 import com.lightcrafts.utils.MemoryLimits;
 import com.lightcrafts.utils.cache.*;
 import com.sun.media.jai.util.CacheDiagnostics;
-import com.sun.media.jai.util.ImageUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import javax.media.jai.EnumeratedParameter;
 import javax.media.jai.TileCache;
-import javax.media.jai.util.ImagingListener;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.File;
@@ -40,11 +40,11 @@ import java.util.prefs.Preferences;
 /**
  * This is Sun Microsystems' reference implementation of the
  * <code>javax.media.jai.TileCache</code> interface.  It provides a
- * central location for images to cachedObject computed tiles, and is used as
- * the default tile cachedObject mechanism when no other tile cachedObject objects
+ * central location for images to cache computed tiles, and is used as
+ * the default tile cache mechanism when no other tile cache objects
  * are specified.
  *
- * <p> In this implementation, the cachedObject size is limited by the memory
+ * <p> In this implementation, the cache size is limited by the memory
  * capacity, which may be set at construction time or using the
  * <code>setMemoryCapacity(long)</code> method.  The tile capacity
  * is not used.  Different images may have very different tile sizes.
@@ -60,7 +60,7 @@ public final class LCTileCache extends Observable
                                 implements TileCache,
         CacheDiagnostics {
 
-    /** The default memory capacity of the cachedObject (16 MB). */
+    /** The default memory capacity of the cache (16 MB). */
     private static final long DEFAULT_MEMORY_CAPACITY = 16L * 1024L * 1024L;
 
     /** The default hashtable capacity (heuristic) */
@@ -74,29 +74,20 @@ public final class LCTileCache extends Observable
     private static LCTileCacheListener Listener;
 
     /**
-     * The tile cachedObject.
-     * A Hashtable is used to cachedObject the tiles.  The "key" is a
+     * The tile cache.
+     * A LinkedHashMap is used to cache the tiles.  The "key" is a
      * <code>Object</code> determined based on tile owner's UID if any or
      * hashCode if the UID doesn't exist, and tile index.  The
      * "value" is a LCCachedTile.
      */
     @Getter
-    private Hashtable<Object, LCCachedTile> cachedObject;
+    private final LinkedHashMap<Object, LCCachedTile> cachedObject;
 
-    /**
-     * Sorted (Tree) Set used with tile metrics.
-     * Adds another level of metrics used to determine
-     * which tiles are removed during memoryControl().
-     */
-    private SortedSet<LCCachedTile> cacheSortedSet;
-
-    private LinkedList<LCCachedTile> tileList;
-
-    /** The memory capacity of the cachedObject. */
+    /** The memory capacity of the cache. */
     @Getter
     private long memoryCapacity;
 
-    /** The amount of memory currently being used by the cachedObject. */
+    /** The amount of memory currently being used by the cache. */
     @Getter
     private long cacheMemoryUsed = 0;
 
@@ -106,15 +97,10 @@ public final class LCTileCache extends Observable
     /** A indicator for tile access time. */
     private long timeStamp = 0;
 
-    /** Custom tileComparator used to determine tile cost or
-     *  priority ordering in the tile cachedObject.
-     */
-    @Getter
-    private Comparator tileComparator = null;
-
-    /** Tile count used for diagnostics */
-    @Getter
-    private long cacheTileCount = 0;
+    @Override
+    public long getCacheTileCount() {
+        return cachedObject.size();
+    }
 
     /** Cache hit count */
     @Getter
@@ -175,7 +161,7 @@ public final class LCTileCache extends Observable
     /**
      * Constructor.  The memory capacity should be explicitly specified.
      *
-     * @param memoryCapacity  The maximum cachedObject memory size in bytes.
+     * @param memoryCapacity  The maximum cache memory size in bytes.
      *
      * @throws IllegalArgumentException  If <code>memoryCapacity</code>
      *         is less than 0.
@@ -187,11 +173,8 @@ public final class LCTileCache extends Observable
 
         this.memoryCapacity = memoryCapacity;
 
-        // try to get a prime number (more efficient?)
         // lower values of LOAD_FACTOR increase speed, decrease space efficiency
-        cachedObject = new Hashtable<>(DEFAULT_HASHTABLE_CAPACITY, LOAD_FACTOR);
-
-        tileList = new LinkedList<>();
+        cachedObject = new LinkedHashMap<>(DEFAULT_HASHTABLE_CAPACITY, LOAD_FACTOR, true);
 
         if (useDisk) {
             m_objectCache = createDiskCache();
@@ -203,11 +186,11 @@ public final class LCTileCache extends Observable
 
 
     /**
-     * Adds a tile to the cachedObject.
+     * Adds a tile to the cache.
      *
-     * <p> If the specified tile is already in the cachedObject, it will not be
-     * cached again.  If by adding this tile, the cachedObject exceeds the memory
-     * capacity, older tiles in the cachedObject are removed to keep the cachedObject
+     * <p> If the specified tile is already in the cache, it will not be
+     * cached again.  If by adding this tile, the cache exceeds the memory
+     * capacity, older tiles in the cache are removed to keep the cache
      * memory usage under the specified limit.
      *
      * @param owner            The image the tile blongs to.
@@ -224,11 +207,11 @@ public final class LCTileCache extends Observable
     }
 
     /**
-     * Adds a tile to the cachedObject with an associated tile compute cost.
+     * Adds a tile to the cache with an associated tile compute cost.
      *
-     * <p> If the specified tile is already in the cachedObject, it will not be
-     * cached again.  If by adding this tile, the cachedObject exceeds the memory
-     * capacity, older tiles in the cachedObject are removed to keep the cachedObject
+     * <p> If the specified tile is already in the cache, it will not be
+     * cached again.  If by adding this tile, the cache exceeds the memory
+     * capacity, older tiles in the cache are removed to keep the cache
      * memory usage under the specified limit.
      *
      * @param owner            The image the tile blongs to.
@@ -248,28 +231,21 @@ public final class LCTileCache extends Observable
             return;
         }
 
-        // This tile is not in the cachedObject; create a new LCCachedTile.
+        // This tile is not in the cache; create a new LCCachedTile.
         // else just update.
         Object key = LCCachedTile.hashKey(owner, tileX, tileY);
-        LCCachedTile ct = cachedObject.get(key);
-
-        if ( ct != null ) {
+        final LCCachedTile ct;
+        if (cachedObject.containsKey(key)) {
+            ct = cachedObject.get(key);
             updateTileList(ct, UPDATE_FROM_ADD);
         } else {
             // create a new tile
             ct = new LCCachedTile(owner, tileX, tileY, tile, tileCacheMetric);
+
+            // add to tile cache
+            cachedObject.put(ct.key, ct);
             updateTileList(ct, ADD);
-
-            // add to tile cachedObject
-            if ( cachedObject.put(ct.key, ct) == null ) {
-                cacheMemoryUsed += ct.tileSize;
-                cacheTileCount++;
-                //cacheMissCount++;  Not necessary?
-
-                if ( cacheSortedSet != null ) {
-                    cacheSortedSet.add(ct);
-                }
-            }
+            cacheMemoryUsed += ct.tileSize;
 
             // Bring memory usage down to memoryThreshold % of memory capacity.
             if (cacheMemoryUsed > memoryCapacity) {
@@ -304,56 +280,39 @@ public final class LCTileCache extends Observable
         }
     }
 
-    private boolean removeFromTileList(Object key, int action) {
-        LCCachedTile ct = cachedObject.remove(key);
-
-        if (ct != null) {
-            cacheMemoryUsed -= ct.tileSize;
-            cacheTileCount--;
-
-            if ( cacheSortedSet != null ) {
-                cacheSortedSet.remove(ct);
-            }
-
-            tileList.remove(ct);
-
-            // Notify observers that a tile has been removed.
-            if ( diagnostics ) {
-                ct.action = action;
-                setChanged();
-                notifyObservers(ct);
-            }
-
-            return true;
-        }
-        return false;
-    }
-
-    private void updateTileList(LCCachedTile ct, int action) {
-        ct.tileTimeStamp = timeStamp++;
-
-        if (tileList.isEmpty()) {
-            tileList.add(ct);
-        }
-        else if (!tileList.getFirst().equals(ct)) {
-            // Bring this tile to the beginning of the list.
-            tileList.remove(ct);
-            tileList.addFirst(ct);
-        }
-
-        cacheHitCount++;
-
-        if ( diagnostics ) {
+    /// Notify observers that a tile has been changed.
+    private void diagnosis(LCCachedTile ct, int action) {
+        if (diagnostics) {
             ct.action = action;
             setChanged();
             notifyObservers(ct);
         }
     }
 
+    private boolean removeFromTileList(Object key, int action) {
+        LCCachedTile ct = cachedObject.remove(key);
+        if (ct != null) {
+            removeTile(ct, action);
+            return true;
+        }
+        return false;
+    }
+
+    private void removeTile(@NotNull LCCachedTile ct, int action) {
+        cacheMemoryUsed -= ct.tileSize;
+            diagnosis(ct, action);
+    }
+
+    private void updateTileList(LCCachedTile ct, int action) {
+        ct.tileTimeStamp = timeStamp++;
+        cacheHitCount++;
+        diagnosis(ct, action);
+    }
+
     /**
-     * Removes a tile from the cachedObject.
+     * Removes a tile from the cache.
      *
-     * <p> If the specified tile is not in the cachedObject, this method
+     * <p> If the specified tile is not in the cache, this method
      * does nothing.
      */
     @Override
@@ -371,17 +330,14 @@ public final class LCTileCache extends Observable
         if ( ct != null ) {
             // Notify observers that a tile is about to be removed.
             // It is possible that the tile will be removed from the
-            // cachedObject before the observers get notified.  This should
+            // cache before the observers get notified.  This should
             // be ok, since a hard reference to the tile will be
             // kept for the observers, so the garbage collector won't
             // remove the tile until the observers release it.
-            ct.action = ABOUT_TO_REMOVE;
-            setChanged();
-            notifyObservers(ct);
-
+            diagnosis(ct, ABOUT_TO_REMOVE);
             removeFromTileList(key, REMOVE);
         } else {
-            // if the tile is not in the memory cachedObject than it might be on disk...
+            // if the tile is not in the memory cache than it might be on disk...
             if (m_objectCache != null && m_objectCache.contains(key)) {
                 m_objectCache.remove(key);
                 tilesOnDisk--;
@@ -390,11 +346,11 @@ public final class LCTileCache extends Observable
     }
 
     /**
-     * Retrieves a tile from the cachedObject.
+     * Retrieves a tile from the cache.
      *
-     * <p> If the specified tile is not in the cachedObject, this method
+     * <p> If the specified tile is not in the cache, this method
      * returns <code>null</code>.  If the specified tile is in the
-     * cachedObject, its last-access time is updated.
+     * cache, its last-access time is updated.
      *
      * @param owner  The image the tile blongs to.
      * @param tileX  The tile's X index within the image.
@@ -433,13 +389,13 @@ public final class LCTileCache extends Observable
     }
 
     /**
-     * Retrieves a contiguous array of all tiles in the cachedObject which are
+     * Retrieves a contiguous array of all tiles in the cache which are
      * owned by the specified image.  May be <code>null</code> if there
-     * were no tiles in the cachedObject.  The array contains no null entries.
+     * were no tiles in the cache.  The array contains no null entries.
      *
      * @param owner The <code>RenderedImage</code> to which the tiles belong.
      * @return An array of all tiles owned by the specified image or
-     *         <code>null</code> if there are none currently in the cachedObject.
+     *         <code>null</code> if there are none currently in the cache.
      */
     @Override
     public synchronized Raster[] getTiles(RenderedImage owner) {
@@ -450,7 +406,7 @@ public final class LCTileCache extends Observable
         }
 
         int size = Math.min(owner.getNumXTiles() * owner.getNumYTiles(),
-                            (int) cacheTileCount);
+                            cachedObject.size());
 
         if ( size > 0 ) {
             int minTx = owner.getMinTileX();
@@ -482,9 +438,9 @@ public final class LCTileCache extends Observable
 
     /**
      * Removes all the tiles that belong to a <code>RenderedImage</code>
-     * from the cachedObject.
+     * from the cache.
      *
-     * @param owner  The image whose tiles are to be removed from the cachedObject.
+     * @param owner  The image whose tiles are to be removed from the cache.
      */
     @Override
     public void removeTiles(RenderedImage owner) {
@@ -503,7 +459,7 @@ public final class LCTileCache extends Observable
     }
 
     /**
-     * Adds an array of tiles to the tile cachedObject.
+     * Adds an array of tiles to the tile cache.
      *
      * @param owner The <code>RenderedImage</code> that the tile belongs to.
      * @param tileIndices An array of <code>Point</code>s containing the
@@ -533,9 +489,9 @@ public final class LCTileCache extends Observable
     }
 
     /**
-     * Returns an array of tile <code>Raster</code>s from the cachedObject.
+     * Returns an array of tile <code>Raster</code>s from the cache.
      * Any or all of the elements of the returned array may be <code>null</code>
-     * if the corresponding tile is not in the cachedObject.
+     * if the corresponding tile is not in the cache.
      *
      * @param owner The <code>RenderedImage</code> that the tile belongs to.
      * @param tileIndices  An array of <code>Point</code>s containing the
@@ -561,7 +517,7 @@ public final class LCTileCache extends Observable
         return tiles;
     }
 
-    /** Removes -ALL- tiles from the cachedObject. */
+    /** Removes -ALL- tiles from the cache. */
     @Override
     public synchronized void flush() {
         // Call the LCTileCacheListener, if one is defined.  This helps detect
@@ -569,9 +525,9 @@ public final class LCTileCache extends Observable
         if (Listener != null) {
             Listener.tileCacheFlushed();
         }
-        // NOTE: we don't do flushing for disk caches, it wipes the persistent cachedObject, rather spill half of the cachedObject out
+        // NOTE: we don't do flushing for disk caches, it wipes the persistent cache, rather spill half of the cache out
         if (m_objectCache != null) {
-            System.err.println("flushing the cachedObject");
+            System.err.println("flushing the cache");
             float mt = memoryThreshold;
             memoryThreshold = 0.1f;
             memoryControl();
@@ -581,7 +537,7 @@ public final class LCTileCache extends Observable
 
         //
         // It is necessary to clear all the elements
-        // from the old cachedObject in order to remove dangling
+        // from the old cache in order to remove dangling
         // references, due to the linked list.  In other
         // words, it is possible to reache the object
         // through 2 paths so the object does not
@@ -596,18 +552,10 @@ public final class LCTileCache extends Observable
         cacheMissCount = 0;
 
         if ( memoryCapacity > 0 ) {
-            cachedObject = new Hashtable<>(DEFAULT_HASHTABLE_CAPACITY, LOAD_FACTOR);
+            cachedObject.clear();
         }
-
-        if ( cacheSortedSet != null ) {
-            cacheSortedSet.clear();
-            cacheSortedSet = Collections.synchronizedSortedSet( new TreeSet<LCCachedTile>(tileComparator) );
-        }
-
-        tileList.clear();
 
         // force reset after diagnostics
-        cacheTileCount = 0;
         timeStamp   = 0;
         cacheMemoryUsed = 0;
 
@@ -615,7 +563,7 @@ public final class LCTileCache extends Observable
     }
 
     /**
-     * Returns the cachedObject's tile capacity.
+     * Returns the cache's tile capacity.
      *
      * <p> This implementation of <code>TileCache</code> does not use
      * the tile capacity.  This method always returns 0.
@@ -624,27 +572,27 @@ public final class LCTileCache extends Observable
     public int getTileCapacity() { return 0; }
 
     /**
-     * Sets the cachedObject's tile capacity to the desired number of tiles.
+     * Sets the cache's tile capacity to the desired number of tiles.
      *
      * <p> This implementation of <code>TileCache</code> does not use
-     * the tile capacity.  The cachedObject size is limited by the memory
+     * the tile capacity.  The cache size is limited by the memory
      * capacity only.  This method does nothing and has no effect on
-     * the cachedObject.
+     * the cache.
      *
-     * @param tileCapacity  The desired tile capacity for this cachedObject
+     * @param tileCapacity  The desired tile capacity for this cache
      *        in number of tiles.
      */
     @Override
     public void setTileCapacity(int tileCapacity) { }
 
     /**
-     * Sets the cachedObject's memory capacity to the desired number of bytes.
+     * Sets the cache's memory capacity to the desired number of bytes.
      * If the new memory capacity is smaller than the amount of memory
-     * currently being used by this cachedObject, tiles are removed from the
-     * cachedObject until the memory usage is less than the specified memory
+     * currently being used by this cache, tiles are removed from the
+     * cache until the memory usage is less than the specified memory
      * capacity.
      *
-     * @param memoryCapacity  The desired memory capacity for this cachedObject
+     * @param memoryCapacity  The desired memory capacity for this cache
      *        in bytes.
      *
      * @throws IllegalArgumentException  If <code>memoryCapacity</code>
@@ -723,36 +671,30 @@ public final class LCTileCache extends Observable
     }
 
     /**
-     * Removes tiles from the cachedObject based on their last-access time
+     * Removes tiles from the cache based on their last-access time
      * (old to new) until the memory usage is memoryThreshold % of that of the
      * memory capacity.
      */
     @Override
     public synchronized void memoryControl() {
-        if ( cacheSortedSet == null ) {
-            standard_memory_control();
-        } else {
-            custom_memory_control();
-        }
-    }
-
-    // time stamp based memory control (LRU)
-    private void standard_memory_control() {
         long limit = (long)(memoryCapacity * memoryThreshold);
 
-        while( cacheMemoryUsed > limit && ! tileList.isEmpty() ) {
-            final Object lastKey = tileList.getLast().key;
-            LCCachedTile ct = cachedObject.get(lastKey);
+        final var iter = cachedObject.entrySet().iterator();
+        while (iter.hasNext() && cacheMemoryUsed > limit) {
+            final var eldestEntry = iter.next();
+            final Object eldestKey = eldestEntry.getKey();
+            final LCCachedTile ct = eldestEntry.getValue();
 
-            if ( ct != null ) {
+            if (ct != null) {
                 if (m_objectCache != null) {
                     RenderedImage owner = ct.getOwner();
                     if (owner != null && owner.getProperty(JAIContext.PERSISTENT_CACHE_TAG) == Boolean.TRUE) {
-                        writeTileToDisk(ct, lastKey);
+                        writeTileToDisk(ct, eldestKey);
                     }
                 }
-                removeFromTileList(lastKey, REMOVE_FROM_MEMCON);
+                removeTile(ct, REMOVE_FROM_MEMCON);
             }
+            iter.remove();
         }
     }
 
@@ -775,7 +717,7 @@ public final class LCTileCache extends Observable
                 );
         }
 
-        // TODO: cachedObject the ByteBuffer with a soft reference
+        // TODO: cache the ByteBuffer with a soft reference
 
         @Override
         public Object decodeFromByteBuffer( ByteBuffer buf, Object obj ) {
@@ -862,24 +804,19 @@ public final class LCTileCache extends Observable
             }
             tmpFile.deleteOnExit();
 
-            // Try to delete old cachedObject files, checking if the file is locked by some other instance of ourself
+            // Try to delete old cache files, checking if the file is locked by some other instance of ourself
             File[] oldCacheFiles = tmpFile.getParentFile().listFiles(new CacheFileFilter(tmpFile));
             if ( oldCacheFiles != null )
                 for (File oldCacheFile : oldCacheFiles) {
                     oldCacheFile.delete();
                 }
 
-            int defaultMemorySize = MemoryLimits.getDefault();
-            Preferences prefs = Preferences.userRoot().node("/com/lightcrafts/app");
-            long maxMemory = (long) prefs.getInt("MaxMemory", defaultMemorySize) * 1024 * 1024;
-            long maxHeap = Runtime.getRuntime().maxMemory();
-            long extraCacheSize = Math.max( maxMemory - maxHeap, 0 );
-
-            System.out.println("Allocating " + (extraCacheSize / (1024 * 1024)) + "MB for the image cachedObject.");
+            final long extraCacheSize = getExtraCacheSize();
+            System.out.println("Allocating " + extraCacheSize / MB + " MB for the image cache.");
 
             return new Cache(
                 new TileCacheCacheObjectBroker(),
-                extraCacheSize < 128 * 1024 * 1024 ?
+                extraCacheSize < 128 * MB ?
                     new WriteThroughCacheObjectMap() :
                     new LRUCacheObjectMap(
                         new NativeByteBufferAllocator( CHUNK_SIZE ), extraCacheSize
@@ -894,27 +831,27 @@ public final class LCTileCache extends Observable
         }
     }
 
-    // private static final long CACHE_SIZE = (long) (1024 * 1024 * 1024);
-    private static final int CHUNK_SIZE = 16 * 1024 * 1024;
+    private static long getExtraCacheSize() {
+        final int defaultMemorySize = MemoryLimits.getDefault();
+        final var prefs = Preferences.userRoot().node("/com/lightcrafts/app");
+        final long maxMemory = (long) prefs.getInt("MaxMemory", defaultMemorySize) * MB;
+        final long maxHeap = Runtime.getRuntime().maxMemory();
+        return Math.max(0, maxMemory - maxHeap);
+    }
+
+    private static final int MB = 1024 * 1024;
+
+    private static final int CHUNK_SIZE = 16 * MB;
 
     public synchronized void dispose() throws IOException {
         m_objectCache.dispose();
 
-        // Close and delete the old cachedObject file
+        // Close and delete the old cache file
         if (m_tileReaper != null)
             m_tileReaper.kill();
 
         if (tmpFile != null)
             tmpFile.delete();
-    }
-
-    /**
-     * Finalize an <code>LCTileCache</code>.
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        dispose();
-        super.finalize();
     }
 
     private long tilesWritten = 0;
@@ -964,18 +901,9 @@ public final class LCTileCache extends Observable
 
             WritableRaster raster;
 
-            if (true)
-                raster = Raster.createWritableRaster(sm, db, new Point(tileX * owner.getTileWidth(),
-                                                                       tileY * owner.getTileHeight()));
-            else {
-                int bands = sm.getNumBands();
-                int[] bandOffsets = ((PixelInterleavedSampleModel) sm).getBandOffsets();
-
-                raster = Raster.createInterleavedRaster(db, owner.getTileWidth(), owner.getTileHeight(),
-                                                        bands * owner.getTileWidth(), bands, bandOffsets,
-                                                        new Point(tileX * owner.getTileWidth(),
-                                                                  tileY * owner.getTileHeight()));
-            }
+            raster = Raster.createWritableRaster(sm, db, new Point(
+                    tileX * owner.getTileWidth(),
+                    tileY * owner.getTileHeight()));
             synchronized (this) {
                 tilesRead++;
             }
@@ -1017,94 +945,37 @@ public final class LCTileCache extends Observable
         }
     }
 
-    // tileComparator based memory control (TreeSet)
-    private void custom_memory_control() {
-        long limit = (long)(memoryCapacity * memoryThreshold);
-        Iterator<LCCachedTile> iter = cacheSortedSet.iterator();
-
-        while( iter.hasNext() && (cacheMemoryUsed > limit) ) {
-            final LCCachedTile ct = iter.next();
-
-            cacheMemoryUsed -= ct.tileSize;
-            synchronized (this) {
-                cacheTileCount--;
-            }
-
-            // remove from sorted set
-            try {
-                iter.remove();
-            } catch(ConcurrentModificationException e) {
-                ImagingListener listener =
-                    ImageUtil.getImagingListener((RenderingHints)null);
-                listener.errorOccurred("something wrong with the TileCache",
-                                       e, this, false);
-//                e.printStackTrace();
-            }
-
-            tileList.remove(ct);
-            cachedObject.remove(ct.key);
-
-            if ( diagnostics ) {
-                ct.action = REMOVE_FROM_MEMCON;
-                setChanged();
-                notifyObservers(ct);
-            }
-        }
-
-        // If the custom memory control didn't release sufficient
-        // number of tiles to satisfy the memory limit, fallback
-        // to the standard memory controller.
-        if ( cacheMemoryUsed > limit ) {
-            standard_memory_control();
-        }
+    /**
+     * Not Supported
+     *
+     * @throws UnsupportedOperationException
+     */
+    @Override
+    public Comparator<LCCachedTile> getTileComparator() {
+        throw new UnsupportedOperationException("Comparator not supported");
     }
 
     /**
-     *  The <code>Comparator</code> is used to produce an
-     *  ordered list of tiles based on a user defined
-     *  compute cost or priority metric.  This determines
-     *  which tiles are subject to "ordered" removal
-     *  during a memory control operation.
+     * Not Supported
      *
-     *  @since 1.1
+     * @throws UnsupportedOperationException
      */
     @Override
     public synchronized void setTileComparator(Comparator c) {
-        if (tileComparator != null)
-            throw new IllegalArgumentException("TileComparator not supported by LCTileCache");
+        throw new UnsupportedOperationException("Comparator not supported");
+    }
 
-        tileComparator = c;
+    private synchronized void reap(Reference<? extends RenderedImage> weakKey) {
+        Set<Object> hashKeys = m_imageMap.remove(weakKey);
+        assert hashKeys != null;
 
-        if ( tileComparator == null ) {
-            // turn off tileComparator
-            if ( cacheSortedSet != null ) {
-                cacheSortedSet.clear();
-                cacheSortedSet = null;
+        for (Object o : hashKeys) {
+            removeFromTileList(o, REMOVE_FROM_GCEVENT);
+            if (m_objectCache.remove(o)) {
+                tilesOnDisk--;
+                // System.out.println("removed entry from disk cache");
             }
-        } else {
-            // copy tiles from hashtable to sorted tree set
-            cacheSortedSet = Collections.synchronizedSortedSet( new TreeSet<LCCachedTile>(tileComparator) );
-            cachedObject.forEach((key, ct) -> cacheSortedSet.add(ct));
         }
-    }
-
-    // test
-    public void dump() {
-
-        System.out.println("first = " + tileList.getFirst());
-        System.out.println("last  = " + tileList.getLast());
-
-        int k = 0;
-        for (LCCachedTile ct : cacheSortedSet) {
-            System.out.println(k++);
-            System.out.println(ct);
-        }
-    }
-
-    void sendExceptionToListener(String message, Exception e) {
-        ImagingListener listener =
-            ImageUtil.getImagingListener((RenderingHints)null);
-        listener.errorOccurred(message, e, this, false);
     }
 
     /**
@@ -1112,7 +983,7 @@ public final class LCTileCache extends Observable
      * asynchronously in the background waiting for {@link RenderedImage}s that
      * the Java garbage collector has determined are weakly reachable.  Once
      * that's the case, remove all of a {@link RenderedImage}'s associated
-     * tiles from the disk cachedObject.
+     * tiles from the disk cache.
      */
     private static final class TileReaper extends Thread {
 
@@ -1120,41 +991,21 @@ public final class LCTileCache extends Observable
 
         /**
          * Run the thread: wait for a weakly reachable {@link RenderedImage} to
-         * become available and remove all of its tiles from the disk cachedObject
+         * become available and remove all of its tiles from the disk cache
          * (if any).
          */
         @Override
         public void run() {
             while ( !m_killed ) {
                 try {
-                    final Reference weakKey = m_refQ.remove(); // Image to be garbage collected
+                    // Image to be garbage collected
+                    final Reference<? extends RenderedImage> weakKey = m_refQ.remove();
 
-                    final LCTileCache tileCache =
-                            m_tileCacheRef.get();
-
-                    if ( tileCache == null )
+                    final LCTileCache tileCache = m_tileCacheRef.get();
+                    if (tileCache == null) {
                         break;
-
-                    synchronized ( tileCache ) {
-                        // System.out.println( "Removing tiles from caches" );
-
-                        Set hashKeys = tileCache.m_imageMap.remove(weakKey);
-
-                        assert hashKeys != null;
-
-                        for (Object o : hashKeys) {
-                            if (tileCache.removeFromTileList(o, REMOVE_FROM_GCEVENT)) {
-                                // System.out.println("removed entry from memory cachedObject");
-                            }
-
-                            if (tileCache.m_objectCache.remove(o)) {
-                                synchronized (tileCache) {
-                                    tileCache.tilesOnDisk--;
-                                }
-                                // System.out.println("removed entry from disk cachedObject");
-                            }
-                        }
                     }
+                    tileCache.reap(weakKey);
                 }
                 catch ( InterruptedException e ) {
                     // do nothing

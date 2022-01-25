@@ -2,8 +2,9 @@
 
 package com.lightcrafts.utils;
 
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**
  * Various array utilities.
@@ -53,8 +54,9 @@ public final class LCArrays {
     public static void copy( int[] src, int srcPos,
                              byte[] dest, int destPos, int length ) {
         ByteBuffer.wrap(dest, destPos, length)
+                .order(LITTLE_ENDIAN)
                 .asIntBuffer()
-                .put(src, srcPos, length / 8);
+                .put(src, srcPos, length / 4);
     }
 
     /**
@@ -80,8 +82,9 @@ public final class LCArrays {
     public static void copy( short[] src, int srcPos,
                              byte[] dest, int destPos, int length ) {
         ByteBuffer.wrap(dest, destPos, length)
+                .order(LITTLE_ENDIAN)
                 .asShortBuffer()
-                .put(src, srcPos, length / 4);
+                .put(src, srcPos, length / 2);
     }
 
     /**
@@ -107,8 +110,9 @@ public final class LCArrays {
     public static void copy( byte[] src, int srcPos,
                              int[] dest, int destPos, int length ) {
         ByteBuffer.wrap(src, srcPos, length)
+                .order(LITTLE_ENDIAN)
                 .asIntBuffer()
-                .get(dest, destPos, length / 8);
+                .get(dest, destPos, length / 4);
     }
 
     /**
@@ -134,36 +138,9 @@ public final class LCArrays {
     public static void copy( byte[] src, int srcPos,
                              short[] dest, int destPos, int length ) {
         ByteBuffer.wrap(src, srcPos, length)
+                .order(LITTLE_ENDIAN)
                 .asShortBuffer()
-                .get(dest, destPos, length / 4);
-    }
-
-    /**
-     * Resize an array.
-     *
-     * @param oldArray The array to resize.  It is not modified.
-     * @param newLength The new length for the array.  It must not be negative.
-     * @return If the old and new lengths differ, returns a new array of the
-     * same type as the original and of the specified size with the elements of
-     * the old array copied to the new array.
-     * If the new array is smaller, only elements up to the new length are
-     * copied; if the new array is larger, elements beyond the old length are
-     * zero or <code>null</code> depending on the component type.  If the old
-     * and new lengths are the same, returns the old array as-is.
-     */
-    public static Object resize( Object oldArray, int newLength )  {
-        final Class<?> c = oldArray.getClass();
-        if ( !c.isArray() )
-            throw new IllegalArgumentException( "given non-array" );
-        final int oldLength = Array.getLength( oldArray );
-        if ( oldLength == newLength )
-            return oldArray;
-        final Class<?> type = c.getComponentType();
-        final Object newArray = Array.newInstance( type, newLength );
-        final int copyLength = Math.min( oldLength, newLength );
-        if ( copyLength > 0 )
-            System.arraycopy( oldArray, 0, newArray, 0, copyLength );
-        return newArray;
+                .get(dest, destPos, length / 2);
     }
 }
 /* vim:set et sw=4 ts=4: */

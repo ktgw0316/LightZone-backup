@@ -1,4 +1,4 @@
-Format: 1.0
+Format: 3.0 (quilt)
 Source: lightzone
 Binary: lightzone
 Architecture: i386 amd64 armhf arm64
@@ -21,7 +21,6 @@ Build-Depends:
  libavcodec58,
  libejml-java,
  libglib2.0-dev,
- libjaxb-java,
  libjetbrains-annotations-java,
  libjiconfont-font-awesome-java,
  libjiconfont-google-material-design-icons-java,
@@ -30,8 +29,6 @@ Build-Depends:
  liblombok-java,
  liblcms2-dev,
  liblensfun-dev (<< 0.3.95),
- librefuel-java,
- libslf4j-java,
  libtiff5-dev,
  libx11-dev,
  pkg-config,

@@ -19,7 +19,6 @@ import com.lightcrafts.jai.operator.LCMSColorConvertDescriptor;
 import com.lightcrafts.jai.opimage.CachedImage;
 import com.lightcrafts.jai.utils.Functions;
 import com.lightcrafts.jai.utils.LCTileCache;
-import javax.media.jai.*;
 import com.lightcrafts.model.*;
 import com.lightcrafts.platform.Platform;
 import com.lightcrafts.image.color.ColorProfileInfo;
@@ -880,7 +879,7 @@ public class ImageEditorEngine implements Engine {
         return new Color(rgb[0] / (float) 0xffff, rgb[1] / (float) 0xffff, rgb[2] / (float) 0xffff);
     }
 
-    private Color getAveragedPixelValue(final int _x, final int _y) {
+    public Color getAveragedPixelValue(final int _x, final int _y) {
         val p = rendering.getInputTransform().transform(new Point(_x, _y), null);
         val x = (int) p.getX();
         val y = (int) p.getY();
