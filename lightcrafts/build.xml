@@ -97,11 +97,12 @@
     <mkdir dir="build"/>
     <mkdir dir="javah"/>
     <javac srcdir="src" destdir="build" includeantruntime="false" debug="true"
-           release="11" nativeheaderdir="javah" classpathref="compile.classpath">
+           release="15" nativeheaderdir="javah" classpathref="compile.classpath">
       <withKotlin>
-        <compilerarg line="-jvm-target 15"/>
+        <compilerarg line="-jvm-target 15 -include-runtime"/>
       </withKotlin>
     </javac>
+    <copy todir="products" file="${env.KOTLIN_HOME}/lib/kotlin-stdlib.jar"/>
   </target>
 
   <target name="coprocesses">
