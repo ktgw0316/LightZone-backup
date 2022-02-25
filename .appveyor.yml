@@ -25,27 +25,27 @@ for:
 
     install:
       - cmd: cinst ant
-      - cmd: bash -lc 'cp "$MSSDK_HOME/../8.1/Lib/winv6.3/um/x64/Htmlhelp.Lib" /c/$MINGW64_PATH/lib/libhtmlhelp.a'
-      - cmd: bash -lc 'cp "$MSSDK_HOME/../8.1/Lib/winv6.3/um/x86/Htmlhelp.Lib" /c/$MINGW32_PATH/lib/libhtmlhelp.a'
+      - sh: cp "$MSSDK_HOME/../8.1/Lib/winv6.3/um/x64/Htmlhelp.Lib" /c/$MINGW64_PATH/lib/libhtmlhelp.a
+      - sh: cp "$MSSDK_HOME/../8.1/Lib/winv6.3/um/x86/Htmlhelp.Lib" /c/$MINGW32_PATH/lib/libhtmlhelp.a
       - ps: (new-object net.webclient).DownloadFile('https://download-gcdn.ej-technologies.com/install4j/install4j_windows-x64_8_0_8.exe', 'install4j-installer.exe')
       - ps: install4j-installer.exe -q
-      - cmd: bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-      - cmd: bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
-      - cmd: bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
-      - cmd: bash -lc "pacman --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-      - cmd: bash -lc "pacman --needed --noconfirm -Sy pacman"
-      - cmd: bash -lc "pacman --needed --noconfirm -Su"
-      - cmd: bash -lc "pacman --noconfirm --disable-download-timeout -S pactoys autoconf unzip zip"
-      - cmd: bash -lc "pacboy --noconfirm --disable-download-timeout -S lcms2:m lensfun:m ntldd-git:m pkg-config:m"
-      - cmd: bash -lc "curl -s "https://get.sdkman.io" | bash"
-      - cmd: bash -lc "source /home/appveyor/.sdkman/bin/sdkman-init.sh"
-      - cmd: bash -lc "sdk install kotlin"
-      - cmd: bash -lc "export KOTLIN_HOME=/home/appveyor/.sdkman/candidates/kotlin/current"
+      - sh: curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
+      - sh: curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
+      - sh: pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
+      - sh: pacman --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
+      - sh: pacman --needed --noconfirm -Sy pacman
+      - sh: pacman --needed --noconfirm -Su
+      - sh: pacman --noconfirm --disable-download-timeout -S pactoys autoconf unzip zip
+      - sh: pacboy --noconfirm --disable-download-timeout -S lcms2:m lensfun:m ntldd-git:m pkg-config:m
+      - sh: curl -s "https://get.sdkman.io" | bash
+      - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"
+      - sh: sdk install kotlin
+      - sh: export KOTLIN_HOME=/home/appveyor/.sdkman/candidates/kotlin/current
 
     build_script:
-      - cmd: bash -lc "MINGW_DIR=/c/$MINGW64_PATH ant -f $ANT_SCRIPT build-installer"
-      - cmd: bash -lc "ant -f $ANT_SCRIPT clean-native"
-      - cmd: bash -lc "TARGET_ARCH=i686 MINGW_DIR=/c/$MINGW32_PATH ant -f $ANT_SCRIPT -Doffline=true build-installer"
+      - sh: MINGW_DIR=/c/$MINGW64_PATH ant -f $ANT_SCRIPT build-installer
+      - sh: ant -f $ANT_SCRIPT clean-native
+      - sh: TARGET_ARCH=i686 MINGW_DIR=/c/$MINGW32_PATH ant -f $ANT_SCRIPT -Doffline=true build-installer
 
     artifacts:
       - path: "windows/LightZone_Installer_*.exe"
