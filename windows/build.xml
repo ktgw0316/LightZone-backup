@@ -27,6 +27,9 @@
   <condition property="jre-arch" value="amd64" else="x86">
     <isset property="64bit"/>
   </condition>
+  <condition property="installer-dir" value="release/x64" else="release/x32">
+    <isset property="64bit"/>
+  </condition>
 
   <property name="installer-name" value="${app-name}-Installer-${jre-arch}.exe"/>
   <property name="windows-jar" value="products/lightcrafts-windows.jar"/>
@@ -135,16 +138,37 @@
 
   <!--===== Make a Windows installer =======================================-->
 
-  <taskdef name="install4j"
-         classname="com.install4j.Install4JTask"
-         classpath="C:\Program Files\install4j8\bin\ant.jar"/>
+  <property name="bundle-contents" value="${installer-dir}/${app-name}"/>
 
-  <target name="build-installer-only">
-    <install4j projectfile="lightzone-${jre-arch}.install4j"
-               license="${env.INSTALL4J_LICENSE}"
-               winKeystorePassword="${env.WIN_KEYSTORE_PASSWORD}">
-      <vmparameter value="-DLC_VERSION=${app-version}"/>
-    </install4j>
+  <property environment="env"/>
+  <property name="jpackage-path" value="${env.JAVA_HOME}/bin/jpackage"/>
+
+  <target name="delete-bundle">
+    <delete dir="${installer-dir}" quiet="true"/>
+  </target>
+
+  <target name="build-installer-only" depends="delete-bundle">
+    <exec executable="${jpackage-path}" dir="." failonerror="true" vmlauncher="false">
+      <arg line="--type exe"/>
+      <arg line="--app-version ${app-version}"/>
+      <arg line="--name ${app-name}"/>
+      <arg line="--copyright 'Copyright 2005-2011 Light Crafts, Inc. All Rights Reserved. Copyright 2013- The LightZone Project. All Rights Reserved.'"/>
+      <arg line="--dest ${installer-dir}"/>
+      <arg line="--vendor 'The LightZone Project'"/>
+      <arg line="--add-modules 'java.base,java.desktop,java.logging,java.management,java.prefs,java.rmi,jdk.management'"/>
+      <arg line="--icon src/main/resources/icons/LightZone.ico"/>
+      <arg line="--input products"/>
+      <arg line="--java-options '-Dfile.encoding=utf-8'"/>
+      <arg line="--java-options '-Djava.library.path=app'"/>
+      <arg line="--java-options '-Dlensfun.dir=app/share/lensfun'"/>
+      <arg line="--java-options '--add-exports=java.desktop/sun.awt.image=ALL-UNNAMED'"/>
+      <arg line="--main-jar lightcrafts-windows.jar"/>
+      <arg line="--main-class com.lightcrafts.platform.windows.WindowsLauncher"/>
+      <arg line="--resource-dir src/main/resources"/>
+      <arg line="--win-dir-chooser"/>
+    </exec>
+    <delete file="${bundle-contents}/app/GNUmakefile"/>
+    <delete file="${bundle-contents}/app/copydeps.sh"/>
   </target>
   <target name="build-installer" depends="jar, help, build-installer-only"/>
 
