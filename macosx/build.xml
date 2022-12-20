@@ -35,9 +35,9 @@
   </target>
 
   <target name="javac" depends="common">
-    <mkdir dir="build"/>
+    <mkdir dir="build/classes/java/main"/>
     <mkdir dir="javah"/>
-    <javac destdir="build" includeantruntime="false" debug="true"
+    <javac destdir="build/classes/java/main" includeantruntime="false" debug="true"
            release="11" nativeheaderdir="javah">
       <src path="src/main/java"/>
       <compilerarg value="-XDignore.symbol.file"/>
@@ -58,7 +58,7 @@
   </target>
 
   <target name="locale">
-    <copy todir="build">
+    <copy todir="build/resources/main">
       <fileset dir="src/main/locale" excludes=".git"/>
     </copy>
   </target>
@@ -76,7 +76,8 @@
   <target name="jar" depends="build">
     <delete file="${macosx-jar}"/>
     <jar jarfile="${macosx-jar}">
-      <fileset dir="build"/>
+      <fileset dir="build/classes/java/main"/>
+      <fileset dir="build/resources/main"/>
       <manifest>
         <attribute name="Main-Class"
                    value="com.lightcrafts.platform.macosx.MacOSXLauncher"/>

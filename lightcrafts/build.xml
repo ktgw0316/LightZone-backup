@@ -92,9 +92,9 @@
           vmlauncher="true">
       <arg value="-j"/>
     </exec>
-    <mkdir dir="build"/>
+    <mkdir dir="build/classes/java/main"/>
     <mkdir dir="javah"/>
-    <javac srcdir="src/main/java" destdir="build" includeantruntime="false" debug="true"
+    <javac srcdir="src/main/java" destdir="build/classes/java/main" includeantruntime="false" debug="true"
       release="11" nativeheaderdir="javah" classpathref="compile.classpath"/>
   </target>
 
@@ -107,23 +107,23 @@
   </target>
 
   <target name="revision">
-    <mkdir dir="build/com/lightcrafts/utils/resources"/>
+    <mkdir dir="build/resources/main/com/lightcrafts/utils/resources"/>
     <exec executable="git">
       <arg line="log -1"/>
-      <redirector output="build/com/lightcrafts/utils/resources/Revision"
+      <redirector output="build/resources/main/com/lightcrafts/utils/resources/Revision"
                   logError="true"/>
     </exec>
     <exec executable="git">
       <arg line="config --list"/>
-      <redirector output="build/com/lightcrafts/utils/resources/Revision"
+      <redirector output="build/resources/main/com/lightcrafts/utils/resources/Revision"
                   logError="true" append="true"/>
     </exec>
     <copy file="version.txt"
-          tofile="build/com/lightcrafts/utils/resources/Version"/>
+          tofile="build/resources/main/com/lightcrafts/utils/resources/Version"/>
   </target>
 
   <target name="resources" depends="revision">
-    <copy todir="build">
+    <copy todir="build/resources/main">
       <fileset dir="src/main/resources" excludes=".git"/>
       <fileset dir="src/main/locale" excludes=".git"/>
     </copy>
@@ -143,7 +143,8 @@
   <target name="jar" depends="build">
     <delete file="${common-jar}"/>
     <jar jarfile="${common-jar}">
-      <fileset dir="build"/>
+      <fileset dir="build/classes/java/main"/>
+      <fileset dir="build/resources/main"/>
       <manifest>
         <attribute name="Built-By" value="${user.name}"/>
         <attribute name="Main-Class" value="com.lightcrafts.app.Application"/>
