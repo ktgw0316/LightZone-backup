@@ -4,7 +4,7 @@
 # Paul J. Lucs [paul@lightcrafts.com]
 ##
 
-ROOT:=			../..
+ROOT:=			../../..
 COMMON_DIR:=		$(ROOT)/lightcrafts
 
 APP_NAME?=		LightZone
